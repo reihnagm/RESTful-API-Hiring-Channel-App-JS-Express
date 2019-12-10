@@ -1,0 +1,24 @@
+{
+  "name": "hiring-channel-app",
+  "version": "1.0.0",
+  "description": "application hiring channel",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon start app.js"
+  },
+  "author": "Reihan Agam",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.7",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.9.1",
+    "multer": "^1.4.2",
+    "mysql": "^2.17.1",
+    "redis": "^2.8.0",
+    "uuid": "^3.3.3"
+  }
+}
