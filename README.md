@@ -10,9 +10,9 @@ a Skeleton Simple Rest API for building next application
 
 ## Prerequiste
 
-- Node.js - Download and Install [Node.js](https://nodejs.org/en/) - Simple bash script to manage multiple active node.js versions.
+- Node.js - Download and Install [Node.js](https://nodejs.org/en/) 
 
-- Nodemon - Download and Install [Nodemon](https://nodemon.io/) - nodemon is a tool that automatically restarting the node application when file changes in the directory are detected.
+- Nodemon - Download and Install [Nodemon](https://nodemon.io/)
 
 ---
 
@@ -21,11 +21,6 @@ a Skeleton Simple Rest API for building next application
 <ol>
   <li>Basic Configuration</li>
   <li>Structured</li>
-  <li>File Handling
-    <ul>
-      <li>Multer</li>
-    </ul>
-  </li>
   <li>Auth with JWT</li>
   <li>Redis Implementation</li>
 </ol>
