@@ -58,7 +58,7 @@ $ npm start
 - [multer](#)
 - [morgan](#)
 - [redis](#)
-- [cors])(#)
+- [cors](#)
 - etc.
 
 ---
