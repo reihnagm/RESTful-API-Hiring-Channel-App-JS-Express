@@ -14,6 +14,6 @@ a Skeleton for build app to more features
 
 ```bash
 $ git clone https://github.com/reihnagm/simple-restful-api
-$ cd express-boilerplate
+$ cd simple-resful-api
 $ npm install
 ```
