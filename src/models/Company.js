@@ -35,7 +35,7 @@ module.exports = {
       })
     })
   },
-  delete: (data, id) => {
+  delete: (id) => {
     return new Promise((resolve, reject) => {
       conn.query('DELETE FROM company WHERE id = ?', id, (err, result) => {
         if (err) {
