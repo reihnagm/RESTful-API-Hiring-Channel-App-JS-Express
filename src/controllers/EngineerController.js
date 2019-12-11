@@ -8,7 +8,6 @@ const JWT = require('jsonwebtoken')
 
 module.exports = {
   getAllData: (req, res) => {
-  
     const page = parseInt(req.query.page) || 1
     const perPage = 5
     const start = (perPage * page) - perPage

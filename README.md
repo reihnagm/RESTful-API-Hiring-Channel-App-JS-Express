@@ -4,7 +4,7 @@
 
 ---
 
-a Skeleton for build app to more features   
+a Skeleton Simple Rest API for building next application  
 
 ---
 
