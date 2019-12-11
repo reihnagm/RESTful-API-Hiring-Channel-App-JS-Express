@@ -32,7 +32,7 @@ a Skeleton Simple Rest API for building next application
 ### Clone
 
 ```bash
-$ git clone https://github.com/reihnagm/simple-restful-api
+$ git clone https://github.com/reihnagm/simple-restful-api.git
 $ cd simple-resful-api
 $ npm install
 ```
