@@ -19,7 +19,7 @@ module.exports = {
           {
             email
           },
-          'secret_key',
+          process.env.JWT_KEY,
           {
             expiresIn: '1h'
           }
@@ -32,20 +32,18 @@ module.exports = {
         })
       } else {
         res.status(400).json({
-          message: 'Name and Passsword not match'
+          message: 'Email and Passsword not match'
         })
       }
     }).catch(err => {
       res.status(400).json({
-        message: 'Name and Password not match'
+        message: 'Email and Password not match'
       })
     })
   },
   register: (req, res) => {
     const email = req.body.email
     const password = req.body.password
-
-    console.log(req)
 
     const salt = bcrypt.genSaltSync(10)
     const password_hash = bcrypt.hashSync(password, salt)

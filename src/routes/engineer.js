@@ -29,6 +29,6 @@ Route
 Route
   .get('/engineers/date_update=:sort', auth.check, EngineerController.dateUpdateDataSort)
   .get('/engineers/name=:sort', auth.check, EngineerController.nameDataSort)
-  .get('/engineers/skill=:sort', auth,check, EngineerController.skillDataSort)
+  .get('/engineers/skill=:sort', auth.check, EngineerController.skillDataSort)
 
 module.exports = Route

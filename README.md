@@ -50,6 +50,11 @@ $ npm start
 ```
 ---
 
+### Problem NPM Install
+
+- if you linux user and new migrate to windows, maybe getting error when install npm,
+in my case specify package "bcrypt", try to uninstall "npm uninstall bcrypt" and install "bcrypt-nodejs" 
+
 ## Other Dependencies
 
 - [mysql](#)
