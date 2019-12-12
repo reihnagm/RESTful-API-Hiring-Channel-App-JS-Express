@@ -72,8 +72,7 @@ module.exports = {
       })
   },
   storeData: (req, res) => {
-    console.log(req.body)
-    const { name, description, skill, location } = req.body
+    const { name, description, skill, location, email, telephone } = req.body
     const showcase = req.file.originalname
     const date_of_birth = req.body.birthdate
 
@@ -84,6 +83,8 @@ module.exports = {
       location,
       date_of_birth,
       showcase,
+      email,
+      telephone,
       date_created: new Date(),
       date_updated: new Date()
     }
@@ -106,7 +107,7 @@ module.exports = {
   },
   updateData: (req, res) => {
     const id = req.params.id
-    const { name, description, skill, location } = req.body
+    const { name, description, skill, location, email, telephone } = req.body
     const showcase = req.file.originalname
     const date_of_birth = req.body.birthdate
 
@@ -117,6 +118,8 @@ module.exports = {
       location,
       date_of_birth,
       showcase,
+      email,
+      telephone,
       date_updated: new Date()
     }
     engineerModel.update(data, id).then(result => {

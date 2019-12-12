@@ -36,13 +36,15 @@ module.exports = {
     })
   },
   storeData: (req, res) => {
-    const { name, location, description } = req.body
+    const { name, location, description, email, telephone } = req.body
     const logo = req.file.originalname
     const data = {
       name,
       logo,
       location,
-      description
+      description,
+      email, 
+      telephone
     }
     companyModel.store(data).then(result => {
       redis.flushall()
@@ -62,7 +64,7 @@ module.exports = {
     })
   },
   updateData: (req, res) => {
-    const { name, location, body, description } = req.body
+    const { name, location, description, email, telephone } = req.body
     const id = req.params.id
     const logo = req.file.originalname
     const data = {
@@ -70,7 +72,9 @@ module.exports = {
       name,
       logo,
       location,
-      description
+      description,
+      email,
+      telephone
     }
     companyModel.update(data, id).then(result => {
       redis.flushall()
