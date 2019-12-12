@@ -1,6 +1,8 @@
 const express = require('express')
 const Route = express.Router()
 
+const auth = require('../helpers/auth')
+
 const multer = require('multer')
 
 const storage = multer.diskStorage({
@@ -19,9 +21,9 @@ const uploadForCompany = multer({ storage, fieldsize: 5000000 })
 const CompanyController = require('../controllers/CompanyController')
 
 Route
-  .get('/companies', CompanyController.getAllData)
-  .post('/company', uploadForCompany.single('logo'), CompanyController.storeData)
-  .patch('/company/:id', uploadForCompany.single('logo'), CompanyController.updateData)
-  .delete('/company/:id', CompanyController.deleteData)
+  .get('/companies', auth.check, CompanyController.getAllData)
+  .post('/company', auth.check, uploadForCompany.single('logo'), CompanyController.storeData)
+  .patch('/company/:id', auth.check, uploadForCompany.single('logo'), CompanyController.updateData)
+  .delete('/company/:id', auth.check, CompanyController.deleteData)
 
 module.exports = Route

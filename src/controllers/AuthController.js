@@ -1,9 +1,7 @@
 require('dotenv').config()
 
 const userModel = require('../models/User')
-const conn = require('../configs/db')
-const bcrypt = require('bcrypt')
-const config = require('../configs/configs')
+const bcrypt = require('bcrypt-nodejs')
 const JWT = require('jsonwebtoken')
 
 module.exports = {

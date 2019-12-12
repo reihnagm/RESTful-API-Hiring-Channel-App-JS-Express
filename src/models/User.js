@@ -1,5 +1,4 @@
 const conn = require('../configs/db')
-const bcrypt = require('bcrypt')
 
 module.exports = {
   login: (email) => {

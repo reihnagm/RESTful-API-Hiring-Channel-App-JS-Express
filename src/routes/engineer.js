@@ -22,13 +22,13 @@ const EngineerController = require('../controllers/EngineerController')
 
 Route
   .get('/engineers', auth.check, EngineerController.getAllData)
-  .post('/engineer', uploadForEngineer.single('showcase'), EngineerController.storeData)
-  .patch('/engineer/:id', uploadForEngineer.single('showcase'), EngineerController.updateData)
-  .delete('/engineer/:id', EngineerController.deleteData)
+  .post('/engineer', auth.check, uploadForEngineer.single('showcase'), EngineerController.storeData)
+  .patch('/engineer/:id', auth.check, uploadForEngineer.single('showcase'), EngineerController.updateData)
+  .delete('/engineer/:id', auth.check, EngineerController.deleteData)
 
 Route
-  .get('/engineers/date_update=:sort', EngineerController.dateUpdateDataSort)
-  .get('/engineers/name=:sort', EngineerController.nameDataSort)
-  .get('/engineers/skill=:sort', EngineerController.skillDataSort)
+  .get('/engineers/date_update=:sort', auth.check, EngineerController.dateUpdateDataSort)
+  .get('/engineers/name=:sort', auth.check, EngineerController.nameDataSort)
+  .get('/engineers/skill=:sort', auth,check, EngineerController.skillDataSort)
 
 module.exports = Route
