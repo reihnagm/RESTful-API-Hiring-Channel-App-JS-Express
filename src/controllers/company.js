@@ -1,7 +1,6 @@
-const companyModel = require('../models/Company')
+const companyModel = require('../models/company')
 const conn = require('../configs/db')
 const redis = require('../configs/redis')
-const uuidv4 = require('uuid/v4')
 
 module.exports = {
   getAllData: (req, res) => {
@@ -38,30 +37,31 @@ module.exports = {
   storeData: (req, res) => {
     const { name, location, description, email, telephone } = req.body
     const logo = req.file.originalname
+    console.log(logo)
     const data = {
       name,
       logo,
       location,
       description,
-      email, 
+      email,
       telephone
     }
-    companyModel.store(data).then(result => {
-      redis.flushall()
+    // companyModel.store(data).then(result => {
+    //   redis.flushall()
 
-      res.status(201).json({
-        status: 201,
-        error: false,
-        result,
-        message: 'Success add company'
-      })
-    }).catch(err => {
-      err.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Error'
-      })
-    })
+    //   res.status(201).json({
+    //     status: 201,
+    //     error: false,
+    //     result,
+    //     message: 'Success add company'
+    //   })
+    // }).catch(err => {
+    //   err.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: 'Error'
+    //   })
+    // })
   },
   updateData: (req, res) => {
     const { name, location, description, email, telephone } = req.body

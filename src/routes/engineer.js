@@ -7,7 +7,7 @@ const multer = require('multer')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './src/images')
+    cb(null, './src/images/showcase')
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname)
@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const uploadForEngineer = multer({ storage, fieldsize: 5000000 })
 
-const EngineerController = require('../controllers/EngineerController')
+const EngineerController = require('../controllers/engineer')
 
 Route
   .get('/engineers', auth.check, EngineerController.getAllData)

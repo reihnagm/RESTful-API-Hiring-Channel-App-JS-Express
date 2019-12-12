@@ -5,7 +5,7 @@ module.exports = {
   all: (data) => {
     return new Promise((resolve, reject) => {
       const page = parseInt(data.page) || 1
-      const perPage = 5
+      const perPage = data.perPage || 5
       const start = (data.perPage * data.page) - data.perPage
 
       const prevPage = page - 1
@@ -13,16 +13,22 @@ module.exports = {
 
       const name = data.name
       const skill = data.skill
+      const date_updated = data.date_updated
 
       let query = ''
 
-      if (name && skill) {
+      if (name) {
         query = `SELECT * FROM engineer 
-                         WHERE name LIKE '%${name}%' OR 
-                         skill LIKE '%${skill}%' LIMIT ${start}, ${perPage}`
-      } else {
-        query = `SELECT * FROM engineer LIMIT ${start}, ${perPage}`
+                          WHERE name LIKE '%${name}% LIMIT ${start}, ${perPage}'`
       }
+
+      if (skill) {
+        query = `SELECT * FROM engineer
+                          WHERE skill '%${skill}% LIMIT ${start}, ${perPage}'`
+      }
+
+      query = `SELECT * FROM engineer LIMIT ${start}, ${perPage}`
+
       conn.query(query, (err, result) => {
         if (err) {
           reject(new Error(err))

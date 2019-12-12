@@ -1,4 +1,4 @@
-const engineerModel = require('../models/Engineer')
+const engineerModel = require('../models/engineer')
 const conn = require('../configs/db')
 const config = require('../configs/configs')
 const redis = require('../configs/redis')
@@ -9,10 +9,14 @@ const JWT = require('jsonwebtoken')
 module.exports = {
   getAllData: (req, res) => {
     const page = parseInt(req.query.page) || 1
-    const perPage = 5
+    const perPage = req.query.limit || 5
     const start = (perPage * page) - perPage
-    const prevPage = page - 1
+    let prevPage = page - 1
     const nextPage = page + 1
+
+    if (prevPage === 0) {
+      prevPage = 1
+    }
 
     const name = req.query.name
     const skill = req.query.skill
@@ -27,8 +31,6 @@ module.exports = {
 
     engineerModel.all(data)
       .then(result => {
-        // Without JSON Parse : [{\"id\":\"b1805524-c39d-48bb-8c77-6331d5301dc7\
-
         redis.get(`Engineer:getAllData${page}`, (err_redis, result_redis) => {
           if (result_redis) {
             res.status(200).json({
@@ -36,11 +38,11 @@ module.exports = {
               error: false,
               source: 'cache',
               data: JSON.parse(result_redis),
-              total_page: totalTableEngineers,
+              total_data: totalTableEngineers,
               per_page: perPage,
               current_page: page,
-              next_page: nextPage,
-              prev_page: prevPage,
+              next_page: `http://localhost:3000/api/v1/engineers/next_page=${nextPage}`,
+              prev_page: `http://localhost:3000/api/v1/engineers/prev_page=${prevPage}`,
               message: 'Success getting all data use redis'
             })
           } else {
@@ -53,11 +55,11 @@ module.exports = {
               error: false,
               source: 'api',
               data: result,
-              total_page: totalTableEngineers,
+              total_data: totalTableEngineers,
               per_page: perPage,
               current_page: page,
-              next_page: nextPage,
-              prev_page: prevPage,
+              next_page: `http://localhost:3000/api/v1/engineers/next_page=${nextPage}`,
+              prev_page: `http://localhost:3000/api/v1/engineers/prev_page=${prevPage}`,
               message: 'Success getting all data'
             })
           }
