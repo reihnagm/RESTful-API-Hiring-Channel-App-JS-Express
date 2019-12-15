@@ -1,4 +1,4 @@
-const conn = require('../configs/db')
+const conn = require('../configs/Db')
 
 module.exports = {
   all: (offset, limit, sort, sortBy, search) => {
