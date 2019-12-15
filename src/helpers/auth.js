@@ -24,7 +24,7 @@ module.exports = {
 
       if (err && err.name === 'TokenExpiredError') {
         res.status(403).json({
-          message: 'Invalid token'
+          message: 'Token Expired'
         })
       }
 

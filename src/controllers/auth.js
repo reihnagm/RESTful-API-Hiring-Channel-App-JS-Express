@@ -13,7 +13,7 @@ module.exports = {
     if (!validEmail) {
       res.status(400).json({
         status: 400,
-        message: 'Invalid Email'
+        message: 'Invalid Email e.g johndoe@gmail.com'
       })
     }
 
@@ -97,7 +97,8 @@ module.exports = {
       })
     }).catch(err => {
       res.status(400).json({
-        message: 'Error'
+        status: 400,
+        message: err
       })
     })
   }

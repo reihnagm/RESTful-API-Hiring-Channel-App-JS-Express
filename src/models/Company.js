@@ -1,5 +1,4 @@
 const conn = require('../configs/db')
-const redis = require('../configs/redis')
 
 module.exports = {
   all: () => {

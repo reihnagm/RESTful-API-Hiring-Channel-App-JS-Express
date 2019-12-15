@@ -3,32 +3,41 @@ const Route = express.Router()
 
 const auth = require('../helpers/auth')
 
+const path = require('path')
 const multer = require('multer')
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './src/images/showcase')
+  destination: function (req, file, callback) {
+    callback(null, './src/images/showcase')
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname)
+  filename: function (req, file, callback) {
+    callback(null, Date.now() + '-' + file.originalname)
   }
 })
 
-// Max 5 MB
+const upload = multer({
+  storage,
+  limits: { fileSize: 5242880 },
+  fileFilter: (req, file, cb) => {
+    checkFileType(req, file, cb)
+  }
+}).single('showcase')
 
-const uploadForEngineer = multer({ storage, fieldsize: 5000000 })
+function checkFileType (req, file, cb) {
 
-const EngineerController = require('../controllers/engineer')
+  if (file.mimetype !== 'image/png') {
+    req.fileValidationError = 'goes wrong on the mimetype';
+    return cb(null, false);
+   }
+
+}
+
+const Engineer = require('../controllers/engineer')
 
 Route
-  .get('/engineers', auth.check, EngineerController.getAllData)
-  .post('/engineer', auth.check, uploadForEngineer.single('showcase'), EngineerController.storeData)
-  .patch('/engineer/:id', auth.check, uploadForEngineer.single('showcase'), EngineerController.updateData)
-  .delete('/engineer/:id', auth.check, EngineerController.deleteData)
-
-Route
-  .get('/engineers/date_update=:sort', auth.check, EngineerController.dateUpdateDataSort)
-  .get('/engineers/name=:sort', auth.check, EngineerController.nameDataSort)
-  .get('/engineers/skill=:sort', auth.check, EngineerController.skillDataSort)
+  .get('/', auth.check, Engineer.getAllData)
+  .post('/', auth.check, upload, Engineer.storeData)
+  .patch('/:id', auth.check, upload, Engineer.updateData)
+  .delete('/:id', auth.check, Engineer.deleteData)
 
 module.exports = Route

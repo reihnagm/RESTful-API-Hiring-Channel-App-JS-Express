@@ -1,48 +1,62 @@
 const engineerModel = require('../models/engineer')
 const conn = require('../configs/db')
-const config = require('../configs/configs')
 const redis = require('../configs/redis')
-// const uuidv4 = require('uuid/v4')
-
-const JWT = require('jsonwebtoken')
+const miscHelper = require('../controllers/response')
 
 module.exports = {
   getAllData: (req, res) => {
+
+    
+
     const page = parseInt(req.query.page) || 1
-    const perPage = req.query.limit || 5
-    const start = (perPage * page) - perPage
-    let prevPage = page - 1
-    const nextPage = page + 1
+    const search = req.query.search || ''
+    const limit = req.query.limit || 10
+    const sort = req.query.sort || 'DESC'
+    const sortBy = req.query.sortBy || 'date_updated'
 
-    if (prevPage === 0) {
-      prevPage = 1
-    }
+    const offset = (page - 1) * limit
 
-    const name = req.query.name
-    const skill = req.query.skill
+    let totalDataEngineer = 0
 
-    let totalTableEngineers = 0
-
-    conn.query('SELECT COUNT(*) total_page FROM engineer', (err, res) => {
-      totalTableEngineers = res[0].total_page
+    conn.query('SELECT COUNT(*) total_data FROM engineer', (err, res) => {
+      if (err) {
+        return miscHelper.response(res, 400, true, 'Error', err)
+      }
+      totalDataEngineer = res[0].total_data
     })
 
-    const data = { page, perPage, start, prevPage, nextPage, name, skill }
+    const prevPage = page === 1 ? 1 : page - 1
+    const nextPage = page === totalDataEngineer ? totalDataEngineer : page + 1
 
-    engineerModel.all(data)
+    engineerModel.all(offset, limit, sort, sortBy, search)
       .then(result => {
-        redis.get(`Engineer:getAllData${page}`, (err_redis, result_redis) => {
-          if (result_redis) {
+        redis.get(`Engineer:getAllData${page}`, (errRedis, resultRedis) => {
+          if (errRedis) {
+            res.status(400).json({
+              error: true,
+              message: errRedis
+            })
+          }
+
+          // let pageDetail = {
+          //   total_data: totalDataEngineer,
+          //   per_page: limit,
+          //   current_page: page,
+          //   nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+          //   prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+          // }
+
+          if (resultRedis) {
             res.status(200).json({
               status: 200,
               error: false,
               source: 'cache',
-              data: JSON.parse(result_redis),
-              total_data: totalTableEngineers,
-              per_page: perPage,
+              data: JSON.parse(resultRedis),
+              total_data: totalDataEngineer,
+              per_page: limit,
               current_page: page,
-              next_page: `http://localhost:3000/api/v1/engineers/next_page=${nextPage}`,
-              prev_page: `http://localhost:3000/api/v1/engineers/prev_page=${prevPage}`,
+              nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+              prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
               message: 'Success getting all data use redis'
             })
           } else {
@@ -55,11 +69,11 @@ module.exports = {
               error: false,
               source: 'api',
               data: result,
-              total_data: totalTableEngineers,
-              per_page: perPage,
+              total_data: totalDataEngineer,
+              per_page: limit,
               current_page: page,
-              next_page: `http://localhost:3000/api/v1/engineers/next_page=${nextPage}`,
-              prev_page: `http://localhost:3000/api/v1/engineers/prev_page=${prevPage}`,
+              nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+              prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
               message: 'Success getting all data'
             })
           }
@@ -69,27 +83,86 @@ module.exports = {
         err.status(400).json({
           status: 400,
           error: true,
-          message: 'Error'
+          message: err
         })
       })
   },
   storeData: (req, res) => {
     const { name, description, skill, location, email, telephone } = req.body
-    const showcase = req.file.originalname
-    const date_of_birth = req.body.birthdate
+    const dateOfBirth = req.body.birthdate
+
+    if(req.fileValidationError) {
+      res.status(400).json({
+        status: '400',
+        message: req.fileValidationError
+      })
+    }
+
+    const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
+
+    if (!validEmail) {
+      res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Invalid Email e.g johndoe@gmail.com'
+      })
+    }
+
+    if (!name) {
+      res.status(400).json({
+        error: true,
+        message: 'Name required'
+      })
+    }
+    if (!description) {
+      res.status(400).json({
+        error: true,
+        message: 'Description required'
+      })
+    }
+    if (!skill) {
+      res.status(400).json({
+        error: true,
+        message: 'Skill required'
+      })
+    }
+    if (!location) {
+      res.status(400).json({
+        error: true,
+        message: 'Location required'
+      })
+    }
+    if (!dateOfBirth) {
+      res.status(400).json({
+        error: true,
+        message: 'Date of birth required'
+      })
+    }
+    if (!email) {
+      res.status(400).json({
+        error: true,
+        message: 'Email required'
+      })
+    }
+    if (!telephone) {
+      res.status(400).json({
+        error: true,
+        message: 'Telephone required'
+      })
+    }
 
     const data = {
       name,
       description,
       skill,
       location,
-      date_of_birth,
-      showcase,
+      date_of_birth: dateOfBirth,
       email,
       telephone,
       date_created: new Date(),
       date_updated: new Date()
     }
+
     engineerModel.store(data).then(result => {
       redis.flushall()
 
@@ -100,10 +173,10 @@ module.exports = {
         message: 'Success add engineer'
       })
     }).catch(err => {
-      err.status(400).json({
+      res.status(400).json({
         status: 400,
         error: true,
-        message: 'Error'
+        message: err
       })
     })
   },
@@ -111,14 +184,14 @@ module.exports = {
     const id = req.params.id
     const { name, description, skill, location, email, telephone } = req.body
     const showcase = req.file.originalname
-    const date_of_birth = req.body.birthdate
+    const dateOfBirth = req.body.birthdate
 
     const data = {
       name,
       description,
       skill,
       location,
-      date_of_birth,
+      date_of_birth: dateOfBirth,
       showcase,
       email,
       telephone,
@@ -157,114 +230,6 @@ module.exports = {
         status: 400,
         error: true,
         message: 'Error'
-      })
-    })
-  },
-  dateUpdateDataSort: (req, res) => {
-    const sort = req.params.sort.charAt(0).toUpperCase() + req.params.sort.slice(1)
-
-    engineerModel.sort_by_date_update(req).then(result => {
-      redis.get(`Engineer:dateUpdatedDataSort${sort}`, (err_redis, result_redis) => {
-        if (err_redis) {
-          res.status(500).json({
-            message: 'Something Went Wrong'
-          })
-        }
-        if (result_redis) {
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'cache',
-            data: JSON.parse(result_redis),
-            message: 'Success getting all data use redis cache'
-          })
-        } else {
-          redis.setex(`Engineer:dateUpdatedDataSort${sort}`, 3600, JSON.stringify(result))
-
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'api',
-            data: result,
-            message: 'Success getting all data'
-          })
-        }
-      })
-    }).catch(err => {
-      err.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Error'
-      })
-    })
-  },
-  nameDataSort: (req, res) => {
-    const sort = req.params.sort.charAt(0).toUpperCase() + req.params.sort.slice(1)
-
-    engineerModel.sort_by_name(req).then(result => {
-      redis.get(`Engineer:nameDataSort${sort}`, (err_redis, result_redis) => {
-        if (err_redis) {
-          res.status(500).json({
-            message: 'Something Went Wrong'
-          })
-        }
-        if (result_redis) {
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'cache',
-            data: JSON.parse(result_redis),
-            message: 'Success getting data use redis'
-          })
-        } else {
-          redis.setex(`Engineer:nameDataSort${sort}`, 3600, JSON.stringify(result))
-
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'ap1',
-            data: result,
-            message: 'Success getting data'
-          })
-        }
-      })
-    }).catch(err => {
-      err.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Error'
-      })
-    })
-  },
-  skillDataSort: (req, res) => {
-    const sort = req.params.sort
-
-    engineerModel.sort_by_skill(req).then(result => {
-      redis.get(`Engineer:skillDataSort${sort}`, (err_redis, result_redis) => {
-        if (err_redis) {
-          res.status(500).json({
-            message: 'Something Went Wrong'
-          })
-        }
-        if (result_redis) {
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'cache',
-            data: JSON.parse(result_redis),
-            message: 'Success getting data use redis'
-          })
-        } else {
-          redis.setex(`Engineer:skillDataSort${sort}`, 3600, JSON.stringify(result))
-
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'api',
-            data: result,
-            message: 'Success getting data'
-          })
-        }
       })
     })
   }

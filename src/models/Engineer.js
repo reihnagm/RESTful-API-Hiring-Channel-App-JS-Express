@@ -1,33 +1,10 @@
 const conn = require('../configs/db')
-const redis = require('../configs/redis')
 
 module.exports = {
-  all: (data) => {
+  all: (offset, limit, sort, sortBy, search) => {
     return new Promise((resolve, reject) => {
-      const page = parseInt(data.page) || 1
-      const perPage = data.perPage || 5
-      const start = (data.perPage * data.page) - data.perPage
-
-      const prevPage = page - 1
-      const nextPage = page + 1
-
-      const name = data.name
-      const skill = data.skill
-      const date_updated = data.date_updated
-
-      let query = ''
-
-      if (name) {
-        query = `SELECT * FROM engineer 
-                          WHERE name LIKE '%${name}% LIMIT ${start}, ${perPage}'`
-      }
-
-      if (skill) {
-        query = `SELECT * FROM engineer
-                          WHERE skill '%${skill}% LIMIT ${start}, ${perPage}'`
-      }
-
-      query = `SELECT * FROM engineer LIMIT ${start}, ${perPage}`
+      const query = `SELECT * FROM engineer WHERE (name LIKE '%${search}%' or skill LIKE '%${search}%') 
+      ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
 
       conn.query(query, (err, result) => {
         if (err) {

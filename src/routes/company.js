@@ -14,16 +14,14 @@ const storage = multer.diskStorage({
   }
 })
 
-// Max 5 MB
+const upload = multer({ storage })
 
-const uploadForCompany = multer({ storage, fieldsize: 5000000 })
-
-const CompanyController = require('../controllers/company')
+const Company = require('../controllers/company')
 
 Route
-  .get('/companies', auth.check, CompanyController.getAllData)
-  .post('/company', auth.check, uploadForCompany.single('logo'), CompanyController.storeData)
-  .patch('/company/:id', auth.check, uploadForCompany.single('logo'), CompanyController.updateData)
-  .delete('/company/:id', auth.check, CompanyController.deleteData)
+  .get('/', auth.check, Company.getAllData)
+  .post('/', auth.check, upload.single('logo'), Company.storeData)
+  .patch('/:id', auth.check, upload.single('logo'), Company.updateData)
+  .delete('/:id', auth.check, Company.deleteData)
 
 module.exports = Route
