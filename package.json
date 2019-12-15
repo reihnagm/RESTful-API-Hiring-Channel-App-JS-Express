@@ -2,10 +2,11 @@
   "name": "hiring-channel-app",
   "version": "1.0.0",
   "description": "application hiring channel",
-  "main": "app.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon start app.js"
+    "start": "nodemon start app.js", 
+    "build": "babel src --out-dir dist"
   },
   "author": "Reihan Agam",
   "license": "ISC",
@@ -24,6 +25,9 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3"
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-node": "0.0.1-security",
+    "babel-preset-env": "^1.7.0"
   }
 }
