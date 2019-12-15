@@ -1,4 +1,4 @@
-const companyModel = require('../models/company')
+const companyModel = require('../models/Company')
 const redis = require('../configs/redis')
 
 module.exports = {
