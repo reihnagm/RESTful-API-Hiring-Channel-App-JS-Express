@@ -1,4 +1,4 @@
-const engineerModel = require('../models/engineer')
+// const engineerModel = require('../models/engineer')
 const conn = require('../configs/db')
 const redis = require('../configs/redis')
 const miscHelper = require('../controllers/response')
