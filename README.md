@@ -1,4 +1,4 @@
-# Simple-RESTful-API
+# simple restful API
 
 ## Introduction 
 
