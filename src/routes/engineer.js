@@ -3,7 +3,6 @@ const Route = express.Router()
 
 const auth = require('../helpers/auth')
 
-const path = require('path')
 const multer = require('multer')
 
 const storage = multer.diskStorage({
