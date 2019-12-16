@@ -1,13 +1,11 @@
 const engineerModel = require('../models/Engineer')
 const conn = require('../configs/db')
 const redis = require('../configs/redis')
+const checkext = require('../helpers/checkext')
 const miscHelper = require('../controllers/response')
 
 module.exports = {
   getAllData: (req, res) => {
-
-    
-
     const page = parseInt(req.query.page) || 1
     const search = req.query.search || ''
     const limit = req.query.limit || 10
@@ -52,11 +50,11 @@ module.exports = {
               error: false,
               source: 'cache',
               data: JSON.parse(resultRedis),
-              total_data: totalDataEngineer,
+              total_data: Math.ceil(totalDataEngineer),
               per_page: limit,
               current_page: page,
-              nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-              prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+              nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+              prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
               message: 'Success getting all data use redis'
             })
           } else {
@@ -69,11 +67,11 @@ module.exports = {
               error: false,
               source: 'api',
               data: result,
-              total_data: totalDataEngineer,
+              total_data: Math.ceil(totalDataEngineer),
               per_page: limit,
               current_page: page,
-              nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-              prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+              nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+              prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
               message: 'Success getting all data'
             })
           }
@@ -88,64 +86,105 @@ module.exports = {
       })
   },
   storeData: (req, res) => {
-    const { name, description, skill, location, email, telephone } = req.body
+    const { name, description, skill, location, email, telephone, salary } = req.body
+
     const dateOfBirth = req.body.birthdate
 
-    if(req.fileValidationError) {
-      res.status(400).json({
-        status: '400',
-        message: req.fileValidationError
+    const showcase = req.files[0].originalname
+    const avatar = req.files[1].originalname
+
+    if (req.files[0].size >= 5242880) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Showcase size cannot larger than 5MB'
       })
     }
+
+    if (req.files[1].size >= 5242880) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Avatar size cannot larger than 5MB'
+      })
+    }
+
+    if (!checkext.checkFileImg(req.files[0].mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+      })
+    }
+
+    if (!checkext.checkFileImg(req.files[1].mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+      })
+    }
+
+    // if (req.fileValidationError) {
+    //   res.status(400).json({
+    //     status: '400',
+    //     message: req.fileValidationError
+    //   })
+    // }
 
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
     if (!validEmail) {
-      res.status(400).json({
+      return res.status(400).json({
         status: 400,
         error: true,
         message: 'Invalid Email e.g johndoe@gmail.com'
       })
     }
-
     if (!name) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: 'Name required'
       })
     }
     if (!description) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: 'Description required'
       })
     }
     if (!skill) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: 'Skill required'
       })
     }
     if (!location) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: 'Location required'
       })
     }
     if (!dateOfBirth) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: 'Date of birth required'
       })
     }
     if (!email) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: 'Email required'
       })
     }
     if (!telephone) {
-      res.status(400).json({
+      return res.status(400).json({
+        error: true,
+        message: 'Telephone required'
+      })
+    }
+    if (!salary) {
+      return res.status(400).json({
         error: true,
         message: 'Telephone required'
       })
@@ -157,8 +196,11 @@ module.exports = {
       skill,
       location,
       date_of_birth: dateOfBirth,
+      showcase,
       email,
       telephone,
+      salary,
+      avatar,
       date_created: new Date(),
       date_updated: new Date()
     }
@@ -182,7 +224,7 @@ module.exports = {
   },
   updateData: (req, res) => {
     const id = req.params.id
-    const { name, description, skill, location, email, telephone } = req.body
+    const { name, description, skill, location, email, telephone, salary } = req.body
     const showcase = req.file.originalname
     const dateOfBirth = req.body.birthdate
 
@@ -195,6 +237,8 @@ module.exports = {
       showcase,
       email,
       telephone,
+      salary,
+      avatar,
       date_updated: new Date()
     }
     engineerModel.update(data, id).then(result => {

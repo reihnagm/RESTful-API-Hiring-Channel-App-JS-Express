@@ -3,6 +3,8 @@ module.exports = {
     switch (extFile) {
       case 'image/jpeg':
         return true
+      case 'image/jpg':
+        return true
       case 'image/gif':
         return true
       case 'image/png':
