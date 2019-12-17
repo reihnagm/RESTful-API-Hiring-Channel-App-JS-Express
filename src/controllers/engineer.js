@@ -86,7 +86,7 @@ module.exports = {
       })
   },
   storeData: (req, res) => {
-    console.log(req.file)
+    console.log(req.body)
 
     const { name, description, skill, location, email, telephone, salary } = req.body
 
