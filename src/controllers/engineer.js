@@ -86,7 +86,6 @@ module.exports = {
       })
   },
   storeData: (req, res) => {
-  
     const { name, description, skill, location, email, telephone, salary } = req.body
 
     const dateOfBirth = req.body.birthdate
@@ -259,6 +258,28 @@ module.exports = {
       })
     })
   },
+
+  editData: (req, res) => {
+    const id = req.params.id
+    console.log('te')
+    engineerModel.edit(id)
+      .then(result => {
+        res.status(200).json({
+          status: 200,
+          error: false,
+          message: 'Success getting edit data',
+          data: result
+        })
+      })
+      .catch(error => {
+        res.status(400).json({
+          status: 200,
+          message: `Error ${error}`,
+          error: true
+        })
+      })
+  },
+
   deleteData: (req, res) => {
     const id = req.params.id
     engineerModel.delete(id).then(result => {

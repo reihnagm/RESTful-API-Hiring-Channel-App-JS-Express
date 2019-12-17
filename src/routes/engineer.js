@@ -50,6 +50,7 @@ const Engineer = require('../controllers/engineer')
 Route
   .get('/', Engineer.getAllData)
   .post('/', upload, Engineer.storeData)
+  .get('/:id', Engineer.editData)
   .patch('/:id', upload, Engineer.updateData)
   .delete('/:id', Engineer.deleteData)
 

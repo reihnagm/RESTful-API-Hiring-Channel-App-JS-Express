@@ -32,7 +32,6 @@ module.exports = {
       const login = matchedEmail && matchedPassword
 
       if (login) {
-
         // const token = JWT.sign(
         //   {
         //     email
