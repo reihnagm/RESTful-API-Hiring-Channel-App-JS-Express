@@ -87,6 +87,8 @@ module.exports = {
   },
   storeData: (req, res) => {
   
+    console.log(req)
+
     const { name, description, skill, location, email, telephone, salary } = req.body
 
     const dateOfBirth = req.body.birthdate
@@ -94,8 +96,8 @@ module.exports = {
     // const showcase = req.body.showcase
     // const avatar = req.body.avatar
 
-    const showcase = req.files[0].originalname
-    const avatar = req.files[1].originalname
+    // const showcase = req.files[0].originalname
+    // const avatar = req.files[1].originalname
 
     // if (req.files[0].size >= 5242880) {
     //   return res.status(400).json({
