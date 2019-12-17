@@ -70,7 +70,7 @@ module.exports = {
               // Set Cache Expiration to 1 Hour (60 minutes)
 
               redis.setex(
-                `Engineer:getAllData${page}`,
+                `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
                 3600,
                 JSON.stringify(result)
               )
