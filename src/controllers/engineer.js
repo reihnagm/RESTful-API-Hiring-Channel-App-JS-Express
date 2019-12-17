@@ -94,7 +94,7 @@ module.exports = {
     const showcase = req.body.showcase
     const avatar = req.body.avatar
 
-    console.log(req.files)
+    console.log(req)
 
     // const showcase = req.files[0].originalname
     // const avatar = req.files[1].originalname
