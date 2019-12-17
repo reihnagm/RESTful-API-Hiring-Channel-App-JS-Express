@@ -26,56 +26,76 @@ module.exports = {
     const prevPage = page === 1 ? 1 : page - 1
     const nextPage = page === totalDataEngineer ? totalDataEngineer : page + 1
 
-    engineerModel.all(offset, limit, sort, sortBy, search)
+    engineerModel
+      .all(offset, limit, sort, sortBy, search)
       .then(result => {
-        redis.get(`Engineer:getAllData${page}`, (errRedis, resultRedis) => {
-          if (errRedis) {
-            res.status(400).json({
-              error: true,
-              message: errRedis
-            })
+        redis.get(
+          `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
+          (errRedis, resultRedis) => {
+            if (errRedis) {
+              res.status(400).json({
+                error: true,
+                message: errRedis
+              })
+            }
+
+            // let pageDetail = {
+            //   total_data: totalDataEngineer,
+            //   per_page: limit,
+            //   current_page: page,
+            //   nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+            //   prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+            // }
+
+            if (resultRedis) {
+              res.status(200).json({
+                status: 200,
+                error: false,
+                source: 'cache',
+                data: JSON.parse(resultRedis),
+                total_data: Math.ceil(totalDataEngineer),
+                per_page: limit,
+                current_page: page,
+                nextLink: `http://localhost:3001${req.originalUrl.replace(
+                  'page=' + page,
+                  'page=' + nextPage
+                )}`,
+                prevLink: `http://localhost:3001${req.originalUrl.replace(
+                  'page=' + page,
+                  'page=' + prevPage
+                )}`,
+                message: 'Success getting all data use redis'
+              })
+            } else {
+              // Set Cache Expiration to 1 Hour (60 minutes)
+
+              redis.setex(
+                `Engineer:getAllData${page}`,
+                3600,
+                JSON.stringify(result)
+              )
+
+              res.status(200).json({
+                status: 200,
+                error: false,
+                source: 'api',
+                data: result,
+                total_data: Math.ceil(totalDataEngineer),
+                per_page: limit,
+                current_page: page,
+                nextLink: `http://localhost:3001${req.originalUrl.replace(
+                  'page=' + page,
+                  'page=' + nextPage
+                )}`,
+                prevLink: `http://localhost:3001${req.originalUrl.replace(
+                  'page=' + page,
+                  'page=' + prevPage
+                )}`,
+                message: 'Success getting all data'
+              })
+            }
           }
-
-          // let pageDetail = {
-          //   total_data: totalDataEngineer,
-          //   per_page: limit,
-          //   current_page: page,
-          //   nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-          //   prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
-          // }
-
-          if (resultRedis) {
-            res.status(200).json({
-              status: 200,
-              error: false,
-              source: 'cache',
-              data: JSON.parse(resultRedis),
-              total_data: Math.ceil(totalDataEngineer),
-              per_page: limit,
-              current_page: page,
-              nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-              prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
-              message: 'Success getting all data use redis'
-            })
-          } else {
-            // Set Cache Expiration to 1 Hour (60 minutes)
-
-            redis.setex(`Engineer:getAllData${page}`, 3600, JSON.stringify(result))
-
-            res.status(200).json({
-              status: 200,
-              error: false,
-              source: 'api',
-              data: result,
-              total_data: Math.ceil(totalDataEngineer),
-              per_page: limit,
-              current_page: page,
-              nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-              prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
-              message: 'Success getting all data'
-            })
-          }
-        })
+        )
       })
       .catch(err => {
         err.status(400).json({
@@ -86,7 +106,15 @@ module.exports = {
       })
   },
   storeData: (req, res) => {
-    const { name, description, skill, location, email, telephone, salary } = req.body
+    const {
+      name,
+      description,
+      skill,
+      location,
+      email,
+      telephone,
+      salary
+    } = req.body
 
     const dateOfBirth = req.body.birthdate
 
@@ -205,27 +233,38 @@ module.exports = {
       date_updated: new Date()
     }
 
-    engineerModel.store(data).then(result => {
-      redis.flushall()
+    engineerModel
+      .store(data)
+      .then(result => {
+        redis.flushall()
 
-      res.status(201).json({
-        status: 201,
-        error: false,
-        result,
-        message: 'Success add engineer'
+        res.status(201).json({
+          status: 201,
+          error: false,
+          result,
+          message: 'Success add engineer'
+        })
       })
-    }).catch(err => {
-      res.status(400).json({
-        status: 400,
-        error: true,
-        message: err
+      .catch(err => {
+        res.status(400).json({
+          status: 400,
+          error: true,
+          message: err
+        })
       })
-    })
   },
   updateData: (req, res) => {
     const id = req.params.id
-    const { name, description, skill, location, email, telephone, salary } = req.body
-      
+    const {
+      name,
+      description,
+      skill,
+      location,
+      email,
+      telephone,
+      salary
+    } = req.body
+
     const dateOfBirth = req.body.birthdate
 
     const showcase = req.files[0].originalname
@@ -326,7 +365,7 @@ module.exports = {
         error: true,
         message: 'Telephone required'
       })
-    } 
+    }
 
     const data = {
       name,
@@ -341,27 +380,31 @@ module.exports = {
       avatar,
       date_updated: new Date()
     }
-    engineerModel.update(data, id).then(result => {
-      redis.flushall()
+    engineerModel
+      .update(data, id)
+      .then(result => {
+        redis.flushall()
 
-      res.status(201).json({
-        status: 201,
-        error: false,
-        result,
-        message: 'Success update engineer'
+        res.status(201).json({
+          status: 201,
+          error: false,
+          result,
+          message: 'Success update engineer'
+        })
       })
-    }).catch(err => {
-      err.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Error'
+      .catch(err => {
+        err.status(400).json({
+          status: 400,
+          error: true,
+          message: 'Error'
+        })
       })
-    })
   },
   editData: (req, res) => {
     const id = req.params.id
     console.log('te')
-    engineerModel.edit(id)
+    engineerModel
+      .edit(id)
       .then(result => {
         res.status(200).json({
           status: 200,
@@ -380,21 +423,24 @@ module.exports = {
   },
   deleteData: (req, res) => {
     const id = req.params.id
-    engineerModel.delete(id).then(result => {
-      redis.flushall()
+    engineerModel
+      .delete(id)
+      .then(result => {
+        redis.flushall()
 
-      res.status(200).json({
-        status: 200,
-        error: false,
-        result,
-        message: 'Success delete engineer'
+        res.status(200).json({
+          status: 200,
+          error: false,
+          result,
+          message: 'Success delete engineer'
+        })
       })
-    }).catch(err => {
-      err.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Error'
+      .catch(err => {
+        err.status(400).json({
+          status: 400,
+          error: true,
+          message: 'Error'
+        })
       })
-    })
   }
 }
