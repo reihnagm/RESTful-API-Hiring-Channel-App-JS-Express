@@ -86,44 +86,46 @@ module.exports = {
       })
   },
   storeData: (req, res) => {
+    console.log(req)
+
     const { name, description, skill, location, email, telephone, salary } = req.body
 
     const dateOfBirth = req.body.birthdate
 
-    const showcase = req.files[0].originalname
-    const avatar = req.files[1].originalname
+    // const showcase = req.files[0].originalname
+    // const avatar = req.files[1].originalname
 
-    if (req.files[0].size >= 5242880) {
-      return res.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Showcase size cannot larger than 5MB'
-      })
-    }
+    // if (req.files[0].size >= 5242880) {
+    //   return res.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: 'Showcase size cannot larger than 5MB'
+    //   })
+    // }
 
-    if (req.files[1].size >= 5242880) {
-      return res.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Avatar size cannot larger than 5MB'
-      })
-    }
+    // if (req.files[1].size >= 5242880) {
+    //   return res.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: 'Avatar size cannot larger than 5MB'
+    //   })
+    // }
 
-    if (!checkext.checkFileImg(req.files[0].mimetype)) {
-      return res.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
-      })
-    }
+    // if (!checkext.checkFileImg(req.files[0].mimetype)) {
+    //   return res.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+    //   })
+    // }
 
-    if (!checkext.checkFileImg(req.files[1].mimetype)) {
-      return res.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
-      })
-    }
+    // if (!checkext.checkFileImg(req.files[1].mimetype)) {
+    //   return res.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+    //   })
+    // }
 
     // if (req.fileValidationError) {
     //   res.status(400).json({
