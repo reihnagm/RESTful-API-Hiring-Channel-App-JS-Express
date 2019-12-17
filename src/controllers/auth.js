@@ -30,21 +30,21 @@ module.exports = {
       const login = matchedEmail && matchedPassword
 
       if (login) {
-        const token = JWT.sign(
-          {
-            email
-          },
-          process.env.JWT_KEY,
-          {
-            expiresIn: '1h'
-          }
-        )
+        // const token = JWT.sign(
+        //   {
+        //     email
+        //   },
+        //   process.env.JWT_KEY,
+        //   {
+        //     expiresIn: '1h'
+        //   }
+        // )
 
         res.status(200).json({
           error: false,
           status: 200,
-          message: 'Success login',
-          token
+          message: 'Success login'
+          // token
         })
       } else {
         res.status(400).json({
