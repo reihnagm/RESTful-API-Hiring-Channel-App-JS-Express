@@ -76,7 +76,7 @@ module.exports = {
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
     if (!validEmail) {
-      return res.status(400).json({
+      return res.json({
         status: 400,
         error: 'true',
         message: 'Invalid Email e.g johndoe@gmail.com'
@@ -84,7 +84,7 @@ module.exports = {
     }
 
     if (!email || !password) {
-      return res.status(400).json({
+      return res.json({
         status: 400,
         error: 'true',
         message: 'Email and Password required'
