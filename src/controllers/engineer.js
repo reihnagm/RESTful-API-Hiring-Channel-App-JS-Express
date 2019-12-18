@@ -116,6 +116,8 @@ module.exports = {
       salary
     } = req.body
 
+    console.log(req.body)
+
     const dateOfBirth = req.body.birthdate
 
     const showcase = req.files[0].originalname
