@@ -97,20 +97,31 @@ module.exports = {
       role_id
     }
 
+    const token = JWT.sign(
+      {
+        email
+      },
+      process.env.JWT_KEY,
+      {
+        expiresIn: '1h'
+      }
+    )
+
     userModel
       .register(data)
       .then(result => {
         res.status(201).json({
           error: false,
           status: 201,
-          message: 'Success register data'
+          message: 'Success register data',
+          token
         })
       })
       .catch(err => {
         res.status(400).json({
           error: true,
           status: 400,
-          message: err
+          message: `Error ${err}`
         })
       })
   }
