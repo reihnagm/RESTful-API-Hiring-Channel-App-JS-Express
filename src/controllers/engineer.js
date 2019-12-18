@@ -435,10 +435,10 @@ module.exports = {
         })
       })
       .catch(err => {
-        err.status(400).json({
+        res.status(400).json({
           status: 400,
           error: true,
-          message: 'Error'
+          message: 'Failed delete engineer'
         })
       })
   }
