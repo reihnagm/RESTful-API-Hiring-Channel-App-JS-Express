@@ -44,8 +44,6 @@ module.exports = {
             }
           )
 
-          window.localStorage.setItem('token', token)
-
           res.status(200).json({
             error: false,
             status: 200,
@@ -108,8 +106,6 @@ module.exports = {
         expiresIn: '1h'
       }
     )
-
-    window.localStorage.setItem('token', token)
 
     userModel
       .register(data)
