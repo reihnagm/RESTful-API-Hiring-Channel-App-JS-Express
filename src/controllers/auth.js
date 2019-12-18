@@ -99,7 +99,8 @@ module.exports = {
 
     const token = JWT.sign(
       {
-        email
+        email,
+        role_id
       },
       process.env.JWT_KEY,
       {
@@ -113,6 +114,7 @@ module.exports = {
         res.status(201).json({
           error: false,
           status: 201,
+          data: result,
           message: 'Success register data',
           token
         })
