@@ -26,42 +26,46 @@ module.exports = {
       })
     }
 
-    userModel.login(email).then(result => {
-      const matchedEmail = email === result[0].email
-      const matchedPassword = bcrypt.compareSync(password, result[0].password)
-      const login = matchedEmail && matchedPassword
+    userModel
+      .login(email)
+      .then(result => {
+        const matchedEmail = email === result[0].email
+        const matchedPassword = bcrypt.compareSync(password, result[0].password)
+        const login = matchedEmail && matchedPassword
 
-      if (login) {
-        // const token = JWT.sign(
-        //   {
-        //     email
-        //   },
-        //   process.env.JWT_KEY,
-        //   {
-        //     expiresIn: '1h'
-        //   }
-        // )
+        if (login) {
+          const token = JWT.sign(
+            {
+              email
+            },
+            process.env.JWT_KEY,
+            {
+              expiresIn: '1h'
+            }
+          )
 
-        res.status(200).json({
-          error: false,
-          status: 200,
-          message: 'Success login'
-          // token
-        })
-      } else {
+          res.status(200).json({
+            error: false,
+            status: 200,
+            data: result,
+            message: 'Success login',
+            token
+          })
+        } else {
+          res.status(400).json({
+            error: true,
+            status: 400,
+            message: 'Email and Passsword not match'
+          })
+        }
+      })
+      .catch(err => {
         res.status(400).json({
           error: true,
           status: 400,
-          message: 'Email and Passsword not match'
+          message: 'Email and Password not match'
         })
-      }
-    }).catch(err => {
-      res.status(400).json({
-        error: true,
-        status: 400,
-        message: 'Email and Password not match'
       })
-    })
   },
   register: (req, res) => {
     const email = req.body.email
@@ -87,25 +91,27 @@ module.exports = {
     const salt = bcrypt.genSaltSync(10)
     const passwordHash = bcrypt.hashSync(password, salt)
 
-    const data =
-      {
-        email,
-        password: passwordHash,
-        role_id
-      }
+    const data = {
+      email,
+      password: passwordHash,
+      role_id
+    }
 
-    userModel.register(data).then(result => {
-      res.status(201).json({
-        error: false,
-        status: 201,
-        message: 'Success register data'
+    userModel
+      .register(data)
+      .then(result => {
+        res.status(201).json({
+          error: false,
+          status: 201,
+          message: 'Success register data'
+        })
       })
-    }).catch(err => {
-      res.status(400).json({
-        error: true,
-        status: 400,
-        message: err
+      .catch(err => {
+        res.status(400).json({
+          error: true,
+          status: 400,
+          message: err
+        })
       })
-    })
   }
 }
