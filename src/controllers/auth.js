@@ -8,6 +8,7 @@ module.exports = {
   login: (req, res) => {
     const email = req.body.email
     const password = req.body.password
+    const role_id = req.body.role_id
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
     if (!validEmail) {
@@ -36,7 +37,8 @@ module.exports = {
         if (login) {
           const token = JWT.sign(
             {
-              email
+              email,
+              role_id
             },
             process.env.JWT_KEY,
             {
@@ -44,15 +46,14 @@ module.exports = {
             }
           )
 
-          res.status(200).json({
+          return res.status(200).json({
             error: false,
             status: 200,
-            data: result,
             message: 'Success login',
             token
           })
         } else {
-          res.status(400).json({
+          return res.status(400).json({
             error: true,
             status: 400,
             message: 'Email and Passsword not match'
@@ -60,7 +61,7 @@ module.exports = {
         }
       })
       .catch(err => {
-        res.status(400).json({
+        return res.status(400).json({
           error: true,
           status: 400,
           message: 'Email and Password not match'
@@ -75,14 +76,14 @@ module.exports = {
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
     if (!validEmail) {
-      res.status(400).json({
+      return res.status(400).json({
         error: 'true',
         message: 'Invalid Email e.g johndoe@gmail.com'
       })
     }
 
     if (!email || !password) {
-      res.status(400).json({
+      return res.status(400).json({
         error: 'true',
         message: 'Email and Password required'
       })
@@ -99,7 +100,8 @@ module.exports = {
 
     const token = JWT.sign(
       {
-        email
+        email,
+        role_id
       },
       process.env.JWT_KEY,
       {
@@ -110,19 +112,18 @@ module.exports = {
     userModel
       .register(data)
       .then(result => {
-        res.status(201).json({
+        return res.status(201).json({
           error: false,
           status: 201,
-          data: result,
           message: 'Success register data',
           token
         })
       })
       .catch(err => {
-        res.status(400).json({
+        return res.status(400).json({
           error: true,
           status: 400,
-          message: `Error ${err}`
+          message: 'Error register data'
         })
       })
   }
