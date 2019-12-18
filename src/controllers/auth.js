@@ -44,7 +44,7 @@ module.exports = {
             }
           )
 
-          localStorage.setItem('token', token)
+          window.localStorage.setItem('token', token)
 
           res.status(200).json({
             error: false,
@@ -109,7 +109,7 @@ module.exports = {
       }
     )
 
-    localStorage.setItem('token', token)
+    window.localStorage.setItem('token', token)
 
     userModel
       .register(data)
