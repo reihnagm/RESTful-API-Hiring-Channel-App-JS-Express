@@ -76,7 +76,7 @@ module.exports = {
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
     if (!validEmail) {
-      return res.send('test')
+      return res.send({ hello: 'world' })
     }
 
     if (!email || !password) {
