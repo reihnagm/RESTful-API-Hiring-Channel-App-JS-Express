@@ -44,6 +44,8 @@ module.exports = {
             }
           )
 
+          localStorage.setItem('token', token)
+
           res.status(200).json({
             error: false,
             status: 200,
@@ -99,14 +101,15 @@ module.exports = {
 
     const token = JWT.sign(
       {
-        email,
-        role_id
+        email
       },
       process.env.JWT_KEY,
       {
         expiresIn: '1h'
       }
     )
+
+    localStorage.setItem('token', token)
 
     userModel
       .register(data)
