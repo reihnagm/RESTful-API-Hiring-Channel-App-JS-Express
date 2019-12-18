@@ -1,6 +1,6 @@
 const engineerModel = require('../models/Engineer')
 const conn = require('../configs/db')
-const redis = require('../configs/redis')
+// const redis = require('../configs/redis')
 const checkext = require('../helpers/checkext')
 const miscHelper = require('../controllers/response')
 
@@ -29,73 +29,72 @@ module.exports = {
     engineerModel
       .all(offset, limit, sort, sortBy, search)
       .then(result => {
-        redis.get(
-          `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
-          (errRedis, resultRedis) => {
-            if (errRedis) {
-              res.status(400).json({
-                error: true,
-                message: errRedis
-              })
-            }
+        // redis.get(
+        //   `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
+        //   (errRedis, resultRedis) => {
+        //     if (errRedis) {
+        //       res.status(400).json({
+        //         error: true,
+        //         message: errRedis
+        //       })
+        //     }
 
-            // let pageDetail = {
-            //   total_data: totalDataEngineer,
-            //   per_page: limit,
-            //   current_page: page,
-            //   nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-            //   prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
-            // }
+        // let pageDetail = {
+        //   total_data: totalDataEngineer,
+        //   per_page: limit,
+        //   current_page: page,
+        //   nextLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+        //   prevLink: `http://localhost:3000${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+        // }
 
-            if (resultRedis) {
-              res.status(200).json({
-                status: 200,
-                error: false,
-                source: 'cache',
-                data: JSON.parse(resultRedis),
-                total_data: Math.ceil(totalDataEngineer),
-                per_page: limit,
-                current_page: page,
-                nextLink: `http://localhost:3001${req.originalUrl.replace(
-                  'page=' + page,
-                  'page=' + nextPage
-                )}`,
-                prevLink: `http://localhost:3001${req.originalUrl.replace(
-                  'page=' + page,
-                  'page=' + prevPage
-                )}`,
-                message: 'Success getting all data use redis'
-              })
-            } else {
-              // Set Cache Expiration to 1 Hour (60 minutes)
+        // if (resultRedis) {
+        //   res.status(200).json({
+        //     status: 200,
+        //     error: false,
+        //     source: 'cache',
+        //     data: JSON.parse(resultRedis),
+        //     total_data: Math.ceil(totalDataEngineer),
+        //     per_page: limit,
+        //     current_page: page,
+        //     nextLink: `http://localhost:3001${req.originalUrl.replace(
+        //       'page=' + page,
+        //       'page=' + nextPage
+        //     )}`,
+        //     prevLink: `http://localhost:3001${req.originalUrl.replace(
+        //       'page=' + page,
+        //       'page=' + prevPage
+        //     )}`,
+        //     message: 'Success getting all data use redis'
+        //   })
+        // } else {
+        // Set Cache Expiration to 1 Hour (60 minutes)
 
-              redis.setex(
-                `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
-                3600,
-                JSON.stringify(result)
-              )
+        // redis.setex(
+        //   `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
+        //   3600,
+        //   JSON.stringify(result)
+        // )
 
-              res.status(200).json({
-                status: 200,
-                error: false,
-                source: 'api',
-                data: result,
-                total_data: Math.ceil(totalDataEngineer),
-                per_page: limit,
-                current_page: page,
-                nextLink: `http://localhost:3001${req.originalUrl.replace(
-                  'page=' + page,
-                  'page=' + nextPage
-                )}`,
-                prevLink: `http://localhost:3001${req.originalUrl.replace(
-                  'page=' + page,
-                  'page=' + prevPage
-                )}`,
-                message: 'Success getting all data'
-              })
-            }
-          }
-        )
+        res.status(200).json({
+          status: 200,
+          error: false,
+          source: 'api',
+          data: result,
+          total_data: Math.ceil(totalDataEngineer),
+          per_page: limit,
+          current_page: page,
+          nextLink: `http://localhost:3001${req.originalUrl.replace(
+            'page=' + page,
+            'page=' + nextPage
+          )}`,
+          prevLink: `http://localhost:3001${req.originalUrl.replace(
+            'page=' + page,
+            'page=' + prevPage
+          )}`,
+          message: 'Success getting all data'
+        })
+        // }
+        // })
       })
       .catch(err => {
         err.status(400).json({
@@ -115,8 +114,6 @@ module.exports = {
       telephone,
       salary
     } = req.body
-
-    console.log(req.body)
 
     const dateOfBirth = req.body.birthdate
 
@@ -238,7 +235,7 @@ module.exports = {
     engineerModel
       .store(data)
       .then(result => {
-        redis.flushall()
+        // redis.flushall()
 
         res.status(201).json({
           status: 201,
@@ -385,7 +382,7 @@ module.exports = {
     engineerModel
       .update(data, id)
       .then(result => {
-        redis.flushall()
+        // redis.flushall()
 
         res.status(201).json({
           status: 201,
@@ -428,7 +425,7 @@ module.exports = {
     engineerModel
       .delete(id)
       .then(result => {
-        redis.flushall()
+        // redis.flushall()
 
         res.status(200).json({
           status: 200,
