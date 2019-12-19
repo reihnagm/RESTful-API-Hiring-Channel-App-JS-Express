@@ -104,8 +104,6 @@ module.exports = {
   },
   storeData: (req, res) => {
 
-    console.log(req.body)
-
     const {
       user_id,
       name,
@@ -119,8 +117,8 @@ module.exports = {
 
     const dateOfBirth = req.body.birthdate
 
-    const showcase =  req.files[0].originalname
-    const avatar =  req.files[1].originalname
+    // const showcase =  req.files[0].originalname
+    // const avatar =  req.files[1].originalname
 
     // if (req.files[0].size >= 5242880) {
     //   return res.status(400).json({
@@ -226,16 +224,12 @@ module.exports = {
       skill,
       location,
       date_of_birth: dateOfBirth,
-      showcase,
       email,
       telephone,
       salary,
-      avatar,
       date_created: new Date(),
       date_updated: new Date()
     }
-
-
 
     engineerModel
       .store(data)
