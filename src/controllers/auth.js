@@ -50,6 +50,7 @@ module.exports = {
           return res.status(200).json({
             error: false,
             status: 200,
+            data: result,
             message: 'Success login',
             token
           })
