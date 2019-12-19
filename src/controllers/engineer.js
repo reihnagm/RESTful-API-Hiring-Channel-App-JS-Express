@@ -271,6 +271,9 @@ module.exports = {
       avatar
     } = req.body
 
+
+    console.log(req.body)
+
     const dateOfBirth = req.body.birthdate
 
 
