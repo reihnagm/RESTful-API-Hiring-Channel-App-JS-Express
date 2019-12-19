@@ -75,7 +75,7 @@ module.exports = {
     const password = req.body.password
     const role_id = req.body.role_id
 
-    User.getId(email).then(res => {
+    userModel.getId(email).then(res => {
         console.log(res)
     }).catch(err => {
         console.log(err)
