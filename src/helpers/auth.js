@@ -6,7 +6,7 @@ module.exports = {
   check: (req, res, next) => {
     const { authorization, email } = req.headers
 
-    if (!authorization || !email) {
+    if (!authorization || !email || !role_id || !id) {
       res.status(404).json({
         message: 'Unauthorized!'
       })
