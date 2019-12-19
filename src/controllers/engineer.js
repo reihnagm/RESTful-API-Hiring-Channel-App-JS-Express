@@ -105,7 +105,7 @@ module.exports = {
   storeData: (req, res) => {
 
     const {
-      user_id
+      user_id,
       name,
       description,
       skill,
