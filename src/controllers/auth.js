@@ -96,18 +96,17 @@ module.exports = {
     const salt = bcrypt.genSaltSync(10)
     const passwordHash = bcrypt.hashSync(password, salt)
 
-    userModel.register(data).then(result => {
+    const data = {
+        email,
+        password: passwordHash,
+        role_id
+    }
 
-        const data = {
-            id: result.data.insertId,
-            email,
-            password: passwordHash,
-            role_id
-        }
+    userModel.register(data).then(result => {
 
         const token = JWT.sign(
             {
-                id,
+                id: result.data.insertId,
                 email,
                 role_id
             },
