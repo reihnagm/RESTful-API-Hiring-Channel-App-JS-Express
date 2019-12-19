@@ -104,6 +104,8 @@ module.exports = {
   },
   storeData: (req, res) => {
 
+    console.log(req.body)
+
     const {
       user_id,
       name,
@@ -233,7 +235,7 @@ module.exports = {
       date_updated: new Date()
     }
 
-    console.log(data)
+
 
     engineerModel
       .store(data)
