@@ -3,24 +3,45 @@ const Route = express.Router()
 
 const auth = require('../helpers/auth')
 
+const config = require('../configs/configs')
+
+const AWS = require('aws-sdk')
+const multerS3 = require('multer-s3')
 const multer = require('multer')
 
+// const s3Config = new AWS.S3({
+//     accessKeyId: config.AWS.accessKeyId,
+//     secretAccessKey: config.AWS.secretAccessKey,
+//     region: config.AWS.region,
+//     Bucket: config.AWS.bucket
+// })
+
+// const multerS3Config = multerS3({
+//     s3: s3Config,
+//     bucket: config.AWS.bucket,
+//     acl: 'public-read',
+//     metadata: function (req, file, cb) {
+//         cb(null, { fieldName: file.fieldname })
+//     },
+//     key: function (req, file, cb) {
+//         cb(null, new Date().getTime() + '-' + file.originalname.replace(/\s/g, '-'))
+//     }
+// })
+
+// const upload = multer({
+//     storage: multerS3Config
+// }).any()
+
 const storage = multer.diskStorage({
-  destination: function(req, file, callback) {
-    callback(null, './src/images')
-  },
-  filename: function(req, file, callback) {
-    callback(null, Date.now() + '-' + file.originalname)
-  }
+    destination: function(req, file, callback) {
+        callback(null, './src/images')
+    },
+    filename: function(req, file, callback) {
+        callback(null, file.originalname)
+    }
 })
 
-const upload = multer({
-  storage
-  // limits: { fileSize: 5242880 }
-  // fileFilter: (req, file, cb) => {
-  //   checkFileType(req, file, cb)
-  // }
-}).any()
+const upload = multer({ storage }).any()
 
 // const showcase = multer({
 //   storage,

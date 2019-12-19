@@ -26,9 +26,7 @@ module.exports = {
     const prevPage = page === 1 ? 1 : page - 1
     const nextPage = page === totalDataEngineer ? totalDataEngineer : page + 1
 
-    engineerModel
-      .all(offset, limit, sort, sortBy, search)
-      .then(result => {
+    engineerModel.all(offset, limit, sort, sortBy, search).then(result => {
         // redis.get(
         //   `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
         //   (errRedis, resultRedis) => {
@@ -117,8 +115,8 @@ module.exports = {
 
     const dateOfBirth = req.body.birthdate
 
-    const showcase = req.files[0].originalname
-    const avatar = req.files[1].originalname
+    const showcase = __dirname + req.files[0].originalname
+    const avatar = __dirname + req.files[1].originalname
 
     if (req.files[0].size >= 5242880) {
       return res.status(400).json({
@@ -401,7 +399,6 @@ module.exports = {
   },
   editData: (req, res) => {
     const id = req.params.id
-    console.log('te')
     engineerModel
       .edit(id)
       .then(result => {
