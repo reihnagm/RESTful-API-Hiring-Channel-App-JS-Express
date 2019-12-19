@@ -104,9 +104,8 @@ module.exports = {
   },
   storeData: (req, res) => {
 
-    console.log(req.body)
-
     const {
+      user_id
       name,
       description,
       skill,
@@ -219,6 +218,7 @@ module.exports = {
     }
 
     const data = {
+      user_id,
       name,
       description,
       skill,
