@@ -119,6 +119,7 @@ module.exports = {
         return res.status(201).json({
             error: false,
             status: 201,
+            data: result,
             message: 'Success register data',
             token
         })
