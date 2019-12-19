@@ -257,21 +257,22 @@ module.exports = {
   },
   updateData: (req, res) => {
     const id = req.params.id
-    const data = {
-        user_id,
-        name,
-        description,
-        skill,
-        location,
-        showcase,
-        email,
-        telephone,
-        salary,
-        avatar,
-        date_updated: new Date()
+
+    const {
+      user_id,
+      name,
+      description,
+      skill,
+      location,
+      email,
+      telephone,
+      showcase,
+      salary,
+      avatar
     } = req.body
 
     const dateOfBirth = req.body.birthdate
+
 
     // const showcase = req.files[0].originalname
     // const avatar = req.files[1].originalname
