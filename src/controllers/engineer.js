@@ -112,9 +112,7 @@ module.exports = {
       location,
       email,
       telephone,
-      showcase,
-      salary,
-      avatar
+      salary
     } = req.body
 
     const dateOfBirth = req.body.birthdate
@@ -266,9 +264,7 @@ module.exports = {
       location,
       email,
       telephone,
-      showcase,
-      salary,
-      avatar
+      salary
     } = req.body
 
     const dateOfBirth = req.body.birthdate
