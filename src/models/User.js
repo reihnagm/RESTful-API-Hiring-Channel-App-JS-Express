@@ -22,7 +22,7 @@ module.exports = {
                 }
             })
         })
-    }.
+    },
     getId: (email) => {
         return new Promise((resolve, reject) => {
             conn.query(`SELECT id FROM user WHERE email = ${email}`, (err, result) => {
