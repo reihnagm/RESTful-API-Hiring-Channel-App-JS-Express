@@ -28,12 +28,6 @@ module.exports = {
         })
       }
 
-      if (email !== decoded.email) {
-        res.status(403).json({
-          message: 'Token not valid for selected email'
-        })
-      }
-
       next()
     })
   }
