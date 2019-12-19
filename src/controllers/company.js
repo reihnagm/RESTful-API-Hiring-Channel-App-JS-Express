@@ -1,20 +1,20 @@
 const companyModel = require('../models/Company')
-const redis = require('../configs/redis')
+// const redis = require('../configs/redis')
 
 module.exports = {
   getAllData: (req, res) => {
     companyModel.all().then(result => {
-      redis.get('Company:getAllData', (errorRedis, resultRedis) => {
-        if (resultRedis) {
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'cache',
-            result,
-            message: 'Success getting all data use redis'
-          })
-        } else {
-          redis.setex('Company:getAllData', 3600, JSON.stringify(result))
+      // redis.get('Company:getAllData', (errorRedis, resultRedis) => {
+        // if (resultRedis) {
+        //   res.status(200).json({
+        //     status: 200,
+        //     error: false,
+        //     source: 'cache',
+        //     result,
+        //     message: 'Success getting all data use redis'
+        //   })
+        // } else {
+        //   redis.setex('Company:getAllData', 3600, JSON.stringify(result))
 
           res.status(200).json({
             status: 200,
@@ -23,8 +23,8 @@ module.exports = {
             result,
             message: 'Success getting all data'
           })
-        }
-      })
+      //   }
+      // })
     }).catch(err => {
       res.status(400).json({
         status: 400,

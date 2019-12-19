@@ -115,17 +115,17 @@ module.exports = {
       .register(data)
       .then(result => {
         return res.status(201).json({
-          error: false,
-          status: 201,
-          message: 'Success register data',
-          token
+            error: false,
+            status: 201,
+            message: 'Success register data',
+            token
         })
       })
       .catch(err => {
         return res.status(400).json({
-          error: true,
-          status: 400,
-          message: 'Error register data'
+            error: true,
+            status: 400,
+            message: 'Error register data'
         })
       })
   }
