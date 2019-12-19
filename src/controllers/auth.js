@@ -96,28 +96,31 @@ module.exports = {
     const salt = bcrypt.genSaltSync(10)
     const passwordHash = bcrypt.hashSync(password, salt)
 
-    const data = {
-        email,
-        password: passwordHash,
-        role_id
-    }
-
-    const token = JWT.sign(
-        {
-            email,
-            role_id
-        },
-        process.env.JWT_KEY,
-        {
-            expiresIn: '1h'
-        }
-    )
-
     userModel.register(data).then(result => {
+
+        const data = {
+            id: result.data.insertId,
+            email,
+            password: passwordHash,
+            role_id
+        }
+
+        const token = JWT.sign(
+            {
+                id,
+                email,
+                role_id
+            },
+            process.env.JWT_KEY,
+            {
+                expiresIn: '1h'
+            }
+        )
+
         return res.status(201).json({
             error: false,
             status: 201,
-            result,
+            insertId,
             data,
             message: 'Success register data',
             token
