@@ -110,8 +110,10 @@ module.exports = {
       description,
       skill,
       location,
+      showcase,
       email,
       telephone,
+      avatar,
       salary
     } = req.body
 
@@ -225,8 +227,10 @@ module.exports = {
       location,
       date_of_birth: dateOfBirth,
       email,
+      showcase,
       telephone,
       salary,
+      avatar,
       date_created: new Date(),
       date_updated: new Date()
     }
