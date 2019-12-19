@@ -3,7 +3,7 @@ const conn = require('../configs/db')
 module.exports = {
   all: (offset, limit, sort, sortBy, search) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM engineer WHERE (name LIKE '%${search}%' or skill LIKE '%${search}%') 
+      const query = `SELECT * FROM engineer WHERE (name LIKE '%${search}%' or skill LIKE '%${search}%')
       ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
 
       conn.query(query, (err, result) => {
@@ -21,7 +21,7 @@ module.exports = {
         if (err) {
           reject(new Error(err))
         } else {
-          resolve(result)
+          resolve(result.insertId)
         }
       })
     })

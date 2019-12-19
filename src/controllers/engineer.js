@@ -216,6 +216,7 @@ module.exports = {
     }
 
     const data = {
+      user_id: result,
       name,
       description,
       skill,
