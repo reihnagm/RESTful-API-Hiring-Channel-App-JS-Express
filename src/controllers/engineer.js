@@ -119,47 +119,47 @@ module.exports = {
 
     const dateOfBirth = req.body.birthdate
 
-    // const showcase =  req.files[0].originalname
-    // const avatar =  req.files[1].originalname
-    //
-    // if (req.files[0].size >= 5242880) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Showcase size cannot larger than 5MB'
-    //   })
-    // }
-    //
-    // if (req.files[1].size >= 5242880) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Avatar size cannot larger than 5MB'
-    //   })
-    // }
-    //
-    // if (!checkext.checkFileImg(req.files[0].mimetype)) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
-    //   })
-    // }
-    //
-    // if (!checkext.checkFileImg(req.files[1].mimetype)) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
-    //   })
-    // }
-    //
-    // if (req.fileValidationError) {
-    //   res.status(400).json({
-    //     status: '400',
-    //     message: req.fileValidationError
-    //   })
-    // }
+    const showcase =  req.files[0].originalname
+    const avatar =  req.files[1].originalname
+
+    if (req.files[0].size >= 5242880) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Showcase size cannot larger than 5MB'
+      })
+    }
+
+    if (req.files[1].size >= 5242880) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Avatar size cannot larger than 5MB'
+      })
+    }
+
+    if (!checkext.checkFileImg(req.files[0].mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+      })
+    }
+
+    if (!checkext.checkFileImg(req.files[1].mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+      })
+    }
+
+    if (req.fileValidationError) {
+      res.status(400).json({
+        status: '400',
+        message: req.fileValidationError
+      })
+    }
 
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
@@ -273,106 +273,105 @@ module.exports = {
 
     const dateOfBirth = req.body.birthdate
 
+    const showcase = req.files[0].originalname
+    const avatar = req.files[1].originalname
 
-    // const showcase = req.files[0].originalname
-    // const avatar = req.files[1].originalname
+    if (req.files[0].size >= 5242880) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Showcase size cannot larger than 5MB'
+      })
+    }
 
-    // if (req.files[0].size >= 5242880) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Showcase size cannot larger than 5MB'
-    //   })
-    // }
-    //
-    // if (req.files[1].size >= 5242880) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Avatar size cannot larger than 5MB'
-    //   })
-    // }
-    //
-    // if (!checkext.checkFileImg(req.files[0].mimetype)) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
-    //   })
-    // }
-    //
-    // if (!checkext.checkFileImg(req.files[1].mimetype)) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
-    //   })
-    // }
+    if (req.files[1].size >= 5242880) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Avatar size cannot larger than 5MB'
+      })
+    }
 
-    // if (req.fileValidationError) {
-    //   res.status(400).json({
-    //     status: '400',
-    //     message: req.fileValidationError
-    //   })
-    // }
-    //
-    // const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
-    //
-    // if (!validEmail) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     error: true,
-    //     message: 'Invalid Email e.g johndoe@gmail.com'
-    //   })
-    // }
-    // if (!name) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Name required'
-    //   })
-    // }
-    // if (!description) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Description required'
-    //   })
-    // }
-    // if (!skill) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Skill required'
-    //   })
-    // }
-    // if (!location) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Location required'
-    //   })
-    // }
-    // if (!dateOfBirth) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Date of birth required'
-    //   })
-    // }
-    // if (!email) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Email required'
-    //   })
-    // }
-    // if (!telephone) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Telephone required'
-    //   })
-    // }
-    // if (!salary) {
-    //   return res.status(400).json({
-    //     error: true,
-    //     message: 'Telephone required'
-    //   })
-    // }
+    if (!checkext.checkFileImg(req.files[0].mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+      })
+    }
+
+    if (!checkext.checkFileImg(req.files[1].mimetype)) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Support type file only : JPEG, GIF, PNG, SVG, BMP'
+      })
+    }
+
+    if (req.fileValidationError) {
+      res.status(400).json({
+        status: '400',
+        message: req.fileValidationError
+      })
+    }
+
+    const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
+
+    if (!validEmail) {
+      return res.status(400).json({
+        status: 400,
+        error: true,
+        message: 'Invalid Email e.g johndoe@gmail.com'
+      })
+    }
+    if (!name) {
+      return res.status(400).json({
+        error: true,
+        message: 'Name required'
+      })
+    }
+    if (!description) {
+      return res.status(400).json({
+        error: true,
+        message: 'Description required'
+      })
+    }
+    if (!skill) {
+      return res.status(400).json({
+        error: true,
+        message: 'Skill required'
+      })
+    }
+    if (!location) {
+      return res.status(400).json({
+        error: true,
+        message: 'Location required'
+      })
+    }
+    if (!dateOfBirth) {
+      return res.status(400).json({
+        error: true,
+        message: 'Date of birth required'
+      })
+    }
+    if (!email) {
+      return res.status(400).json({
+        error: true,
+        message: 'Email required'
+      })
+    }
+    if (!telephone) {
+      return res.status(400).json({
+        error: true,
+        message: 'Telephone required'
+      })
+    }
+    if (!salary) {
+      return res.status(400).json({
+        error: true,
+        message: 'Telephone required'
+      })
+    }
 
     const data = {
       user_id,
