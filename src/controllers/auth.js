@@ -32,7 +32,8 @@ module.exports = {
       .then(result => {
         const matchedEmail = email === result[0].email
         const matchedPassword = bcrypt.compareSync(password, result[0].password)
-        const login = matchedEmail && matchedPassword
+        const matchedRoleId = role_id === result[0].role_id
+        const login = matchedEmail && matchedPassword && matchedRoleId
 
         if (login) {
           const token = JWT.sign(
