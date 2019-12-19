@@ -18,7 +18,7 @@ module.exports = {
                 if (err) {
                     reject(new Error(err))
                 } else {
-                    resolve(result)
+                    resolve(result.insertId)
                 }
             })
         })

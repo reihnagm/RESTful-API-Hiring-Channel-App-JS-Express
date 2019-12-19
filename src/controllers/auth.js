@@ -75,12 +75,6 @@ module.exports = {
     const password = req.body.password
     const role_id = req.body.role_id
 
-    userModel.getId(email).then(res => {
-        console.log(res)
-    }).catch(err => {
-        console.log(err)
-    })
-
     const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
 
     if (!validEmail) {
