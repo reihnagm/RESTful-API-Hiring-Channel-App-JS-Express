@@ -62,9 +62,9 @@ module.exports = {
       })
       .catch(err => {
         return res.status(400).json({
-          error: true,
-          status: 400,
-          message: 'Email and Password not match'
+            error: true,
+            status: 400,
+            message: 'Data not found'
         })
       })
   },

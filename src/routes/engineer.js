@@ -69,7 +69,7 @@ const upload = multer({ storage }).any()
 const Engineer = require('../controllers/engineer')
 
 Route.get('/', Engineer.getAllData)
-  .post('/', auth.check, upload, Engineer.storeData)
+  .post('/',  upload, Engineer.storeData)
   .get('/:id', Engineer.editData)
   .patch('/:id', upload, Engineer.updateData)
   .delete('/:id', Engineer.deleteData)
