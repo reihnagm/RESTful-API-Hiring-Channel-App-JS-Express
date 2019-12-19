@@ -271,9 +271,6 @@ module.exports = {
       avatar
     } = req.body
 
-
-    console.log(req.body)
-
     const dateOfBirth = req.body.birthdate
 
 
@@ -318,64 +315,64 @@ module.exports = {
     //     message: req.fileValidationError
     //   })
     // }
-
-    const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
-
-    if (!validEmail) {
-      return res.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Invalid Email e.g johndoe@gmail.com'
-      })
-    }
-    if (!name) {
-      return res.status(400).json({
-        error: true,
-        message: 'Name required'
-      })
-    }
-    if (!description) {
-      return res.status(400).json({
-        error: true,
-        message: 'Description required'
-      })
-    }
-    if (!skill) {
-      return res.status(400).json({
-        error: true,
-        message: 'Skill required'
-      })
-    }
-    if (!location) {
-      return res.status(400).json({
-        error: true,
-        message: 'Location required'
-      })
-    }
-    if (!dateOfBirth) {
-      return res.status(400).json({
-        error: true,
-        message: 'Date of birth required'
-      })
-    }
-    if (!email) {
-      return res.status(400).json({
-        error: true,
-        message: 'Email required'
-      })
-    }
-    if (!telephone) {
-      return res.status(400).json({
-        error: true,
-        message: 'Telephone required'
-      })
-    }
-    if (!salary) {
-      return res.status(400).json({
-        error: true,
-        message: 'Telephone required'
-      })
-    }
+    //
+    // const validEmail = /[a-zA-Z0-9_]+@[a-zA-Z]+\.(com|net|org)$/.test(email)
+    //
+    // if (!validEmail) {
+    //   return res.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: 'Invalid Email e.g johndoe@gmail.com'
+    //   })
+    // }
+    // if (!name) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Name required'
+    //   })
+    // }
+    // if (!description) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Description required'
+    //   })
+    // }
+    // if (!skill) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Skill required'
+    //   })
+    // }
+    // if (!location) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Location required'
+    //   })
+    // }
+    // if (!dateOfBirth) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Date of birth required'
+    //   })
+    // }
+    // if (!email) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Email required'
+    //   })
+    // }
+    // if (!telephone) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Telephone required'
+    //   })
+    // }
+    // if (!salary) {
+    //   return res.status(400).json({
+    //     error: true,
+    //     message: 'Telephone required'
+    //   })
+    // }
 
     const data = {
       user_id,
