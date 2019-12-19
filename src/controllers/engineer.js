@@ -256,6 +256,7 @@ module.exports = {
   updateData: (req, res) => {
     const id = req.params.id
     const {
+      user_id,
       name,
       description,
       skill,
@@ -368,6 +369,7 @@ module.exports = {
     }
 
     const data = {
+      user_id,
       name,
       description,
       skill,
