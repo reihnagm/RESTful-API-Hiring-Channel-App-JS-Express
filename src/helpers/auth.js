@@ -4,7 +4,7 @@ const JWT = require('jsonwebtoken')
 
 module.exports = {
   check: (req, res, next) => {
-    const { authorization, email } = req.headers
+    const { authorization, email, role_id, id } = req.headers
 
     if (!authorization || !email || !role_id || !id) {
       res.status(404).json({

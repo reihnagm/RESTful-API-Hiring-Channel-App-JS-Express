@@ -114,7 +114,7 @@ module.exports = {
       telephone,
       showcase,
       salary,
-      avatar,
+      avatar
     } = req.body
 
     const dateOfBirth = req.body.birthdate
