@@ -36,27 +36,24 @@ const storage = multer.diskStorage({
         callback(null, './src/images')
     },
     filename: (request, file, callback) => {
-        callback(null, file.fieldname)
+        callback(null, file.fieldname + '-' + Date.now())
     }
 })
 
 const upload = multer({
     storage,
-    limits: { fileSize: 5242880 } // 5 MB
-
-    // fileFilter: (request, file, callback) => {
-        // checkFileType(request, file, callback)
-        // checkFileSize(request, file, callback)
-    // }
+    limits: { fileSize: 5242880 }, // 5 MB
+    fileFilter: (request, file, callback) => {
+        checkFileType(request, file, callback)
+    }
 }).any()
 
-
-// const checkFileType = (request, file, callback) => {
-    // if (file.mimetype) {
-    //     request.fileValidationError = 'goes wrong on the mimetype'
-    //     return callback(null, false)
-    // }
-// }
+const checkFileType = (request, file, callback) => {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+        request.fileValidationError = 'Support only type : JPG, JPEG, PNG, GIF, SVG'
+        return callback(null, false)
+    }
+}
 
 // const showcase = multer({
 //   storage,
@@ -93,10 +90,17 @@ Route.get('/', Engineer.getAllData)
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
         check('salary', 'Salary is required').trim().not().isEmpty()
     ], upload, Engineer.storeData)
-  .get('/:id', Engineer.editData)
-  .patch('/:id',  Engineer.updateData)
-  .delete('/:id',  Engineer.deleteData)
-
+    .get('/:id', Engineer.editData)
+    .patch('/:id',[
+        check('name', 'Name is required').trim().not().isEmpty(),
+        check('description', 'Description is required').trim().not().isEmpty(),
+        check('skill', 'Skill is required').trim().not().isEmpty(),
+        check('location', 'Location is required').trim().not().isEmpty(),
+        check('email', 'Please include valid email').trim().not().isEmpty().isEmail().normalizeEmail(),
+        check('telephone', 'Telephone is required').trim().not().isEmpty(),
+        check('salary', 'Salary is required').trim().not().isEmpty()
+    ], upload, Engineer.updateData)
+    .delete('/:id',  Engineer.deleteData)
 
 
 module.exports = Route

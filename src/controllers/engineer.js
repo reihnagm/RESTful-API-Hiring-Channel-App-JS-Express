@@ -1,26 +1,29 @@
 const engineerModel = require('../models/Engineer')
-const conn = require('../configs/db')
+const connection = require('../configs/db')
 // const redis = require('../configs/redis')
 const { check, validationResult } = require('express-validator');
 const checkext = require('../helpers/checkext')
-const miscHelper = require('../controllers/response')
 
 module.exports = {
-    getAllData: (req, res) => {
+    getAllData: (request, response) => {
 
-        const page = parseInt(req.query.page) || 1
-        const search = req.query.search || ''
-        const limit = req.query.limit || 10
-        const sort = req.query.sort || 'DESC'
-        const sortBy = req.query.sortBy || 'date_updated'
+        const page = parseInt(request.query.page) || 1
+        const search = request.query.search || ''
+        const limit = request.query.limit || 10
+        const sort = request.query.sort || 'DESC'
+        const sortBy = request.query.sortBy || 'date_updated'
 
         const offset = (page - 1) * limit
 
         let totalDataEngineer = 0
 
-        conn.query('SELECT COUNT(*) total_data FROM engineer', (err, res) => {
-            if (err) {
-                return miscHelper.response(res, 400, true, 'Error', err)
+        connection.query('SELECT COUNT(*) total_data FROM engineer', (error, result) => {
+            if (error) {
+                return response.status(400).json({
+                    status: 400,
+                    error: true,
+                    message: error
+                })
             }
             totalDataEngineer = res[0].total_data
         })
@@ -113,6 +116,7 @@ module.exports = {
 
         const data =
         {
+            name: request.body.name,
             description: request.body.description,
             skill: request.body.skill,
             location: request.body.location,
@@ -126,21 +130,21 @@ module.exports = {
 
         engineerModel.store(data).then(result => {
 
-        // uncomment if use redis, to restart getting new data
-        // redis.flushall()
+            // uncomment if use redis, to restart getting new data
+            // redis.flushall()
 
-        response.status(201).json({
-            status: 201,
-            error: false,
-            files: request.files,
-            data: result,
-            message: 'Successfull'
-        })
+            return response.status(201).json({
+                status: 201,
+                error: false,
+                files: request.files,
+                data: result,
+                message: 'Successfull'
+            })
         }).catch(error => {
-            response.status(422).json({
+            return response.status(422).json({
                 status: 422,
                 error: true,
-                errors: errors.array()
+                errors: validationResult(request).array()
             })
         })
 
@@ -190,11 +194,59 @@ module.exports = {
 
 
     },
-  updateData: (req, res) => {
-    const id = req.params.id
+    updateData: (request, response) => {
 
-    const { name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar, user_id } = req.body
+        if(request.files >= 5242880)  { // 5 MB
+            return response.status(400).json({ status: 400, error: true, message: "File too large"})
+        }
 
+        if (!request.files) {
+            return response.status(400).json({ status: 400, error: true, message: "Please upload file"})
+        }
+
+        if (!validationResult(request).isEmpty()) {
+            return response.status(422).json({ errors: validationResult(request).array() })
+        }
+
+        if (request.fileValidationError) {
+            return response.status(400).json({
+                status: '400',
+                message: req.fileValidationError
+            })
+        }
+
+        const data =
+        {
+            name: request.body.name,
+            description: request.body.description,
+            skill: request.body.skill,
+            location: request.body.location,
+            birthdate: request.body.birthdate,
+            showcase: request.body.showcase,
+            email: request.body.email,
+            telephone: request.body.telephone,
+            salary: request.body.salary,
+            user_id: request.body.user_id
+        }
+
+        engineerModel.update(data, request.params.id).then(result => {
+
+            // uncomment if use redis, to restart getting new data
+            // redis.flushall()
+
+            return response.status(201).json({
+                status: 201,
+                error: false,
+                data: result,
+                message: 'Successful'
+            })
+        }).catch(error => {
+            return response.status(400).json({
+                status: 400,
+                error: true,
+                message: error
+            })
+        })
 
     // const showcase = req.files[0].originalname
     // const avatar = req.files[1].originalname
@@ -238,63 +290,41 @@ module.exports = {
     //   })
     // }
 
-    engineerModel.update(data, id).then(result => {
-      // redis.flushall()
+    },
+    editData: (request, response) => {
+        engineerModel.edit(request.params.id).then(result => {
+            response.status(200).json({
+                status: 200,
+                error: false,
+                data: result,
+                message: 'Successful'
+            })
+        }).catch(error => {
+            response.status(400).json({
+                status: 200,
+                error: true,
+                message: error
+            })
+        })
+    },
+    deleteData: (request, response) => {
+        engineerModel.delete(req.params.id).then(result => {
 
-      response.status(201).json({
-        status: 201,
-        error: false,
-        result,
-        message: 'Success update engineer'
-      })
-    }).catch(error => {
-      error.status(400).json({
-        status: 400,
-        error: true,
-        message: 'Error'
-      })
-    })
-  },
-  editData: (req, res) => {
-    const id = req.params.id
-    engineerModel
-      .edit(id)
-      .then(result => {
-        res.status(200).json({
-          status: 200,
-          error: false,
-          message: 'Success getting edit data',
-          data: result
-        })
-      })
-      .catch(error => {
-        res.status(400).json({
-          status: 200,
-          message: `Error ${error}`,
-          error: true
-        })
-      })
-  },
-  deleteData: (req, res) => {
-    const id = req.params.id
-    engineerModel
-      .delete(id)
-      .then(result => {
-        // redis.flushall()
+            // uncomment if use redis, to restart getting new data
+            // redis.flushall()
 
-        res.status(200).json({
-          status: 200,
-          error: false,
-          result,
-          message: 'Success delete engineer'
+            response.status(200).json({
+                status: 200,
+                error: false,
+                data: result,
+                message: 'Successful'
+            })
+        }).catch(error => {
+            response.status(400).json({
+              status: 400,
+              error: true,
+              message: error
+            })
         })
-      })
-      .catch(err => {
-        res.status(400).json({
-          status: 400,
-          error: true,
-          message: 'Failed delete engineer'
-        })
-      })
-  }
+    }
 }
