@@ -1,13 +1,12 @@
-const express = require('express')
-const Route = express.Router()
+const   express = require('express'),
+        Route = express.Router(),
+        auth = require('../helpers/auth'),
+        { check, validationResult } = require('express-validator'),
+        config = require('../configs/configs'),
+        AWS = require('aws-sdk'),
+        multerS3 = require('multer-s3'),
+        multer = require('multer')
 
-const auth = require('../helpers/auth')
-
-const config = require('../configs/configs')
-
-const AWS = require('aws-sdk')
-const multerS3 = require('multer-s3')
-const multer = require('multer')
 
 // const s3Config = new AWS.S3({
 //     accessKeyId: config.AWS.accessKeyId,
@@ -33,15 +32,31 @@ const multer = require('multer')
 // }).any()
 
 const storage = multer.diskStorage({
-    destination: function(req, file, callback) {
+    destination: (request, file, callback) => {
         callback(null, './src/images')
     },
-    filename: function(req, file, callback) {
-        callback(null, file.originalname)
+    filename: (request, file, callback) => {
+        callback(null, file.fieldname)
     }
 })
 
-const upload = multer({ storage }).any()
+const upload = multer({
+    storage,
+    limits: { fileSize: 5242880 } // 5 MB
+
+    // fileFilter: (request, file, callback) => {
+        // checkFileType(request, file, callback)
+        // checkFileSize(request, file, callback)
+    // }
+}).any()
+
+
+// const checkFileType = (request, file, callback) => {
+    // if (file.mimetype) {
+    //     request.fileValidationError = 'goes wrong on the mimetype'
+    //     return callback(null, false)
+    // }
+// }
 
 // const showcase = multer({
 //   storage,
@@ -66,12 +81,22 @@ const upload = multer({ storage }).any()
 //   }
 // }
 
-const Engineer = require('../controllers/engineer')
 
+const Engineer = require('../controllers/engineer')
 Route.get('/', Engineer.getAllData)
-  .post('/',  Engineer.storeData)
+    .post('/',[
+        check('name', 'Name is required').trim().not().isEmpty(),
+        check('description', 'Description is required').trim().not().isEmpty(),
+        check('skill', 'Skill is required').trim().not().isEmpty(),
+        check('location', 'Location is required').trim().not().isEmpty(),
+        check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),
+        check('telephone', 'Telephone is required').trim().not().isEmpty(),
+        check('salary', 'Salary is required').trim().not().isEmpty()
+    ], upload, Engineer.storeData)
   .get('/:id', Engineer.editData)
   .patch('/:id',  Engineer.updateData)
   .delete('/:id',  Engineer.deleteData)
+
+
 
 module.exports = Route

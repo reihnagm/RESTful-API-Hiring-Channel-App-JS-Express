@@ -8,10 +8,11 @@ const app = express()
 const port = config.port
 const routerNav = require('./src/index')
 
+// Allow Cors
 app.use(cors())
 
-app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(logger('dev'))
 

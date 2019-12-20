@@ -46,27 +46,28 @@ module.exports = {
                     expiresIn: '365d'
                 }
             )
-
-            return res.status(200).json({
-                error: false,
-                status: 200,
-                data: result,
-                message: 'Success login',
-                token
-            })
-            } else {
-            return res.status(400).json({
-                error: true,
-                status: 400,
-                message: 'Email and Passsword not match'
-          })
-        }
+                return res.status(200).json({
+                    error: false,
+                    status: 200,
+                    data: result,
+                    message: 'Success login',
+                    token
+                })
+            }
+            else
+            {
+                return res.status(400).json({
+                    error: true,
+                    status: 400,
+                    message: 'Email and Passsword not match'
+                })
+            }
       })
       .catch(err => {
         return res.status(400).json({
             error: true,
             status: 400,
-            message: 'Data not found'
+            message: 'Email not exists'
         })
       })
   },
