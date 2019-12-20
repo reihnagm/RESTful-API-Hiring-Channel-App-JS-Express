@@ -43,7 +43,7 @@ module.exports = {
                 },
                 process.env.JWT_KEY,
                 {
-                    expiresIn: '1h'
+                    expiresIn: '365d'
                 }
             )
 
@@ -112,7 +112,7 @@ module.exports = {
             },
             process.env.JWT_KEY,
             {
-                expiresIn: '1h'
+                expiresIn: '365d'
             }
         )
 

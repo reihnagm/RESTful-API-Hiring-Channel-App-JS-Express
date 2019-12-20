@@ -28,7 +28,7 @@ module.exports = {
   },
   edit: (id) => {
     return new Promise((resolve, reject) => {
-      conn.query(`SELECT * FROM engineer WHERE id = '${id}'`, (err, result) => {
+      conn.query(`SELECT * FROM engineer WHERE id = ${id}`, (err, result) => {
         if (err) {
           reject(new Error(err))
         } else {

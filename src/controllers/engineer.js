@@ -264,15 +264,17 @@ module.exports = {
       description,
       skill,
       location,
+      showcase,
       email,
       telephone,
+      avatar,
       salary
     } = req.body
 
     const dateOfBirth = req.body.birthdate
 
-    const showcase = req.files[0].originalname
-    const avatar = req.files[1].originalname
+    // const showcase = req.files[0].originalname
+    // const avatar = req.files[1].originalname
 
     // if (req.files[0].size >= 5242880) {
     //   return res.status(400).json({
@@ -378,13 +380,14 @@ module.exports = {
       skill,
       location,
       date_of_birth: dateOfBirth,
-      showcase,
       email,
+      showcase,
       telephone,
       salary,
       avatar,
       date_updated: new Date()
     }
+
     engineerModel
       .update(data, id)
       .then(result => {
