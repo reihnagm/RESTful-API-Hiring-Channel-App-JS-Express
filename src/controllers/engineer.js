@@ -1,11 +1,11 @@
-const engineerModel = require('../models/Engineer')
+const Engineer = require('../models/Engineer')
 const connection = require('../configs/db')
 // const redis = require('../configs/redis')
 const { check, validationResult } = require('express-validator');
 const checkext = require('../helpers/checkext')
 
 module.exports = {
-    getAllData: (request, response) => {
+    getAllData: async (request, response) => {
 
         const page = parseInt(request.query.page) || 1
         const search = request.query.search || ''
@@ -31,7 +31,25 @@ module.exports = {
         const prevPage = page === 1 ? 1 : page - 1
         const nextPage = page === totalDataEngineer ? totalDataEngineer : page + 1
 
-        engineerModel.all(offset, limit, sort, sortBy, search).then(result => {
+        try {
+            let getEngineers = await Engineer.all(offset, limit, sort, sortBy, search)
+
+            response.status(200).json({
+                data: getEngineers,
+                total_data: Math.ceil(totalDataEngineer),
+                per_page: limit,
+                current_page: page,
+                nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+                message: 'Success getting all data'
+            })
+        }
+        catch(error) {
+            console.error(error)
+            response.status(500).send('Server Error')
+        }
+
+
           // redis.get(
           //   `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
           //   (errRedis, resultRedis) => {
@@ -78,75 +96,97 @@ module.exports = {
           //   JSON.stringify(result)
           // )
 
-            response.status(200).json({
-                status: 200,
-                error: false,
-                source: 'api',
-                data: result,
-                total_data: Math.ceil(totalDataEngineer),
-                per_page: limit,
-                current_page: page,
-                nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
-                message: 'Success getting all data'
-            })
           // }
           // })
-        }).catch(error => {
-            response.status(400).json({
-                status: 400,
-                error: true,
-                message: error
-            })
-        })
+        // }).catch(error => {
+        //     response.status(400).json({
+        //         status: 400,
+        //         error: true,
+        //         message: error
+        //     })
+        // })
       },
-    storeData: (request, response) => {
+    storeData: async (request, response) => {
 
-        if(request.files >= 5242880)  { // 5 MB
-            return response.status(400).json({ status: 400, error: true, message: "File too large"})
-        }
-
-        if (!request.files) {
-            return response.status(400).json({ status: 400, error: true, message: "Please upload file"})
-        }
-
+        // if(request.files >= 5242880)  { // 5 MB
+        //     return response.status(400).json({ status: 400, error: true, message: "File too large"})
+        // }
+        //
+        // if (!request.files) {
+        //     return response.status(400).json({ status: 400, error: true, message: "Please upload file"})
+        // }
+        //
+        
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
         }
 
-        const data =
-        {
-            name: request.body.name,
-            description: request.body.description,
-            skill: request.body.skill,
-            location: request.body.location,
-            birthdate: request.body.birthdate,
-            showcase: request.body.showcase,
-            email: request.body.email,
-            telephone: request.body.telephone,
-            salary: request.body.salary,
-            user_id: request.body.user_id
+        const {
+            name,
+            description,
+            skill,
+            location,
+            birthdate,
+            showcase,
+            email,
+            telephone,
+            salary
+        } = request.body
+
+        const data = {
+            name,
+            description,
+            skill,
+            location,
+            birthdate,
+            showcase,
+            email,
+            telephone,
+            salary
         }
 
-        engineerModel.store(data).then(result => {
+        // If you want default null
+        // const engineerFields = {}
+        //
+        // if(name) engineerFields.name = name
+        // if(description) engineerFields.description = description
+        // if(skill) engineerFields.skill = skill
+        // if(location) engineerFields.location = location
+        // if(birthdate) engineerFields.birthdate = birthdate
+        // if(showcase) engineerFields.showcase = showcase
+        // if(email) engineerFields.email = email
+        // if(telephone) engineerFields.telephone = telephone
+        // if(salary) engineerFields.salary = salary
 
-            // uncomment if use redis, to restart getting new data
+        try {
+
+            // Uncomment if use redis, to restart getting new data
             // redis.flushall()
 
-            return response.status(201).json({
-                status: 201,
-                error: false,
-                files: request.files,
-                data: result,
-                message: 'Successfull'
-            })
-        }).catch(error => {
-            return response.status(422).json({
-                status: 422,
-                error: true,
-                errors: validationResult(request).array()
-            })
-        })
+            const store = await Engineer.store(data)
+
+            response.json(store)
+
+        } catch (error) {
+            console.error(error)
+            response.status(500).send('Server Error')
+        }
+
+        //     return response.status(201).json({
+        //         status: 201,
+        //         error: false,
+        //         files: request.files,
+        //         data: result,
+        //         message: 'Successfull'
+        //     })
+        // }).catch(error => {
+        //     return response.status(422).json({
+        //         status: 422,
+        //         error: true,
+        //         data: error.response,
+        //         errors: validationResult(request).array()
+        //     })
+        // })
 
     // request.checkBody('avatar', 'Avatar - Please upload an image JPG, JPEG, PNG or GIF').isImage(typeof request.files['avatar'] !== "undefined" ? request.files['avatar'][0].filename : '');
 
