@@ -9,7 +9,7 @@ const jwtAuth = require('../helpers/auth')
 const Auth = require('../controllers/auth')
 
 Route
-    .post('/', jwtAuth, Auth.auth)
+    .get('/', jwtAuth, Auth.auth)
     .post('/login', [
         check('email', 'Please include a valid email').isEmail(),
         check('password', 'Password is required').exists(),
