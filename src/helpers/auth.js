@@ -41,7 +41,7 @@ module.exports = async function(request, response, next) {
 
     // NOTE: Get token from header
 
-        const token = request.header('x-auth-token')
+    const token = request.header('x-auth-token')
 
     // NOTE: Check if not token
 
@@ -52,18 +52,20 @@ module.exports = async function(request, response, next) {
     // NOTE: Verify Token
 
     try {
-        await jwt.verify(token, process.JWT_KEY, (error, decoded) => {
-            if(error){
+
+        await jwt.verify(token, process.env.JWT_KEY, (error, decoded) => {
+            if(error) {
                 response.status(401).json({ msg: 'Token is not valid' })
             }
-            else{
+            else {
                 request.user = decoded.user;
                 next();
             }
         })
+
     }
     catch (error) {
-        console.error('Something wrong with auth middleware')
+        console.error(error)
         response.status(500).json({ msg: 'Server Error' });
     }
 }

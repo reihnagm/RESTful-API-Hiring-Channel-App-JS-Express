@@ -3,7 +3,6 @@ const Route = express.Router()
 
 const { check } = require('express-validator')
 
-
 const jwtAuth = require('../helpers/auth')
 
 const Auth = require('../controllers/auth')
