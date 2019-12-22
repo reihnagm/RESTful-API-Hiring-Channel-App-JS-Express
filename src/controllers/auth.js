@@ -7,6 +7,16 @@ const { validationResult } = require('express-validator')
 
 module.exports = {
 
+    auth: async (request, response) => {
+        try {
+            const user = await User.auth(request.user.id);
+            response.json(user);
+        } catch (error) {
+            console.error(error.message);
+            response.status(500).send('Server Error');
+        }
+    },
+
     login: async (request, response) => {
 
         const errors = validationResult(request);
