@@ -3,7 +3,7 @@ const conn = require('../configs/db')
 module.exports = {
     auth: (id) => {
         return new Promise((resolve, reject) => {
-            conn.query(`SELECT * FROM user WHERE id = '${id}'`, (error, result) => {
+            conn.query(`SELECT id, name, email FROM user WHERE id = '${id}'`, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
