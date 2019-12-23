@@ -1,6 +1,7 @@
 const Engineer = require('../models/Engineer')
 const connection = require('../configs/db')
 const cloudinary = require('cloudinary')
+const FormData = require('form-data')
 // NOTE: Uncomment if use redis
 // const redis = require('../configs/redis')
 const { check, validationResult } = require('express-validator');
@@ -121,9 +122,6 @@ module.exports = {
         // }
         //
 
-        const avatar = request.files
-
-        console.log(avatar)
 
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
@@ -141,17 +139,19 @@ module.exports = {
             salary
         } = request.body
 
-        const data = {
-            name,
-            description,
-            skill,
-            location,
-            birthdate,
-            showcase,
-            email,
-            telephone,
-            salary
-        }
+        const { avatar } = request.files
+
+        form = new FormData()
+        form.append('name', name)
+        form.append('description', description)
+        form.append('skill', skill)
+        form.append('location', location)
+        form.append('birthdate', birthdate)
+        form.append('showcase', showcase)
+        form.append('telephone', telephone)
+        form.append('salary', salary)
+        form.append('avatar', avatar)
+
 
         // If you want default null
         // const engineerFields = {}
@@ -169,7 +169,7 @@ module.exports = {
         try {
             // NOTE: Uncomment if use redis, to restart getting new data
             // redis.flushall()
-            const result = await Engineer.store(data)
+            const result = await Engineer.store(form)
             response.json(result)
         } catch (error) {
             console.error(error)
