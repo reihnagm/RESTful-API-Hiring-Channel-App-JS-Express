@@ -11,6 +11,9 @@ const app = express()
 const port = config.port
 const routerNav = require('./src/index')
 
+// NOTE: Allow all CORS Origin
+app.use(cors())
+
 // NOTE: Third Party Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -20,9 +23,6 @@ cloudinary.config({
 
 // NOTE: Module to parse multipart/form data
 app.use(formData.parse())
-
-// NOTE: Allow all CORS Origin
-app.use(cors())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
