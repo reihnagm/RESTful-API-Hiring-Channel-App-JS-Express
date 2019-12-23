@@ -112,6 +112,8 @@ module.exports = {
     },
     storeData: async (request, response) => {
 
+        console.log(request.files)
+
         // if(request.files >= 5242880)  { // 5 MB
         //     return response.status(400).json({ status: 400, error: true, message: "File too large"})
         // }
