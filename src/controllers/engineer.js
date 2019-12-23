@@ -141,16 +141,18 @@ module.exports = {
 
         const { avatar } = request.files
 
-        form = new FormData()
-        form.append('name', name)
-        form.append('description', description)
-        form.append('skill', skill)
-        form.append('location', location)
-        form.append('birthdate', birthdate)
-        form.append('showcase', showcase)
-        form.append('telephone', telephone)
-        form.append('salary', salary)
-        form.append('avatar', avatar)
+        const data = {
+            name,
+            description,
+            skill,
+            location,
+            birthdate,
+            showcase,
+            email,
+            telephone,
+            salary,
+            avatar
+        }
 
 
         // If you want default null
@@ -169,7 +171,7 @@ module.exports = {
         try {
             // NOTE: Uncomment if use redis, to restart getting new data
             // redis.flushall()
-            const result = await Engineer.store(form)
+            const result = await Engineer.store(data)
             response.json(result)
         } catch (error) {
             console.error(error)
