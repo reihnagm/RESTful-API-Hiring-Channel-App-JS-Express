@@ -34,7 +34,7 @@ module.exports = {
                 if (error) {
                     reject(new Error(error))
                 } else {
-                    resolve(result.insertId)
+                    resolve(result)
                 }
             })
         })

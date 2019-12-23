@@ -121,7 +121,9 @@ module.exports = {
         // }
         //
 
-        console.log(request.files)
+        const avatar = request.files
+
+        console.log(avatar)
 
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
@@ -139,8 +141,6 @@ module.exports = {
             salary
         } = request.body
 
-        const avatar = request.files
-
         const data = {
             name,
             description,
@@ -150,8 +150,7 @@ module.exports = {
             showcase,
             email,
             telephone,
-            salary,
-            avatar
+            salary
         }
 
         // If you want default null
