@@ -112,8 +112,6 @@ module.exports = {
     },
     storeData: async (request, response) => {
 
-        console.log(request.files)
-
         // if(request.files >= 5242880)  { // 5 MB
         //     return response.status(400).json({ status: 400, error: true, message: "File too large"})
         // }
@@ -122,6 +120,8 @@ module.exports = {
         //     return response.status(400).json({ status: 400, error: true, message: "Please upload file"})
         // }
         //
+
+        console.log(request.files)
 
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
@@ -139,6 +139,8 @@ module.exports = {
             salary
         } = request.body
 
+        const avatar = request.files
+
         const data = {
             name,
             description,
@@ -148,7 +150,8 @@ module.exports = {
             showcase,
             email,
             telephone,
-            salary
+            salary,
+            avatar
         }
 
         // If you want default null
