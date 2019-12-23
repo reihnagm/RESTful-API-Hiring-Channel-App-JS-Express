@@ -71,5 +71,16 @@ module.exports = {
                 }
             })
         })
+    },
+    saveAvatar: (avatar) => {
+        return new Promise((resolve, reject) => {
+            connection.query(`UPDATE engineer SET avatar = '${avatar}'`, (error, result) => {
+                if(error) {
+                    reject(new Error(error))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
     }
 }

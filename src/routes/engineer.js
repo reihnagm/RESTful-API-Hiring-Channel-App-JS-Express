@@ -101,6 +101,7 @@ Route.get('/', Engineer.getAllData)
         check('salary', 'Salary is required').trim().not().isEmpty()
     ], upload, Engineer.updateData)
     .delete('/:id',  Engineer.deleteData)
+    .post('/upload-avatar', Engineer.uploadAvatar)
 
 
 module.exports = Route

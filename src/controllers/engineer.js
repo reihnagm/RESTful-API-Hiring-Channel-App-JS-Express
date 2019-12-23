@@ -1,5 +1,7 @@
 const Engineer = require('../models/Engineer')
 const connection = require('../configs/db')
+const cloudinary = require('cloudinary')
+// NOTE: Uncomment if use redis
 // const redis = require('../configs/redis')
 const { check, validationResult } = require('express-validator');
 const checkext = require('../helpers/checkext')
@@ -161,14 +163,10 @@ module.exports = {
         // if(salary) engineerFields.salary = salary
 
         try {
-
-            // Uncomment if use redis, to restart getting new data
+            // NOTE: Uncomment if use redis, to restart getting new data
             // redis.flushall()
-
-            const store = await Engineer.store(data)
-
-            response.json(store)
-
+            const result = await Engineer.store(data)
+            response.json(result)
         } catch (error) {
             console.error(error)
             response.status(500).send('Server Error')
@@ -236,26 +234,26 @@ module.exports = {
 
 
     },
-    updateData: (request, response) => {
+    updateData: async (request, response) => {
 
-        if (request.files >= 5242880) { // 5 MB
-            return response.status(400).json({ status: 400, error: true, message: "File too large" })
-        }
-
-        if (!request.files) {
-            return response.status(400).json({ status: 400, error: true, message: "Please upload file" })
-        }
-
-        if (!validationResult(request).isEmpty()) {
-            return response.status(422).json({ errors: validationResult(request).array() })
-        }
-
-        if (request.fileValidationError) {
-            return response.status(400).json({
-                status: '400',
-                message: req.fileValidationError
-            })
-        }
+        // if (request.files >= 5242880) { // 5 MB
+        //     return response.status(400).json({ status: 400, error: true, message: "File too large" })
+        // }
+        //
+        // if (!request.files) {
+        //     return response.status(400).json({ status: 400, error: true, message: "Please upload file" })
+        // }
+        //
+        // if (!validationResult(request).isEmpty()) {
+        //     return response.status(422).json({ errors: validationResult(request).array() })
+        // }
+        //
+        // if (request.fileValidationError) {
+        //     return response.status(400).json({
+        //         status: '400',
+        //         message: req.fileValidationError
+        //     })
+        // }
 
         const data =
         {
@@ -271,24 +269,34 @@ module.exports = {
             user_id: request.body.user_id
         }
 
-        engineerModel.update(data, request.params.id).then(result => {
 
-            // uncomment if use redis, to restart getting new data
+        try {
+            const result = await Engineer.update(data, request.params.id)
+            response.json(result)
+        } catch (error) {
+            console.error(errors)
+            response.status(500).json('Server error')
+        }
+
+
+        // Engineer.update(data, request.params.id).then(result => {
+
+            // NOTE : Uncomment if use redis, to restart getting new data
             // redis.flushall()
 
-            return response.status(201).json({
-                status: 201,
-                error: false,
-                data: result,
-                message: 'Successful'
-            })
-        }).catch(error => {
-            return response.status(400).json({
-                status: 400,
-                error: true,
-                message: error
-            })
-        })
+        //     return response.status(201).json({
+        //         status: 201,
+        //         error: false,
+        //         data: result,
+        //         message: 'Successful'
+        //     })
+        // }).catch(error => {
+        //     return response.status(400).json({
+        //         status: 400,
+        //         error: true,
+        //         message: error
+        //     })
+        // })
 
         // const showcase = req.files[0].originalname
         // const avatar = req.files[1].originalname
@@ -333,40 +341,97 @@ module.exports = {
         // }
 
     },
-    editData: (request, response) => {
-        engineerModel.edit(request.params.id).then(result => {
-            response.status(200).json({
-                status: 200,
-                error: false,
-                data: result,
-                message: 'Successful'
-            })
-        }).catch(error => {
-            response.status(400).json({
-                status: 200,
-                error: true,
-                message: error
-            })
-        })
+    editData: async (request, response) => {
+
+        try {
+            const data = await Engineer.edit(request.params.id)
+            response.json(data)
+        }
+        catch(error)
+        {
+            console.error(error)
+            response.status(500).json('Server Error')
+        }
+
+
+        // engineerModel.edit(request.params.id).then(result => {
+        //     response.status(200).json({
+        //         status: 200,
+        //         error: false,
+        //         data: result,
+        //         message: 'Successful'
+        //     })
+        // }).catch(error => {
+        //     response.status(400).json({
+        //         status: 200,
+        //         error: true,
+        //         message: error
+        //     })
+        // })
     },
-    deleteData: (request, response) => {
-        engineerModel.delete(req.params.id).then(result => {
+    deleteData: async (request, response) => {
 
-            // uncomment if use redis, to restart getting new data
-            // redis.flushall()
+        try {
+            const data = await Engineer.delete(request.params.id)
+            response.json(data)
+        }
+        catch(error)
+        {
+            console.error(error)
+            response.status(500).send('Server Error')
+        }
 
-            response.status(200).json({
-                status: 200,
-                error: false,
-                data: result,
-                message: 'Successful'
-            })
-        }).catch(error => {
-            response.status(400).json({
-                status: 400,
-                error: true,
-                message: error
-            })
-        })
+        // NOTE: Without Async Await
+        // Engineer.delete(req.params.id).then(result => {
+        //
+        //     // uncomment if use redis, to restart getting new data
+        //     // redis.flushall()
+        //
+        //     response.status(200).json({
+        //         status: 200,
+        //         error: false,
+        //         data: result,
+        //         message: 'Successful'
+        //     })
+        // }).catch(error => {
+        //     response.status(400).json({
+        //         status: 400,
+        //         error: true,
+        //         message: error
+        //     })
+        // })
+    },
+    uploadAvatar: async (request, response) => {
+
+        const values = Object.values(request.files)
+        const promises = values.map(image => cloudinary.uploader.upload(image.path))
+
+        try {
+
+            const result = await Promise.all(promises)
+
+            // NOTE: promises output
+            // public_id: 'umshmrnaldhiwd5kn11b',
+            // version: 1577098270,
+            // signature: 'f1a4c65736906d0f22ff7c7d0cfa4847917bfd9a',
+            // width: 745,
+            // height: 497,
+            // format: 'jpg',
+            // resource_type: 'image',
+            // created_at: '2019-12-23T10:51:10Z',
+            // tags: [],
+            // bytes: 59921,
+            // type: 'upload',
+            // etag: 'f3cf3bd351fdbb73d32f07d1d832abd0',
+            // placeholder: false,
+            // url: 'http://res.cloudinary.com/dilzovvfk/image/upload/v1577098270/umshmrnaldhiwd5kn11b.jpg',
+            // secure_url: 'https://res.cloudinary.com/dilzovvfk/image/upload/v1577098270/umshmrnaldhiwd5kn11b.jpg',
+            // original_filename: '8FPchFVJpFNAtzbgbZ2O0obH'
+
+            await Engineer.saveAvatar(result[0].url)
+
+        } catch(error) {
+            console.error(error)
+        }
     }
 }
