@@ -7,40 +7,44 @@ const checkext = require('../helpers/checkext')
 module.exports = {
     getAllData: async (request, response) => {
 
-        const page = parseInt(request.query.page) || 1
-        const search = request.query.search || ''
-        const limit = request.query.limit || 10
-        const sort = request.query.sort || 'DESC'
-        const sortBy = request.query.sortBy || 'date_updated'
+        // NOTE: Without async await
+        // let total = 0
 
-        const offset = (page - 1) * limit
-
-        let totalDataEngineer = 0
-
-        connection.query('SELECT COUNT(*) total_data FROM engineer', (error, result) => {
-            if (error) {
-                return response.status(400).json({
-                    status: 400,
-                    error: true,
-                    message: error
-                })
-            }
-            totalDataEngineer = res[0].total_data
-        })
-
-        const prevPage = page === 1 ? 1 : page - 1
-        const nextPage = page === totalDataEngineer ? totalDataEngineer : page + 1
+        // connection.query('SELECT COUNT(*) total FROM engineer', (error, result) => {
+        //     if (error) {
+        //         return response.status(400).json({
+        //             status: 400,
+        //             error: true,
+        //             message: error
+        //         })
+        //     }
+        //     total = response[0].total
+        // })
 
         try {
+
+            const page = parseInt(request.query.page) || 1
+            const search = request.query.search || ''
+            const limit = request.query.limit || 10
+            const sort = request.query.sort || 'DESC'
+            const sortBy = request.query.sortBy || 'date_updated'
+
+            const offset = (page - 1) * limit
+
+            let total = await Engineer.getCountAll()
+
+            const prevPage = page === 1 ? 1 : page - 1
+            const nextPage = page === total[0].total ? total[0].total : page + 1
+
             let getEngineers = await Engineer.all(offset, limit, sort, sortBy, search)
 
             response.status(200).json({
                 data: getEngineers,
-                total_data: Math.ceil(totalDataEngineer),
+                total: Math.ceil(total[0].total),
                 per_page: limit,
                 current_page: page,
-                nextLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prevLink: `http://localhost:3001${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+                nextLink: `http://localhost:3001${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prevLink: `http://localhost:3001${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
                 message: 'Success getting all data'
             })
         }
@@ -48,7 +52,6 @@ module.exports = {
             console.error(error)
             response.status(500).send('Server Error')
         }
-
 
           // redis.get(
           //   `page - ${page} - search ${search} - limit ${limit} - ${sort} - ${sortBy}`,
@@ -116,7 +119,7 @@ module.exports = {
         //     return response.status(400).json({ status: 400, error: true, message: "Please upload file"})
         // }
         //
-        
+
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
         }
