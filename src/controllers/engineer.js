@@ -171,7 +171,7 @@ module.exports = {
         try {
             // NOTE: Uncomment if use redis, to restart getting new data
             // redis.flushall()
-            const result = await Engineer.store(data)
+            const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar)
             response.json(result)
         } catch (error) {
             console.error(error)
