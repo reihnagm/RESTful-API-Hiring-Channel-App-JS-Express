@@ -410,6 +410,8 @@ module.exports = {
 
             const result = await Promise.all(promises)
 
+            console.log(result)
+
             // NOTE: promises output
             // public_id: 'umshmrnaldhiwd5kn11b',
             // version: 1577098270,
