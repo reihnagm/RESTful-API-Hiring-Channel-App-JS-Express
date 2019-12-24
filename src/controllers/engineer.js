@@ -133,7 +133,8 @@ module.exports = {
             showcase,
             email,
             telephone,
-            salary
+            salary,
+            user_id
         } = request.body
 
         // const data = {
@@ -149,7 +150,7 @@ module.exports = {
         // }
 
         try {
-            const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary)
+            const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary, user_id)
             response.json(result)
         } catch (error) {
             console.error(error)
