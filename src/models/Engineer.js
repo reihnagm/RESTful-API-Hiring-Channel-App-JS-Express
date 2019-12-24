@@ -28,9 +28,9 @@ module.exports = {
             })
         })
     },
-    store: (name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar) => {
+    store: (name, description, skill, location, birthdate, showcase, email, telephone, salary, user_id) => {
         return new Promise((resolve, reject) => { // NOTE: if you want insert values, dont forget single qoute, and restart server npm
-                connection.query(`INSERT INTO engineer (name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar) VALUES ('${name}', '${description}', '${skill}', '${location}', STR_TO_DATE('${birthdate}', '%Y-%m-%d'), '${showcase}', '${email}', '${telephone}', '${salary}', '${avatar}')`, (error, result) => {
+                connection.query(`INSERT INTO engineer (name, description, skill, location, birthdate, showcase, email, telephone, salary, user_id) VALUES ('${name}', '${description}', '${skill}', '${location}', STR_TO_DATE('${birthdate}', '%Y-%m-%d'), '${showcase}', '${email}', '${telephone}', '${salary}', '${user_id}')`, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
