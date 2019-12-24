@@ -46,11 +46,10 @@ module.exports = {
             }
 
             const payload = {
-                user: user[0].id
-                // user: {
-                //     id: user[0].id // NOTE: be aware, when if you want getting data, type data is array object, you must be
-                //     // use this, : user[0].data
-                // }
+                user: {
+                    id: user[0].id // NOTE: be aware, when if you want getting data, type data is array object, you must be
+                    // use this, : user[0].data
+                }
             }
 
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
@@ -62,13 +61,10 @@ module.exports = {
             //     if (error) throw error
             //     response.json({ token })
             // })
-
         }
         catch(error) {
-
             console.error(error.message)
             response.status(500).send('Server error')
-
         }
     },
     register: async (request, response) => {
@@ -101,11 +97,9 @@ module.exports = {
             let registered = await User.register(data)
 
             const payload = {
-                user: registered.insertId // NOTE: insertId mean is user when first register
-
-                // user: {
-                //     id: registered.insertId // NOTE: insertId mean is user when first register
-                // }
+                user: {
+                    id: registered.insertId // NOTE: insertId mean is user when first register
+                }
             };
 
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
