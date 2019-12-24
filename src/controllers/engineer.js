@@ -1,7 +1,9 @@
 const Engineer = require('../models/Engineer')
+
 const connection = require('../configs/db')
 const cloudinary = require('cloudinary')
-const FormData = require('form-data')
+const fs = require('fs-extra')
+
 // NOTE: Uncomment if use redis
 // const redis = require('../configs/redis')
 const { check, validationResult } = require('express-validator');
@@ -116,11 +118,11 @@ module.exports = {
         // NOTE: Use nodemon app if you want console.log, if not, cannot logging in console every you changes
         // Check route, use middleware or not, if use, request files cannot detect
 
-        console.log(request.body)
-
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
         }
+
+        console.log(request)
 
         const {
             name,
@@ -409,14 +411,38 @@ module.exports = {
     },
     uploadAvatar: async (request, response) => {
 
-        const values = Object.values(request.files)
-        const promises = values.map(image => cloudinary.uploader.upload(image.path))
+        // const values = Object.values(request.files) // NOTE: change {{}} to [{}]
 
-        try {
 
-            const result = await Promise.all(promises)
+        // NOTE: __dirname "/Users/Sam/gator-app/cronjobs"
+        // NOTE: process.cwd() "/Users/Sam/gator-app"
 
-            console.log(result)
+        // const srcpath = values[0].path
+        // const filename = srcpath.lastIndexOf('/')
+        // console.log(filename)
+        // const dstpath = values[0].name
+
+        // try {
+        //
+        //     await fs.move(srcpath, dstpath)
+        //
+        //     // Engineer.uploadAvatar()
+        //
+        // } catch (error) {
+        //     console.error(error)
+        //     response.json('Server error')
+        // }
+
+
+
+
+        // const promises = values.map(image => cloudinary.uploader.upload(image.path))
+        //
+        // try {
+        //
+        //     const result = await Promise.all(promises)
+        //
+        //     console.log(result)
 
             // NOTE: promises output
             // public_id: 'umshmrnaldhiwd5kn11b',
@@ -436,10 +462,10 @@ module.exports = {
             // secure_url: 'https://res.cloudinary.com/dilzovvfk/image/upload/v1577098270/umshmrnaldhiwd5kn11b.jpg',
             // original_filename: '8FPchFVJpFNAtzbgbZ2O0obH'
 
-            await Engineer.saveAvatar(result[0].url)
+            // await Engineer.saveAvatar(result[0].url)
 
-        } catch(error) {
-            console.error(error)
-        }
+        // } catch(error) {
+        //     console.error(error)
+        // }
     }
 }

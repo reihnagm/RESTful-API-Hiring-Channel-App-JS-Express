@@ -7,7 +7,6 @@ const   express = require('express'),
         multerS3 = require('multer-s3'),
         multer = require('multer')
 
-
 // const s3Config = new AWS.S3({
 //     accessKeyId: config.AWS.accessKeyId,
 //     secretAccessKey: config.AWS.secretAccessKey,
@@ -46,7 +45,7 @@ const upload = multer({
     fileFilter: (request, file, callback) => {
         checkFileType(request, file, callback)
     }
-}).any()
+})
 
 const checkFileType = (request, file, callback) => {
     if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
@@ -81,7 +80,7 @@ const checkFileType = (request, file, callback) => {
 
 const Engineer = require('../controllers/engineer')
 Route.get('/', Engineer.getAllData)
-    .post('/',[
+    .post('/', [
         check('name', 'Name is required').trim().not().isEmpty(),
         check('description', 'Description is required').trim().not().isEmpty(),
         check('skill', 'Skill is required').trim().not().isEmpty(),
@@ -89,9 +88,9 @@ Route.get('/', Engineer.getAllData)
         check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
         check('salary', 'Salary is required').trim().not().isEmpty()
-    ], upload, Engineer.storeData)
+    ], Engineer.storeData)
     .get('/:id', Engineer.editData)
-    .patch('/:id',[
+    .patch('/:id', [
         check('name', 'Name is required').trim().not().isEmpty(),
         check('description', 'Description is required').trim().not().isEmpty(),
         check('skill', 'Skill is required').trim().not().isEmpty(),
@@ -99,7 +98,7 @@ Route.get('/', Engineer.getAllData)
         check('email', 'Please include valid email').trim().not().isEmpty().isEmail().normalizeEmail(),
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
         check('salary', 'Salary is required').trim().not().isEmpty()
-    ], upload, Engineer.updateData)
+    ], Engineer.updateData)
     .delete('/:id',  Engineer.deleteData)
     .post('/upload-avatar', Engineer.uploadAvatar)
 
