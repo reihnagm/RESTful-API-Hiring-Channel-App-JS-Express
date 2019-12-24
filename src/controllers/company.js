@@ -1,9 +1,18 @@
-const companyModel = require('../models/Company')
+const Company = require('../models/Company')
 // const redis = require('../configs/redis')
 
 module.exports = {
-  getAllData: (req, res) => {
-    companyModel.all().then(result => {
+    getAllData: async (request, response) => {
+
+        try {
+            const result = await Company.all()
+            response.json(result)
+        } catch (error) {
+            console.error(error)
+            response.status(500).json('Server error')
+        }
+
+    // companyModel.all().then(result => {
       // redis.get('Company:getAllData', (errorRedis, resultRedis) => {
         // if (resultRedis) {
         //   res.status(200).json({
@@ -16,22 +25,22 @@ module.exports = {
         // } else {
         //   redis.setex('Company:getAllData', 3600, JSON.stringify(result))
 
-          res.status(200).json({
-            status: 200,
-            error: false,
-            source: 'api',
-            result,
-            message: 'Success getting all data'
-          })
+          // res.status(200).json({
+          //   status: 200,
+          //   error: false,
+          //   source: 'api',
+          //   result,
+          //   message: 'Success getting all data'
+          // })
       //   }
       // })
-    }).catch(err => {
-      res.status(400).json({
-        status: 400,
-        error: true,
-        message: err
-      })
-    })
+    // }).catch(err => {
+    //   res.status(400).json({
+    //     status: 400,
+    //     error: true,
+    //     message: err
+    //   })
+    // })
   },
   storeData: (req, res) => {
     const { name, location, description, email, telephone } = req.body
