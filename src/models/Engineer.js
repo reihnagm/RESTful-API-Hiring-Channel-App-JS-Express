@@ -29,8 +29,8 @@ module.exports = {
         })
     },
     store: (name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar) => {
-        return new Promise((resolve, reject) => {
-                connection.query(`INSERT INTO engineer (name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar ) VALUES (${name}, ${description}, ${skill}, ${location}, STR_TO_DATE(${birthdate}, '%Y-%m-%d'), ${showcase}, ${email}, ${telephone}, ${salary}, ${avatar}), `, data, (error, result) => {
+        return new Promise((resolve, reject) => { // NOTE: if you want insert values, dont forget single qoute, and restart server npm
+                connection.query(`INSERT INTO engineer (name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar) VALUES ('${name}', '${description}', '${skill}', '${location}', STR_TO_DATE('${birthdate}', '%Y-%m-%d'), '${showcase}', '${email}', '${telephone}', '${salary}', '${avatar}')`, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -39,6 +39,17 @@ module.exports = {
             })
         })
     },
+    // store: (data) => {
+    //     return new Promise((resolve, reject) => { // NOTE: if you want insert values, dont forget single qoute, and restart server npm
+    //             connection.query(`INSERT INTO engineer SET ?`, data, (error, result) => {
+    //             if (error) {
+    //                 reject(new Error(error))
+    //             } else {
+    //                 resolve(result)
+    //             }
+    //         })
+    //     })
+    // },
     edit: (id) => {
         return new Promise((resolve, reject) => {
             connection.query(`SELECT * FROM engineer WHERE id = ${id}`, (error, result) => {

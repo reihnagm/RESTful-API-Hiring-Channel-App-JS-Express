@@ -113,15 +113,10 @@ module.exports = {
     },
     storeData: async (request, response) => {
 
-        // if(request.files >= 5242880)  { // 5 MB
-        //     return response.status(400).json({ status: 400, error: true, message: "File too large"})
-        // }
-        //
-        // if (!request.files) {
-        //     return response.status(400).json({ status: 400, error: true, message: "Please upload file"})
-        // }
-        //
+        // NOTE: Use nodemon app if you want console.log, if not, cannot logging in console every you changes
+        // Check route, use middleware or not, if use, request files cannot detect
 
+        console.log(request.body)
 
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
@@ -139,23 +134,28 @@ module.exports = {
             salary
         } = request.body
 
-        const { avatar } = request.files
+        // const data = {
+        //     name,
+        //     description,
+        //     skill,
+        //     location,
+        //     birthdate,
+        //     showcase,
+        //     email,
+        //     telephone,
+        //     salary
+        // }
 
-        const data = {
-            name,
-            description,
-            skill,
-            location,
-            birthdate,
-            showcase,
-            email,
-            telephone,
-            salary,
-            avatar
+        try {
+            const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary)
+            response.json(result)
+        } catch (error) {
+            console.error(error)
+            response.status(500).json('Server error')
         }
 
+        // NOTE: If you want default null
 
-        // If you want default null
         // const engineerFields = {}
         //
         // if(name) engineerFields.name = name
@@ -168,15 +168,17 @@ module.exports = {
         // if(telephone) engineerFields.telephone = telephone
         // if(salary) engineerFields.salary = salary
 
-        try {
-            // NOTE: Uncomment if use redis, to restart getting new data
+        // NOTE: Uncomment if use redis, to restart getting new data
+
+        // try {
             // redis.flushall()
-            const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar)
-            response.json(result)
-        } catch (error) {
-            console.error(error)
-            response.status(500).send('Server Error')
-        }
+            // const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar)
+        //     const result = await Engineer.store(data)
+        //     response.json(result)
+        // } catch (error) {
+        //     console.error(error)
+        //     response.status(500).send('Server Error')
+        // }
 
         //     return response.status(201).json({
         //         status: 201,
@@ -237,8 +239,6 @@ module.exports = {
         //     message: req.fileValidationError
         //   })
         // }
-
-
     },
     updateData: async (request, response) => {
 

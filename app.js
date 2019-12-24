@@ -24,9 +24,11 @@ cloudinary.config({
 // NOTE: Module to parse multipart/form data
 app.use(formData.parse())
 
+// NOTE: Parsing application/json 
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
 
+// NOTE: Parsing form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }))
 
 // NOTE: Log Request HTTP Activity in Terminal
 app.use(logger('dev'))
