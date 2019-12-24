@@ -28,10 +28,9 @@ module.exports = {
             })
         })
     },
-    store: (name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar, user_id) => {
+    store: (data) => {
         return new Promise((resolve, reject) => {
-                connection.query(`INSERT INTO engineer (name, description, skill, location, birthdate, showcase, email, telephone, salary, user_id) VALUES ('${name}', '${description}', '${skill}', '${location}', STR_TO_DATE('${birthdate}', '%Y-%m-%d'), '${showcase}', '${email}', '${telephone}', '${salary}',
-                '${avatar}','${user_id}')`, (error, result) => {
+                connection.query(`INSERT INTO engineer SET ?`, data, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {

@@ -36,21 +36,23 @@ module.exports = {
         }
     },
     storeData: async (request, response) => {
-        const {
-            name,
-            description,
-            skill,
-            location,
-            birthdate,
-            showcase,
-            email,
-            telephone,
-            salary,
-            avatar,
-            user_id,
-        } = request.body
+
+        const data = {
+            name: request.body.name,
+            description: request.body.description,
+            skill: request.body.skill,
+            location: request.body.location,
+            birthdate: request.body.birthdate,
+            showcase: request.body.showcase,
+            email: request.body.email,
+            telephone: request.body.telephone,
+            salary: request.body.salary,
+            avatar: request.file.avatar,
+            user_id: request.body.user_id
+        }
+
         try {
-            const result = await Engineer.store(name, description, skill, location, birthdate, showcase, email, telephone, salary, avatar, user_id)
+            const result = await Engineer.store(data)
             response.json(result)
         } catch (error) {
             console.error(error.message)
