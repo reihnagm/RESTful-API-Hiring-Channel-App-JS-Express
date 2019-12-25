@@ -23,8 +23,7 @@ module.exports = {
             telephone
         }
         try {
-            const result = await Company.store(data)
-            response.json(result)
+            await Company.store(data)
         }
         catch(error) {
             console.error(error.message)
@@ -45,7 +44,7 @@ module.exports = {
             telephone
         }
         try {
-            const result = await Company.update(data, id)
+            await Company.update(data, id)
         }
         catch(error)
         {
@@ -53,10 +52,20 @@ module.exports = {
             response.status(500).json('Server error')
         }
     },
-    deleteData: async (request, response) => {
-        const id = request.params.id
+    editData: async (request, response) => {
         try {
-            await Company.delete(id)
+            const data = await Company.edit(request.params.id)
+            response.json(data)
+        }
+        catch(error)
+        {
+            console.error(error.message)
+            response.status(500).json('Server Error')
+        }
+    },
+    deleteData: async (request, response) => {
+        try {
+            await Company.delete(request.params.id)
         }
         catch(error)
         {

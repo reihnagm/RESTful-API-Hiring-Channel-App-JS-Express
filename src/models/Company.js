@@ -1,7 +1,7 @@
 const connection = require('../configs/db')
 
 module.exports = {
-    
+
     all: () => {
         return new Promise((resolve, reject) => {
             connection.query('SELECT * FROM company', (error, result) => {
@@ -21,6 +21,17 @@ module.exports = {
                 } else {
                     resolve(error)
                 }
+            })
+        })
+    },
+    edit: (id) => {
+        return new Promise((resolve, reject) => {
+            connection.query(`SELECT * FROM company WHERE id = ${id}`, (error, result) => {
+            if (error) {
+                reject(new Error(error))
+            } else {
+                resolve(result)
+            }
             })
         })
     },

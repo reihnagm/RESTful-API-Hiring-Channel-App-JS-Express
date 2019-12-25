@@ -36,11 +36,9 @@ module.exports = {
         }
     },
     storeData: async (request, response) => {
-
         if (!validationResult(request).isEmpty()) {
             return response.status(422).json({ errors: validationResult(request).array() })
         }
-
         const data = {
             name: request.body.name,
             description: request.body.description,
@@ -54,7 +52,6 @@ module.exports = {
             avatar: request.body.avatar,
             user_id: request.body.user_id
         }
-
         try {
             const result = await Engineer.store(data)
             response.json(result)
@@ -75,6 +72,7 @@ module.exports = {
             email: request.body.email,
             telephone: request.body.telephone,
             salary: request.body.salary,
+            avatar: request.body.avatar,
             user_id: request.body.user_id
         }
         try {
@@ -98,8 +96,7 @@ module.exports = {
     },
     deleteData: async (request, response) => {
         try {
-            const data = await Engineer.delete(request.params.id)
-            response.json(data)
+            await Engineer.delete(request.params.id)
         }
         catch(error)
         {

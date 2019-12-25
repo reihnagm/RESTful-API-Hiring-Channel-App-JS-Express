@@ -41,7 +41,7 @@ Route.get('/', Engineer.getAllData)
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
         check('salary', 'Salary is required').trim().not().isEmpty()
     ], Engineer.updateData)
-    .delete('/:id',  Engineer.deleteData)
+    .delete('/:id',Engineer.deleteData)
 
 
 module.exports = Route
