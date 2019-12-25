@@ -48,6 +48,7 @@ module.exports = {
         }
     },
     editData: async (request, response) => {
+        console.log('test')
         try {
             const data = await Company.edit(request.params.id)
             response.json(data)

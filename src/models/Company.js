@@ -25,7 +25,7 @@ module.exports = {
     },
     edit: (id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT * FROM company WHERE id = ${id}`, (error, result) => {
+            connection.query(`SELECT * FROM company WHERE id = '${id}'`, (error, result) => {
             if (error) {
                 reject(new Error(error))
             } else {
