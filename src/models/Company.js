@@ -16,7 +16,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
             connection.query('INSERT INTO company SET ?', data, (error, result) => {
                 if (error) {
-                    reject(new Error(err))
+                    reject(new Error(error))
                 } else {
                     resolve(error)
                 }
