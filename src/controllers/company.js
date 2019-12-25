@@ -11,16 +11,13 @@ module.exports = {
         }
     },
     storeData: async (request, response) => {
-        const { name, location, description, email, telephone } = req.body
-        const logo = request.file.originalname
-
         const data = {
-            name,
-            logo,
-            location,
-            description,
-            email,
-            telephone
+            name: request.body.name,
+            location: request.body.location,
+            description: request.body.description,
+            email: request.body.email,
+            telephone: request.body.telephone,
+            logo: request.body.logo
         }
         try {
             await Company.store(data)
@@ -31,20 +28,15 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
-        const { name, location, description, email, telephone } = request.body
-        const id = request.params.id
-        const logo = request.file.originalname
         const data = {
-            id,
-            name,
-            logo,
-            location,
-            description,
-            email,
-            telephone
-        }
+            name: request.body.name,
+            location: request.body.location,
+            description: request.body.description,
+            email: request.body.email,
+            telephone: request.body.telephone,
+            logo: request.body.logo
         try {
-            await Company.update(data, id)
+            await Company.update(data, request.params.id)
         }
         catch(error)
         {
