@@ -36,7 +36,7 @@ module.exports = {
         }
     },
     storeData: async (request, response) => {
-        
+
         const data = {
             name: request.body.name,
             description: request.body.description,
@@ -47,7 +47,7 @@ module.exports = {
             email: request.body.email,
             telephone: request.body.telephone,
             salary: request.body.salary,
-            avatar: request.file.originalname,
+            avatar: request.body.avatar,
             user_id: request.body.user_id
         }
 
