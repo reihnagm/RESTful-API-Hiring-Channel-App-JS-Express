@@ -35,6 +35,7 @@ module.exports = {
             email: request.body.email,
             telephone: request.body.telephone,
             logo: request.body.logo
+        }
         try {
             await Company.update(data, request.params.id)
         }
