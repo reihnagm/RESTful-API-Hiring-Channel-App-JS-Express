@@ -53,7 +53,7 @@ module.exports = {
     update: (data, id) => {
         return new Promise((resolve, reject) => {
             connection.query('UPDATE engineer SET ? WHERE id = ?', [data, id], (error, result) => {
-                if (err) {
+                if (error) {
                     reject(new Error(error))
                 } else {
                     resolve(result)
