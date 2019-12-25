@@ -17,7 +17,8 @@ module.exports = {
             description: request.body.description,
             email: request.body.email,
             telephone: request.body.telephone,
-            logo: request.body.logo
+            logo: request.body.logo,
+            user_id: request.body.user_id
         }
         try {
             await Company.store(data)
@@ -34,7 +35,8 @@ module.exports = {
             description: request.body.description,
             email: request.body.email,
             telephone: request.body.telephone,
-            logo: request.body.logo
+            logo: request.body.logo,
+            user_id: request.body.user_id
         }
         try {
             await Company.update(data, request.params.id)
