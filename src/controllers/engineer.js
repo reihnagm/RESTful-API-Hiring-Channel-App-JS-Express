@@ -1,6 +1,6 @@
 const Engineer = require('../models/Engineer')
 const connection = require('../configs/db')
-const { check, validationResult } = require('express-validator');
+const { check, validationResult } = require('express-validator')
 const checkext = require('../helpers/checkext')
 
 module.exports = {
