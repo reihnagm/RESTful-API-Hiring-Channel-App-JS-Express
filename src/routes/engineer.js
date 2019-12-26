@@ -1,7 +1,7 @@
 const   express = require('express'),
         Route = express.Router(),
         auth = require('../helpers/auth'),
-        { check, validationResult } = require('express-validator'),
+        { check } = require('express-validator'),
         config = require('../configs/configs'),
         multer = require('multer')
 
@@ -17,7 +17,6 @@ const upload = multer({
     storage,
     limits: { fileSize: 5242880 }
 })
-
 
 const Engineer = require('../controllers/engineer')
 
@@ -41,7 +40,7 @@ Route.get('/', Engineer.getAllData)
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
         check('salary', 'Salary is required').trim().not().isEmpty()
     ], Engineer.updateData)
-    .delete('/:id',Engineer.deleteData)
+    .delete('/:id', Engineer.deleteData)
 
 
 module.exports = Route

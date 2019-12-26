@@ -61,6 +61,9 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
+        if (!validationResult(request).isEmpty()) {
+            return response.status(422).json({ errors: validationResult(request).array() })
+        }
         const data =
         {
             name: request.body.name,

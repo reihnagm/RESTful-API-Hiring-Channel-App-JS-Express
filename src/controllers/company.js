@@ -11,6 +11,9 @@ module.exports = {
         }
     },
     storeData: async (request, response) => {
+        if (!validationResult(request).isEmpty()) {
+            return response.status(422).json({ errors: validationResult(request).array() })
+        }
         const data = {
             name: request.body.name,
             location: request.body.location,
@@ -29,6 +32,9 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
+        if (!validationResult(request).isEmpty()) {
+            return response.status(422).json({ errors: validationResult(request).array() })
+        }
         const data = {
             name: request.body.name,
             location: request.body.location,
@@ -48,7 +54,6 @@ module.exports = {
         }
     },
     editData: async (request, response) => {
-        console.log('test')
         try {
             const data = await Company.edit(request.params.id)
             response.json(data)

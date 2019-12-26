@@ -23,18 +23,6 @@ module.exports = {
             })
         })
     },
-    // NOTE: Without single param
-    // register: (name, email, password) => {
-    //     return new Promise((resolve, reject) => {
-    //         conn.query(`INSERT INTO user (name, email, password) VALUES ('${name}', '${email}', '${password})'`, (error, result) => {
-    //             if (error) {
-    //                 reject(new Error(error))
-    //             } else {
-    //                 resolve(result)
-    //             }
-    //         })
-    //     })
-    // },
     register: (data) => {
         return new Promise((resolve, reject) => {
             conn.query('INSERT INTO user SET ?', data, (error, result) => {
