@@ -9,7 +9,6 @@ Route
     .get('/', Company.getAllData)
     .post('/',  [
         check('name', 'Name is required').trim().not().isEmpty(),
-        check('logo', 'Logo is required').trim().not().isEmpty(),
         check('location', 'Location is required').trim().not().isEmpty(),
         check('description', 'Description is required').trim().not().isEmpty(),
         check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),
@@ -18,7 +17,6 @@ Route
     .get('/:id', Company.editData)
     .patch('/:id', [
         check('name', 'Name is required').trim().not().isEmpty(),
-        check('logo', 'Logo is required').trim().not().isEmpty(),
         check('location', 'Location is required').trim().not().isEmpty(),
         check('description', 'Description is required').trim().not().isEmpty(),
         check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),

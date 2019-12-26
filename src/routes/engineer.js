@@ -28,8 +28,7 @@ Route.get('/', Engineer.getAllData)
         check('location', 'Location is required').trim().not().isEmpty(),
         check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
-        check('salary', 'Salary is required').trim().not().isEmpty(),
-        check('avatar', 'Avatar is required').trim().not().isEmpty()
+        check('salary', 'Salary is required').trim().not().isEmpty()
     ], Engineer.storeData)
     .get('/:id', Engineer.editData)
     .patch('/:id', [
@@ -39,8 +38,7 @@ Route.get('/', Engineer.getAllData)
         check('location', 'Location is required').trim().not().isEmpty(),
         check('email', 'Please include valid email').trim().not().isEmpty().isEmail().normalizeEmail(),
         check('telephone', 'Telephone is required').trim().not().isEmpty(),
-        check('salary', 'Salary is required').trim().not().isEmpty(),
-        check('avatar', 'avatar is required').trim().not().isEmpty()
+        check('salary', 'Salary is required').trim().not().isEmpty()
     ], Engineer.updateData)
     .delete('/:id', Engineer.deleteData)
 
