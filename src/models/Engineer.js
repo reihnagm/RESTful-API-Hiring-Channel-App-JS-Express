@@ -16,7 +16,7 @@ module.exports = {
     },
     all: (offset, limit, sort, sortBy, search) => {
         return new Promise((resolve, reject) => {
-            const query = `SELECT * FROM engineer WHERE (name LIKE '%${search}%' or skill LIKE '%${search}%')
+            const query = `SELECT * FROM engineer WHERE (location LIKE '%${search}%' or skill LIKE '%${search}%')
             ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
 
             connection.query(query, (error, result) => {
