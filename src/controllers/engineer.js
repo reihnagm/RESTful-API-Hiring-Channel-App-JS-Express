@@ -40,7 +40,6 @@ module.exports = {
             return response.status(422).json({ errors: validationResult(request).array() })
         }
         const data = {
-            name: request.body.name,
             description: request.body.description,
             skill: request.body.skill,
             location: request.body.location,
@@ -65,7 +64,6 @@ module.exports = {
         }
         const data =
         {
-            name: request.body.name,
             description: request.body.description,
             skill: request.body.skill,
             location: request.body.location,
