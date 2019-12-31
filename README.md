@@ -1,11 +1,9 @@
-# simple restful API
+# RESTful API MySQL
 
 ## Introduction 
 
 ---
-
-a Skeleton Simple Rest API for building next application  
-
+   
 ---
 
 ## Prerequiste
