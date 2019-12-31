@@ -93,6 +93,17 @@ module.exports = {
             response.status(500).json('Server Error')
         }
     },
+    profileEngineerData: async (request, response) => {
+        try {
+            const data = await Engineer.getCurrentProfileEngineer(request.params.id)
+            response.json(data)
+        }
+        catch(error)
+        {
+            console.error(error.message)
+            response.status(500).json('Server Error')
+        }
+    },
     deleteData: async (request, response) => {
         try {
             await Engineer.delete(request.params.id)

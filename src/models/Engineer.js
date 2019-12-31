@@ -72,9 +72,9 @@ module.exports = {
             })
         })
     },
-    saveAvatar: (avatar) => {
+    getCurrentProfileEngineer: (id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`UPDATE engineer SET avatar = '${avatar}'`, (error, result) => {
+            connection.query(`SELECT a.*,b.* FROM engineer a INNER JOIN user b ON a.user_id = '${id}'`, (error, result) => {
                 if(error) {
                     reject(new Error(error))
                 } else {

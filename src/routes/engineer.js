@@ -29,6 +29,7 @@ Route.get('/', Engineer.getAllData)
         check('salary', 'Salary is required').trim().not().isEmpty()
     ], Engineer.storeData)
     .get('/:id', Engineer.editData)
+    .get('/user/:id', Engineer.profileEngineerData)
     .patch('/:id', [
         check('description', 'Description is required').trim().not().isEmpty(),
         check('skill', 'Skill is required').trim().not().isEmpty(),
