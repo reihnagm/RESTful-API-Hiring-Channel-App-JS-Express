@@ -17,7 +17,7 @@ module.exports = {
     all: (offset, limit, sort, sortBy, search) => {
         return new Promise((resolve, reject) => {
             const query = `SELECT a.*, b.name, b.email FROM engineer a INNER JOIN user b ON a.user_id = b.id
-            WHERE (location LIKE '%${search}%' or skill LIKE '%${search}%')
+            WHERE (name LIKE '%${search}%' or skill LIKE '%${search}%')
             ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
             connection.query(query, (error, result) => {
                 if (error) {
