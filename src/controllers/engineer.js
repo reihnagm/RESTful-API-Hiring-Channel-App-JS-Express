@@ -69,6 +69,7 @@ module.exports = {
             birthdate: request.body.birthdate,
             showcase: request.body.showcase,
             telephone: request.body.telephone,
+            avatar: request.body.avatar,
             salary: request.body.salary,
             user_id: request.body.user_id
         }
