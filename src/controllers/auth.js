@@ -66,7 +66,7 @@ module.exports = {
             return response.status(400).json({ errors: errors.array() })
         }
 
-        const { email, password, role_id } = request.body
+        const { name, email, password, role_id } = request.body
 
         try {
             let user = await User.checkUser(email)
@@ -76,7 +76,7 @@ module.exports = {
 
             const passwordHash = await bcrypt.hash(password, salt)
 
-            const data = { email, password: passwordHash, role_id }
+            const data = { name, email, password: passwordHash, role_id }
 
             let registered = await User.register(data)
 
