@@ -60,6 +60,7 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
+        console.log(request.file)
         const data =
         {
             description: request.body.description,
