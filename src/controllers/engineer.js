@@ -60,7 +60,7 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
-        console.log(request.file)
+        console.log(request)
         const data =
         {
             description: request.body.description,
@@ -70,7 +70,6 @@ module.exports = {
             showcase: request.body.showcase,
             telephone: request.body.telephone,
             salary: request.body.salary,
-            avatar: request.file.originalname,
             user_id: request.body.user_id
         }
         try {
