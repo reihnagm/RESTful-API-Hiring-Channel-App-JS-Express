@@ -5,7 +5,7 @@ const checkext = require('../helpers/checkext')
 
 module.exports = {
     getAllData: async (request, response) => {
-        try {
+
             const page = parseInt(request.query.page) || 1
             const search = request.query.search || ''
             const limit = request.query.limit || 10
@@ -14,6 +14,8 @@ module.exports = {
 
             const offset = (page - 1) * limit
 
+        try {
+
             let total = await Engineer.getCountAll()
 
             const prevPage = page === 1 ? 1 : page - 1
@@ -21,13 +23,15 @@ module.exports = {
 
             let data = await Engineer.all(offset, limit, sort, sortBy, search)
 
+            console.log(data)
+
             response.json({
                 data,
                 total: Math.ceil(total[0].total),
                 per_page: limit,
                 current_page: page,
-                nextLink: `http://localhost:3001${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prevLink: `http://localhost:3001${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+                nextLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prevLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
             })
         }
         catch (error) {
@@ -36,9 +40,6 @@ module.exports = {
         }
     },
     storeData: async (request, response) => {
-        if (!validationResult(request).isEmpty()) {
-            return response.status(422).json({ errors: validationResult(request).array() })
-        }
         const data = {
             description: request.body.description,
             skill: request.body.skill,
@@ -47,7 +48,7 @@ module.exports = {
             showcase: request.body.showcase,
             telephone: request.body.telephone,
             salary: request.body.salary,
-            avatar: request.body.avatar,
+            avatar: request.file.originalname,
             user_id: request.body.user_id
         }
         try {
@@ -59,9 +60,6 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
-        if (!validationResult(request).isEmpty()) {
-            return response.status(422).json({ errors: validationResult(request).array() })
-        }
         const data =
         {
             description: request.body.description,
@@ -71,7 +69,7 @@ module.exports = {
             showcase: request.body.showcase,
             telephone: request.body.telephone,
             salary: request.body.salary,
-            avatar: request.body.avatar,
+            avatar: request.file.originalname,
             user_id: request.body.user_id
         }
         try {

@@ -1,27 +1,26 @@
 const   express = require('express'),
         Route = express.Router(),
-        { check } = require('express-validator')
+        multer = require('multer')
 
-const auth = require('../helpers/auth')
+const storage = multer.diskStorage({
+    destination: (request, file, callback) => {
+        callback(null, './src/images')
+    },
+    filename: (request, file, callback) => {
+        callback(null, file.originalname)
+    }
+})
+const upload = multer({
+    storage,
+    limits: { fileSize: 5242880 }
+})
 
 const Company = require('../controllers/company')
 Route
     .get('/', Company.getAllData)
-    .post('/',  [
-        check('name', 'Name is required').trim().not().isEmpty(),
-        check('location', 'Location is required').trim().not().isEmpty(),
-        check('description', 'Description is required').trim().not().isEmpty(),
-        check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),
-        check('telephone', 'Telephone is required').trim().not().isEmpty()
-    ], Company.storeData)
+    .post('/', upload.single('logo'), Company.storeData)
     .get('/:id', Company.editData)
-    .patch('/:id', [
-        check('name', 'Name is required').trim().not().isEmpty(),
-        check('location', 'Location is required').trim().not().isEmpty(),
-        check('description', 'Description is required').trim().not().isEmpty(),
-        check('email', 'Please include valid email').trim().isEmail().normalizeEmail(),
-        check('telephone', 'Telephone is required').trim().not().isEmpty()
-    ], Company.updateData)
+    .patch('/:id', upload.single('logo'), Company.updateData)
     .delete('/:id', Company.deleteData)
 
 module.exports = Route

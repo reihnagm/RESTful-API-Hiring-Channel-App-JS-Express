@@ -21,22 +21,10 @@ const upload = multer({
 const Engineer = require('../controllers/engineer')
 
 Route.get('/', Engineer.getAllData)
-    .post('/', [
-        check('description', 'Description is required').trim().not().isEmpty(),
-        check('skill', 'Skill is required').trim().not().isEmpty(),
-        check('location', 'Location is required').trim().not().isEmpty(),
-        check('telephone', 'Telephone is required').trim().not().isEmpty(),
-        check('salary', 'Salary is required').trim().not().isEmpty()
-    ], Engineer.storeData)
+    .post('/', upload.single('avatar'), Engineer.storeData)
     .get('/:id', Engineer.editData)
     .get('/user/:id', Engineer.profileEngineerData)
-    .patch('/:id', [
-        check('description', 'Description is required').trim().not().isEmpty(),
-        check('skill', 'Skill is required').trim().not().isEmpty(),
-        check('location', 'Location is required').trim().not().isEmpty(),
-        check('telephone', 'Telephone is required').trim().not().isEmpty(),
-        check('salary', 'Salary is required').trim().not().isEmpty()
-    ], Engineer.updateData)
+    .patch('/:id', upload.single('avatar'), Engineer.updateData)
     .delete('/:id', Engineer.deleteData)
 
 

@@ -1,6 +1,8 @@
 require('dotenv').config()
 
 const User = require('../models/User')
+const Engineer = require('../models/Engineer')
+const Company = require('../models/Engineer')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
@@ -27,18 +29,14 @@ module.exports = {
 
         const { email, password } = request.body
 
-        // NOTE: try catch useful when use async await
         try {
 
             let user = await User.login(email)
 
-            // NOTE:  when use mongoose db, use findOne,to check user already exists or not
             if (user.length === 0) {
                 return response.status(400).json({ errors: [{ msg: 'Invalid Credentials' }] })
             }
 
-            // NOTE: be aware, when if you want getting data, type data is array object, you must be
-            // use this, : user[0].data
             const isMatch = await bcrypt.compare(password, user[0].password);
 
             if (!isMatch) {
@@ -47,20 +45,13 @@ module.exports = {
 
             const payload = {
                 user: {
-                    id: user[0].id // NOTE: be aware, when if you want getting data, type data is array object, you must be
-                    // use this, : user[0].data
+                    id: user[0].id
                 }
             }
 
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
 
             response.json({ token })
-
-            // NOTE: Without async await
-            // jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 }, (error, token) => {
-            //     if (error) throw error
-            //     response.json({ token })
-            // })
         }
         catch(error) {
             console.error(error.message)
@@ -75,42 +66,39 @@ module.exports = {
             return response.status(400).json({ errors: errors.array() })
         }
 
-        const { name, email, password } = request.body
+        const { email, password, role_id } = request.body
 
-        // NOTE: try catch useful when use async await
         try {
-
-            let user = await User.checkUser(email);
-
-            // NOTE: when use mongoose db, use findOne,to check user already exists or not
+            let user = await User.checkUser(email)
             if (user.length === 0)
             {
-            // NOTE: Hash Password, be aware when use bcrypt, sometimes error with different packages if use async await
-            //surely use package bcryptjs
             const salt = await bcrypt.genSalt(10);
 
-            const passwordHash = await bcrypt.hash(password, salt);
+            const passwordHash = await bcrypt.hash(password, salt)
 
-            const data = { name, email, password: passwordHash }
+            const data = { email, password: passwordHash, role_id }
 
-            // NOTE: Success with async
             let registered = await User.register(data)
+
+            switch (role_id) {
+                case 1:
+                    await Engineer.insertDataUser(registered.insertId)
+                break;
+                case 2:
+                    await Company.insertDataUser(registered.insertId)
+                break;
+                default:
+            }
 
             const payload = {
                 user: {
-                    id: registered.insertId // NOTE: insertId mean is user when first register
+                    id: registered.insertId
                 }
-            };
+            }
 
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
 
             response.json({ token })
-
-            // NOTE: Without async await
-            // jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 }, (error, token) => {
-            //     if (error) throw error
-            //     response.json({ token })
-            // })
 
             } else {
                 return response.status(400).json({ errors: [{ msg: 'User already exists' }] });
