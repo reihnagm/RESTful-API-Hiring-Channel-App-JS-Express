@@ -3,7 +3,7 @@ const connection = require('../configs/db')
 module.exports = {
     all: () => {
         return new Promise((resolve, reject) => {
-            connection.query('SELECT a.*, b.name name_user, b.email FROM company a INNER JOIN user b ON a.user_id = b.id', (error, result) => {
+            connection.query('SELECT a.*, b.name name_user, b.email email_user FROM company a INNER JOIN user b ON a.user_id = b.id', (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
