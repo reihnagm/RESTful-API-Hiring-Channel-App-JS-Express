@@ -60,7 +60,6 @@ module.exports = {
         }
     },
     updateData: async (request, response) => {
-        console.log(request)
         const data =
         {
             description: request.body.description,
@@ -73,8 +72,10 @@ module.exports = {
             salary: request.body.salary,
             user_id: request.body.user_id
         }
+
         try {
             const result = await Engineer.update(data, request.params.id)
+            await Engineer.updateNameUser(request.body.name, request.body.user_id)
             response.json(result)
         } catch (error) {
             console.error(error.message)

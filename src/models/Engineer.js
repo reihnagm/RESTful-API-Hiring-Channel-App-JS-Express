@@ -61,6 +61,17 @@ module.exports = {
             })
         })
     },
+    updateNameUser: (data, id) => {
+        return new Promise((resolve, reject) => {
+            connection.query(`UPDATE user SET name='${data}' WHERE id = '${id}'`, [data, id], (error, result) => {
+                if (error) {
+                    reject(new Error(error))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    },
     delete: (id) => {
         return new Promise((resolve, reject) => {
                 connection.query('DELETE FROM engineer WHERE id = ?', id, (error, result) => {
