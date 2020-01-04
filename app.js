@@ -7,6 +7,8 @@ const app = express()
 const port = config.port
 const routerNav = require('./src/index')
 
+app.use(express.static('public'))
+
 app.use(cors())
 
 app.use(logger('dev'))

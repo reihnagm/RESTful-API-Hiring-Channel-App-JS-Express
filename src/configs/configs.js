@@ -1,7 +1,6 @@
 require('dotenv/config')
 
 module.exports = {
-
     database: {
         mysql: {
             host: process.env.DB_HOST,
@@ -18,5 +17,4 @@ module.exports = {
     },
     port: process.env.PORT,
     jwtSecret: process.env.JWT_KEY
-
 }
