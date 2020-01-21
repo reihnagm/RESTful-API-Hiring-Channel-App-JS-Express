@@ -11,23 +11,19 @@ module.exports = {
         const user_id = request.user.id
         try {
             const data = await User.auth(user_id)
-            misc.response(response, 200, false, 'Succesfull Authentication.', data[0])
+            misc.response(response, 200, false, 'Succesfull Authentication.', data)
         } catch (error) {
             misc.response(response, 500, true, error.message)
         }
     },
     login: async (request, response) => {
-        const errors = validationResult(request);
-        if (!errors.isEmpty()) {
-            return response.status(400).json({ errors: errors.array() })
-        }
         const { email, password } = request.body
         try {
             const user = await User.login(email)
+            const isMatch = await bcrypt.compare(password, user[0].password)
             if (user.length === 0) {
                 throw new Error('Invalid Credentials.')
             }
-            const isMatch = await bcrypt.compare(password, user[0].password)
             if (!isMatch) {
                 throw new Error('Invalid Credentials.')
             }
@@ -37,24 +33,20 @@ module.exports = {
                 }
             }
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
-            misc.response(response, 200, false, 'Succesfull Login.', token)
+            response.json({ token })
         } catch(error) {
             misc.response(response, 500, true, error.message)
         }
     },
     register: async (request, response) => {
-        const errors = validationResult(request)
-        if (!errors.isEmpty()) {
-            return response.status(400).json({ errors: errors.array() })
-        }
         const { name, email, password, role_id } = request.body
         try {
             const user = await User.checkUser(email)
+            const salt = await bcrypt.genSalt(10);
+            const passwordHash = await bcrypt.hash(password, salt)
             if(user.length !== 0) {
                 throw new Error('User already exists.')
             }
-            const salt = await bcrypt.genSalt(10);
-            const passwordHash = await bcrypt.hash(password, salt)
             const data = {
                 name,
                 email,
@@ -62,15 +54,12 @@ module.exports = {
                 role_id
             }
             const registered = await User.register(data)
-            let user_data = {
-                user_id: registered.insertId
-            }
             switch (role_id) {
                 case 1:
-                    await Engineer.insertDataUser(user_data)
+                    await Engineer.insertDataUser(registered.insertId)
                 break;
                 case 2:
-                    await Company.insertDataUser(user_data)
+                    await Company.insertDataUser(registered.insertId)
                 break;
                 default:
             }
@@ -80,7 +69,7 @@ module.exports = {
                 }
             }
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
-            misc.response(response, 200, false, 'Succesfull Register.', token)
+            response.json({ token })
         } catch(error) {
             misc.response(response, 500, true, error.message)
         }

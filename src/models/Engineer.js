@@ -81,4 +81,15 @@ module.exports = {
             })
         })
     },
+    insertDataUser: (user_id) => {
+        return new Promise((resolve, reject) => {
+            connection.query(`INSERT INTO engineer (user_id) VALUES('${user_id}')`, (error, result) => {
+                if(error) {
+                    reject(new Error(error))
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    }
 }
