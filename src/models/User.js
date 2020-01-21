@@ -1,9 +1,11 @@
-const conn = require('../configs/db')
+const connection = require('../configs/db')
 
 module.exports = {
-    auth: (id) => {
+    auth: (user_id) => {
         return new Promise((resolve, reject) => {
-            conn.query(`SELECT id, name, email FROM user WHERE id = '${id}'`, (error, result) => {
+            connection.query(`SELECT a.id, a.name, a.email, a.role_id, b.avatar FROM user a, engineer b
+            WHERE a.id = '${user_id}'
+            AND b.user_id = '${user_id}'`, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -14,7 +16,7 @@ module.exports = {
     },
     login: (email) => {
         return new Promise((resolve, reject) => {
-            conn.query(`SELECT * FROM user WHERE email = '${email}'`, (error, result) => {
+            connection.query(`SELECT * FROM user WHERE email = ?`, email, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -25,11 +27,10 @@ module.exports = {
     },
     register: (data) => {
         return new Promise((resolve, reject) => {
-            conn.query('INSERT INTO user SET ?', data, (error, result) => {
+            connection.query('INSERT INTO user SET ?', data, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
-                    console.log(result)
                     resolve(result)
                 }
             })
@@ -37,7 +38,7 @@ module.exports = {
     },
     checkUser: (email) => {
         return new Promise((resolve, reject) => {
-            conn.query(`SELECT email FROM user WHERE email = '${email}'`, (error, result) => {
+            connection.query(`SELECT email FROM user WHERE email = '${email}'`, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {

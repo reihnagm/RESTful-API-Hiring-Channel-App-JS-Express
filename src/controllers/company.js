@@ -1,101 +1,146 @@
 const Company = require('../models/Company')
 const fs = require('fs-extra')
-
+const misc = require('../helpers/response')
 module.exports = {
-    getAllData: async (request, response) => {
+    getAll: async (request, response) => {
+        const page = parseInt(request.query.page) || 1
+        const search = request.query.search || ''
+        const limit = request.query.limit || 10
+        const sort = request.query.sort || 'DESC'
+        const sortBy = request.query.sortBy || 'date_updated'
+        const offset = (page - 1) * limit
         try {
-            const result = await Company.all()
-            response.json(result)
+            const total = await Company.getTotal()
+            const prevPage = page === 1 ? 1 : page - 1
+            const nextPage = page === total[0].total ? total[0].total : page + 1
+            const data = await Company.getAll(offset, limit, sort, sortBy, search)
+            const pageDetail = {
+                total: Math.ceil(total[0].total),
+                per_page: limit,
+                current_page: page,
+                nextLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prevLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+            }
+            misc.responsePagination(response, 200, false, 'Succesfull get all data.', pageDetail, data)
         } catch (error) {
-            console.error(error.message)
-            response.status(500).json('Server error')
+            misc.response(response, 500, true, error.message)
         }
     },
-    storeData: async (request, response) => {
-        const data = {
-            name: request.body.name,
-            location: request.body.location,
-            description: request.body.description,
-            email: request.body.email,
-            telephone: request.body.telephone,
-            logo: request.body.logo,
-            user_id: request.body.user_id
+    store: async (request, response) => {
+        let error = false
+        let filename
+        let extension
+        let fileSize
+        if(request.file) {
+            filename = request.file.originalname
+            extension =  request.file.originalname.split('.')[1]
+            fileSize = request.file.fileSize
         }
         try {
-            await Company.store(data)
-        } catch(error) {
-            console.error(error.message)
-            response.status(500).json('Server error')
-        }
-    },
-    updateData: async (request, response) => {
-
-        if(request.file.size >= 5242880)
-        {
-            const msg = 'Oops!, Size cannot more than 5MB'
-            next(msg)
-            fs.unlink(`public/images/company/${request.file.originalname}`, function(err) {
-                if (err) throw err
-                console.log('File deleted !')
-            })
-        }
-
-        const file = request.file.originalname
-        const extension = file.split('.')
-        const filename = extension[extension.length - 1]
-
-        if(!isImage(filename)) {
-            const msg = 'Oops!, File allowed only JPG, JPEG, PNG, GIF, SVG'
-            next(msg)
-            fs.unlink(`public/images/company/${request.file.originalname}`, function(err) {
-                if (err) throw err
-                console.log('File deleted !')
-            })
-        }
-
-        function isImage(filename) {
-            switch (filename) {
-                case 'jpg':
-                case 'jpeg':
-                case 'png':
-                case 'gif':
-                case 'svg':
-                    return true
+            if(request.file) {
+                if(fileSize >= 5242880) {
+                    error = true
+                    fs.unlink(`public/images/company/${filename}`)
+                    throw new Error('Oops!, Size cannot more than 5MB.')
                 }
-                return false
-        }
-
-        const data = {
-            name: request.body.name,
-            location: request.body.location,
-            description: request.body.description,
-            email: request.body.email,
-            telephone: request.body.telephone,
-            logo: request.file.originalname,
-            user_id: request.body.user_id
-        }
-        try {
-            await Company.update(data, request.params.id)
+                if(!isImage(extension)) {
+                    error = true
+                    fs.unlink(`public/images/company/${filename}`)
+                    throw new Error('Oops!, File allowed only JPG, JPEG, PNG, GIF, SVG.')
+                }
+                function isImage(extension) {
+                    switch (filename) {
+                            case 'jpg':
+                            case 'jpeg':
+                            case 'png':
+                            case 'gif':
+                            case 'svg':
+                                return true
+                            }
+                            return false
+                    }
+            }
+            const data = {
+                name: request.body.name,
+                location: request.body.location,
+                description: request.body.description,
+                email: request.body.email,
+                telephone: request.body.telephone,
+                logo: request.file ? request.file.originalname : '',
+                user_id: request.body.user_id
+            }
+            await Company.store(data)
+            misc.response(response, 200, false, 'Succesfull create data.', data)
         } catch(error) {
-            console.log(error.message)
-            response.status(500).json('Server error')
+            misc.response(response, 500, true, error.message)
         }
     },
-    editData: async (request, response) => {
+    update: async (request, response) => {
+        let error = false
+        let filename
+        let extension
+        let fileSize
+        if(request.file) {
+            filename = request.file.originalname
+            extension =  request.file.originalname.split('.')[1]
+            fileSize = request.file.fileSize
+        }
         try {
-            const data = await Company.edit(request.params.id)
-            response.json(data)
+            if(request.file) {
+                if(fileSize >= 5242880) {
+                    error = true
+                    fs.unlink(`public/images/company/${filename}`)
+                    throw new Error('Oops!, Size cannot more than 5MB.')
+                }
+                if(!isImage(extension)) {
+                    error = true
+                    fs.unlink(`public/images/company/${filename}`)
+                    throw new Error('Oops!, File allowed only JPG, JPEG, PNG, GIF, SVG.')
+                }
+                function isImage(extension) {
+                switch (filename) {
+                        case 'jpg':
+                        case 'jpeg':
+                        case 'png':
+                        case 'gif':
+                        case 'svg':
+                            return true
+                        }
+                        return false
+                }
+            }
+            const data = {
+                name: request.body.name,
+                location: request.body.location,
+                description: request.body.description,
+                email: request.body.email,
+                telephone: request.body.telephone,
+                logo: request.file ? request.file.originalname  : '',
+                user_id: request.body.user_id
+            }
+            const company_id = request.params.id
+            await Company.update(data, company_id)
+            misc.response(response, 200, false, 'Succesfull update data.', data)
         } catch(error) {
-            console.error(error.message)
-            response.status(500).json('Server Error')
+            misc.response(response, 500, true, error.message)
         }
     },
-    deleteData: async (request, response) => {
+    edit: async (request, response) => {
         try {
-            await Company.delete(request.params.id)
+            const company_id = request.params.id
+            const data = await Company.edit(company_id)
+            misc.response(response, 200, false, 'Succesfull edit data.', data)
         } catch(error) {
-            console.log(error.message)
-            response.status(500).json('Server error')
+            misc.response(response, 500, true, error.message)
+        }
+    },
+    delete: async (request, response) => {
+        try {
+            const company_id = request.params.id
+            await Company.delete(company_id)
+            misc.response(response, 200, false, 'Succesfull delete data.')
+        } catch(error) {
+            misc.response(response, 500, true, error.message)
         }
     }
 }

@@ -1,8 +1,6 @@
 const connection = require('../configs/db')
-
 module.exports = {
-
-    getCountAll: () => {
+    getTotal: () => {
         return new Promise ((resolve, reject) => {
             const query = `SELECT COUNT(*) total from engineer`
             connection.query(query, (error, result) => {
@@ -14,10 +12,10 @@ module.exports = {
             })
         })
     },
-    all: (offset, limit, sort, sortBy, search) => {
+    getAll: (offset, limit, sort, sortBy, search) => {
         return new Promise((resolve, reject) => {
             const query = `SELECT a.*, b.name, b.email FROM engineer a INNER JOIN user b ON a.user_id = b.id
-            WHERE (name LIKE '%${search}%' or skill LIKE '%${search}%')
+            WHERE (b.name LIKE '%${search}%' or a.skill LIKE '%${search}%')
             ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
             connection.query(query, (error, result) => {
                 if (error) {
@@ -30,7 +28,7 @@ module.exports = {
     },
     store: (data) => {
         return new Promise((resolve, reject) => {
-                connection.query(`INSERT INTO engineer SET ?`, data, (error, result) => {
+            connection.query(`INSERT INTO engineer SET ?`, data, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -39,20 +37,9 @@ module.exports = {
             })
         })
     },
-    edit: (id) => {
+    update: (data, engineer_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT * FROM engineer WHERE id = ${id}`, (error, result) => {
-            if (error) {
-                reject(new Error(error))
-            } else {
-                resolve(result)
-            }
-            })
-        })
-    },
-    update: (data, id) => {
-        return new Promise((resolve, reject) => {
-            connection.query('UPDATE engineer SET ? WHERE id = ?', [data, id], (error, result) => {
+            connection.query('UPDATE engineer SET ? WHERE id = ?', [data, engineer_id], (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -61,9 +48,9 @@ module.exports = {
             })
         })
     },
-    updateNameUser: (data, id) => {
+    delete: (engineer_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`UPDATE user SET name='${data}' WHERE id = '${id}'`, [data, id], (error, result) => {
+                connection.query('DELETE FROM engineer WHERE id = ?', engineer_id, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -72,9 +59,9 @@ module.exports = {
             })
         })
     },
-    delete: (id) => {
+    updateNameUser: (data, user_id) => {
         return new Promise((resolve, reject) => {
-                connection.query('DELETE FROM engineer WHERE id = ?', id, (error, result) => {
+            connection.query(`UPDATE user SET name = ? WHERE id = ?`, [data, user_id], (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -83,9 +70,9 @@ module.exports = {
             })
         })
     },
-    getCurrentProfileEngineer: (id) => {
+    getProfile: (user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.*,b.* FROM engineer a INNER JOIN user b ON a.user_id = '${id}'`, (error, result) => {
+            connection.query(`SELECT * from engineer WHERE user_id = ?`, user_id, (error, result) => {
                 if(error) {
                     reject(new Error(error))
                 } else {
@@ -94,15 +81,4 @@ module.exports = {
             })
         })
     },
-    insertDataUser: (id) => {
-        return new Promise((resolve, reject) => {
-            connection.query(`INSERT INTO engineer (user_id) VALUES ('${id}')`, (error, result) => {
-                if(error) {
-                    reject(new Error(error))
-                } else {
-                    resolve(result)
-                }
-            })
-        })
-    }
 }

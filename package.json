@@ -5,9 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app",
-    "server": "nodemon app",
-    "build": "babel src --out-dir dist"
+    "start": "nodemon app",
+    "build": "babel src --out-dir public"
   },
   "author": "Reihan Agam",
   "license": "MIT",
@@ -24,13 +23,8 @@
     "multer": "^1.4.2",
     "mysql": "^2.17.1",
     "path": "^0.12.7",
+    "pusher": "^3.0.0",
     "redis": "^2.8.0",
     "uuid": "^3.3.3"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-node": "0.0.1-security",
-    "babel-preset-env": "^1.7.0"
   }
 }
