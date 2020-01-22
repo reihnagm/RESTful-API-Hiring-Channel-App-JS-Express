@@ -72,7 +72,8 @@ module.exports = {
     },
     getProfile: (user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT * from engineer WHERE user_id = ?`, user_id, (error, result) => {
+            connection.query(`SELECT a.*, b.name, b.email from engineer a, user b WHERE a.user_id = '${user_id}' AND b.id = '${user_id}'`,
+            (error, result) => {
                 if(error) {
                     reject(new Error(error))
                 } else {

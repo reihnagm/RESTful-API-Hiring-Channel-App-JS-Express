@@ -2,7 +2,8 @@ const connection = require('../configs/db')
 module.exports = {
     auth: (user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.id, a.name, a.email, a.role_id FROM user a`, (error, result) => {
+            connection.query(`SELECT a.id, a.name, a.email, a.role_id, b.avatar FROM user a,
+                engineer b WHERE a.id = '${user_id}' AND b.user_id = a.id`, (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {

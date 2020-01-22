@@ -5,7 +5,7 @@ module.exports = {
     getAll: async (request, response) => {
         const page = parseInt(request.query.page) || 1
         const search = request.query.search || ''
-        const limit = request.query.limit || 10
+        const limit = request.query.limit || 5
         const sort = request.query.sort || 'DESC'
         const sortBy = request.query.sortBy || 'date_updated'
         const offset = (page - 1) * limit
@@ -18,8 +18,10 @@ module.exports = {
                 total: Math.ceil(total[0].total),
                 per_page: limit,
                 current_page: page,
-                nextLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prevLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+                next_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prev_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
+                prev_url_page: `http://localhost:5000/api/v1/engineers?page=${prevPage}`,
+                next_url_page: `http://localhost:5000/api/v1/engineers?page=${nextPage}`
             }
             misc.responsePagination(response, 200, false, 'Succesfull get all data.', pageDetail, data)
         }
