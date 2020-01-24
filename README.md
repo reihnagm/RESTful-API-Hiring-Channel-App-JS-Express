@@ -1,4 +1,4 @@
-- a Simple RESTful API this match for learning from scratch, especially this project build use MYSQL Database.
+a Simple RESTful API this match for learning from scratch, especially this project build use MYSQL Database.
 
 ---
 ## Prerequiste
@@ -18,7 +18,7 @@
 ### Clone
 ```bash
 $ git clone https://github.com/reihnagm/RESTful-API-Node-JS-Express.git
-$ cd simple-resful-api
+$ cd RESTful-API-Node-JS-Express
 $ npm install
 ```
 
@@ -33,8 +33,18 @@ $ nano .env
 ```bash
 $ npm run start
 ```
-
 ---
+
+### ENDPOINT
+GET api/v1/engineers  
+POST api/v1/engineers  
+PATCH api/v1/engineers/:id  
+POST api/v1/engineers/profile
+
+GET api/v1/companies  
+POST api/v1/companies  
+PATCH api/v1/companies/:id  
+POST api/v1/companies/profile
 
 ### Problem with Bcrypt-JS
 - if you Linux user and new migrate to Windows, maybe getting an error when installing npm, in my case, specify package "bcrypt", try to uninstall "npm uninstall bcrypt" and install "bcrypt-nodejs".
