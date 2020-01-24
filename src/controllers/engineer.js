@@ -10,18 +10,20 @@ module.exports = {
         const sortBy = request.query.sortBy || 'date_updated'
         const offset = (page - 1) * limit
         try {
-            const total = await Engineer.getTotal()
-            const prevPage = page === 1 ? 1 : page - 1
-            const nextPage = page === total[0].total ? total[0].total : page + 1
-            const data = await Engineer.getAll(offset, limit, sort, sortBy, search)
+            const total = await Engineer.getTotal();
+            const resultTotal =  Math.ceil(total[0].total);
+            const checkNextPage = Math.ceil(resultTotal / limit);
+            const prevPage = page === 1 ? 1 : page - 1;
+            const nextPage = page === checkNextPage ? 1 : page + 1;
+            const data = await Engineer.getAll(offset, limit, sort, sortBy, search);
             const pageDetail = {
-                total: Math.ceil(total[0].total),
+                total: resultTotal,
                 per_page: limit,
+                next_page: nextPage,
+                prev_page: prevPage,
                 current_page: page,
                 next_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prev_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`,
-                prev_url_page: `http://localhost:5000/api/v1/engineers?page=${prevPage}`,
-                next_url_page: `http://localhost:5000/api/v1/engineers?page=${nextPage}`
+                prev_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
             }
             misc.responsePagination(response, 200, false, 'Succesfull get all data.', pageDetail, data)
         }
@@ -71,7 +73,7 @@ module.exports = {
                 showcase: request.body.showcase,
                 telephone: request.body.telephone,
                 salary: request.body.salary,
-                avatar: request.file ? request.file.originalname : '',
+                avatar: request.file ? request.file.originalname : request.body.avatar,
                 user_id: request.body.user_id
             }
             if(error === false) {
@@ -116,15 +118,21 @@ module.exports = {
                         return false
                 }
             }
+            let avatar;
+            if(request.file) {
+                avatar = request.file.originalname;
+            } else {
+                avatar = request.body.avatar;
+            }
             const data = {
-                description: request.body.description,
-                skill: request.body.skill,
-                location: request.body.location,
-                birthdate: request.body.birthdate,
-                showcase: request.body.showcase,
-                telephone: request.body.telephone,
-                salary: request.body.salary,
-                avatar: request.file ? request.file.originalname : '',
+                description: request.body.description ? request.body.description : '',
+                skill: request.body.skill ? request.body.skill : '',
+                location: request.body.location ? request.body.location : '',
+                birthdate:  request.body.birthdate ? request.body.birthdate : '',
+                showcase:  request.body.showcase ? request.body.showcase : '',
+                telephone: request.body.telephone ? request.body.telephone : '',
+                salary: request.body.salary ? request.body.salary : '',
+                avatar: avatar,
                 user_id: request.body.user_id
             }
             if(error === false) {

@@ -10,13 +10,17 @@ module.exports = {
         const sortBy = request.query.sortBy || 'date_updated'
         const offset = (page - 1) * limit
         try {
-            const total = await Company.getTotal()
-            const prevPage = page === 1 ? 1 : page - 1
-            const nextPage = page === total[0].total ? total[0].total : page + 1
-            const data = await Company.getAll(offset, limit, sort, sortBy, search)
+            const total = await Company.getTotal();
+            const resultTotal =  Math.ceil(total[0].total);
+            const checkNextPage =  Math.ceil(resultTotal / limit);
+            const prevPage = page === 1 ? 1 : page - 1;
+            const nextPage = page === checkNextPage ? 1 : page + 1;
+            const data = await Company.getAll(offset, limit, sort, sortBy, search);
             const pageDetail = {
-                total: Math.ceil(total[0].total),
+                total: resultTotal,
                 per_page: limit,
+                next_page: nextPage,
+                prev_page: prevPage,
                 current_page: page,
                 nextLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
                 prevLink: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`

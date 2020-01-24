@@ -59,9 +59,9 @@ module.exports = {
             })
         })
     },
-    updateNameUser: (data, user_id) => {
+    updateNameUser: (name, user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`UPDATE user SET name = ? WHERE id = ?`, [data, user_id], (error, result) => {
+            connection.query(`UPDATE user SET name = ? WHERE id = ?`, [name, user_id], (error, result) => {
                 if (error) {
                     reject(new Error(error))
                 } else {
@@ -72,7 +72,7 @@ module.exports = {
     },
     getProfile: (user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.*, b.name, b.email from engineer a, user b WHERE a.user_id = '${user_id}' AND b.id = '${user_id}'`,
+            connection.query(`SELECT a.*, b.name, b.email from engineer a, user b WHERE a.user_id = b.id AND b.id = '${user_id}'`,
             (error, result) => {
                 if(error) {
                     reject(new Error(error))

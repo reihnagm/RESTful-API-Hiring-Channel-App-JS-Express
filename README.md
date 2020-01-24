@@ -8,16 +8,16 @@
 
 ## Featured
 <ol>
-    <li>Auth with JWT</li>
-    <li>Validate File Image</li>
-    <li>Password Hashing</li>
+    <li>Auth with JWT.</li>
+    <li>Validate File Image.</li>
+    <li>Password Hashing.</li>
 </ol>
 
 ---
 ## Installation
 ### Clone
 ```bash
-$ git clone https://github.com/reihnagm/simple-restful-api.git
+$ git clone https://github.com/reihnagm/RESTful-API-Node-JS-Express.git
 $ cd simple-resful-api
 $ npm install
 ```
@@ -37,7 +37,7 @@ $ npm run start
 ---
 
 ### Problem with Bcrypt-JS
-- if you Linux user and new migrate to Windows, maybe getting an error when installing npm, in my case, specify package "bcrypt", try to uninstall "npm uninstall bcrypt" and install "bcrypt-nodejs"
+- if you Linux user and new migrate to Windows, maybe getting an error when installing npm, in my case, specify package "bcrypt", try to uninstall "npm uninstall bcrypt" and install "bcrypt-nodejs".
 
 ## Other Dependencies
 - [mysql](#)
@@ -51,5 +51,3 @@ $ npm run start
 - [redis](#)
 - [cors](#)
 - etc.
-
----
