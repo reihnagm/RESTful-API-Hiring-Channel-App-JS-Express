@@ -17,8 +17,8 @@ a Simple RESTful API this match for learning from scratch, especially this proje
 ## Installation
 ### Clone
 ```bash
-$ git clone https://github.com/reihnagm/simple-restful-api.git
-$ cd simple-resful-api
+$ git clone https://github.com/reihnagm/RESTful-API-Node-JS-Express.git
+$ cd RESTful-API-Node-JS-Express
 $ npm install
 ```
 
