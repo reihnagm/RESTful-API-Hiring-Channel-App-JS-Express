@@ -38,11 +38,13 @@ $ npm run start
 
 ### ENDPOINT
 GET api/v1/engineers  
+GET api/v1/engineers/profile/:slug
 POST api/v1/engineers  
-PATCH api/v1/engineers/:id  
+PATCH api/v1/engineers/:id
 POST api/v1/engineers/profile
 
 GET api/v1/companies  
+GET api/v1/companies/profile/:slug
 POST api/v1/companies  
 PATCH api/v1/companies/:id  
 POST api/v1/companies/profile
