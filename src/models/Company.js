@@ -72,7 +72,7 @@ module.exports = {
     },
     getProfile: (user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.*, b.name, b.email from company a, user b WHERE a.user_id = b.id AND b.id = '${user_id}'`,
+            connection.query(`SELECT a.*, b.name, b.email, b.role_id from company a, user b WHERE a.user_id = b.id AND b.id = '${user_id}'`,
             (error, result) => {
                 if(error) {
                     reject(new Error(error));
@@ -82,7 +82,7 @@ module.exports = {
             });
         });
     },
-    getDataBySlug: (slug) => {
+    getProfileBySlug: (slug) => {
         return new Promise((resolve, reject) => {
             connection.query(`SELECT a.*, b.name, b.email from company a, user b WHERE a.user_id = b.id AND b.slug = '${slug}'`,
             (error, result) => {

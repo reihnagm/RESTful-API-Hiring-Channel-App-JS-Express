@@ -15,7 +15,7 @@ const upload = multer({
 });
 Route
     .get('/', Company.getAll)
-    .get('/profile/:slug', Company.getDataBySlug)
+    .get('/profile/:slug', Company.getProfileBySlug)
     .post('/', upload.single('logo'), Company.store)
     .patch('/:id', upload.single('logo'), Company.update)
     .delete('/:id', Company.delete)

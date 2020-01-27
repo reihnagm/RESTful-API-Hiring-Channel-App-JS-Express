@@ -82,7 +82,7 @@ module.exports = {
             });
         });
     },
-    getDataBySlug: (slug) => {
+    getProfileBySlug: (slug) => {
         return new Promise((resolve, reject) => {
             connection.query(`SELECT a.*, b.name, b.email from engineer a, user b WHERE a.user_id = b.id AND b.slug = '${slug}'`,
             (error, result) => {

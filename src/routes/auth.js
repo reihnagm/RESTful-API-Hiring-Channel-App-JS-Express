@@ -1,10 +1,10 @@
-const express = require('express')
-const Route = express.Router()
-const Auth = require('../controllers/auth')
-const { check } = require('express-validator')
-const jwtAuth = require('../helpers/jwt')
+const express = require('express');
+const Route = express.Router();
+const Auth = require('../controllers/auth');
+const { check } = require('express-validator');
+const jwtAuth = require('../helpers/jwt');
 Route
     .get('/', jwtAuth, Auth.auth)
     .post('/login', Auth.login)
-    .post('/register', Auth.register)
+    .post('/register', Auth.register);
 module.exports = Route

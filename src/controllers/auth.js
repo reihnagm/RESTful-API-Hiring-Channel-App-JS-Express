@@ -10,7 +10,7 @@ module.exports = {
     auth: async (request, response) => {
         const user_id = request.user.id;
         try {
-            const data = await User.auth(user_id)
+            const data = await User.auth(user_id);
             misc.response(response, 200, false, 'Succesfull Authentication.', data[0]);
         } catch (error) {
             misc.response(response, 500, true, error.message);

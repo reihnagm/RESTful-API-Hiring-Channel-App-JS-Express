@@ -1,5 +1,6 @@
 const Engineer = require('../models/Engineer');
 const fs = require('fs-extra');
+const redis = require('../configs/redis');
 const misc = require('../helpers/response');
 module.exports = {
     getAll: async (request, response) => {
@@ -25,9 +26,17 @@ module.exports = {
                 next_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
                 prev_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
             }
-            misc.responsePagination(response, 200, false, 'Succesfull get all data.', pageDetail, data);
-        }
-        catch (error) {
+            await redis.get(`engineers-${page}-${search}-${limit}-${sort}-${sortBy}`, (errorRedis, resultRedis) => {
+                if(resultRedis) {
+                    misc.responsePagination(response, 200, false, 'Succesfull get all data with redis.', pageDetail, JSON.parse(resultRedis));
+                } else {
+                    if(data.length !== null || typeof data !== "undefined") {
+                        redis.setex(`engineers-${page}-${search}-${limit}-${sort}-${sortBy}`, 3600, JSON.stringify(data));
+                    }
+                    misc.responsePagination(response, 200, false, 'Succesfull get all data.', pageDetail, data);
+                }
+            });
+        } catch (error) {
             misc.response(response, 500, true, error.message);
         }
     },
@@ -79,6 +88,7 @@ module.exports = {
             if(error === false) {
                 await Engineer.store(data);
                 misc.response(response, 200, false, 'Succesfull create data.', data);
+                redis.flushall();
             }
         } catch (error) {
             misc.response(response, 500, true, error.message);
@@ -143,6 +153,7 @@ module.exports = {
                 await Engineer.update(data, engineer_id);
                 await Engineer.updateNameUser(name, slug, user_id);
                 misc.response(response, 200, false, 'Succesfull update data.', data);
+                redis.flushall();
             }
         } catch (error) {
             misc.response(response, 500, true, error.message);
@@ -153,6 +164,7 @@ module.exports = {
         try {
             await Engineer.delete(engineer_id);
             misc.response(response, 200, false, 'Succesfull delete data.');
+            redis.flushall();
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
@@ -161,16 +173,38 @@ module.exports = {
         const user_id = request.body.user_id;
         try {
             const data = await Engineer.getProfile(user_id);
-            misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+            await redis.get(`user_id:${user_id}`, (errorRedis, resultRedis) => {
+                if(user_id) {
+                    if(resultRedis) {
+                        misc.response(response, 200, false, 'Succesfull get profile with redis.', JSON.parse(resultRedis));
+                    } else {
+                        if(typeof data[0] !== "undefined") {
+                            redis.setex(`user_id:${user_id}`, 3600, JSON.stringify(data[0]));
+                        }
+                        misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+                    }
+                }
+            });
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
     },
-    getDataBySlug: async (request, response) => {
+    getProfileBySlug: async (request, response) => {
         const slug = request.params.slug;
         try {
-            const data = await Engineer.getDataBySlug(slug);
-            misc.response(response, 200, false, 'Succesfull get user by slug.', data[0]);
+            const data = await Engineer.getProfileBySlug(slug);
+            await redis.get(`slug:${slug}`, (errorRedis, resultRedis) => {
+                if(slug) {
+                    if(resultRedis) {
+                        misc.response(response, 200, false, 'Succesfull get profile by slug with redis.', JSON.parse(resultRedis));
+                    } else {
+                        if(typeof data[0] !== "undefined") {
+                            redis.setex(`slug:${slug}`, 3600, JSON.stringify(data[0]));
+                        }
+                        misc.response(response, 200, false, 'Succesfull get profile by slug.', data[0]);
+                    }
+                }
+            });
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
