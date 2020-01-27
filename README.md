@@ -12,6 +12,7 @@ a Simple RESTful API this match for learning from scratch, especially this proje
     <li>Auth with JWT.</li>
     <li>Validate File Image.</li>
     <li>Password Hashing.</li>
+    <li>Redis Implementation.</li>
 </ol>
 
 ---
