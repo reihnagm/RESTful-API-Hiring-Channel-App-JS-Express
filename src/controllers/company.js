@@ -1,6 +1,6 @@
-const Company = require('../models/Company')
-const fs = require('fs-extra')
-const misc = require('../helpers/response')
+const Company = require('../models/Company');
+const fs = require('fs-extra');
+const misc = require('../helpers/response');
 module.exports = {
     getAll: async (request, response) => {
         const page = parseInt(request.query.page) || 1;
@@ -12,9 +12,9 @@ module.exports = {
         try {
             const total = await Company.getTotal();
             const resultTotal =  Math.ceil(total[0].total);
-            const checkNextPage =  Math.ceil(resultTotal / limit);
+            const lastPage =  Math.ceil(resultTotal / limit);
             const prevPage = page === 1 ? 1 : page - 1;
-            const nextPage = page === checkNextPage ? 1 : page + 1;
+            const nextPage = page === lastPage ? 1 : page + 1;
             const data = await Company.getAll(offset, limit, sort, sortBy, search);
             const pageDetail = {
                 total: resultTotal,
@@ -53,7 +53,7 @@ module.exports = {
                     throw new Error('Oops!, File allowed only JPG, JPEG, PNG, GIF, SVG.');
                 }
                 function isImage(extension) {
-                    switch (filename) {
+                    switch (extension) {
                             case 'jpg':
                             case 'jpeg':
                             case 'png':
@@ -129,7 +129,6 @@ module.exports = {
                 user_id: request.body.user_id
             }
             if(error === false) {
-                console.log(data)
                 const company_id = request.params.id;
                 await Company.update(data, company_id);
                 misc.response(response, 200, false, 'Succesfull update data.', data);

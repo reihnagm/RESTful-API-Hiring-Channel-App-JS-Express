@@ -1,6 +1,6 @@
-const Engineer = require('../models/Engineer')
-const fs = require('fs-extra')
-const misc = require('../helpers/response')
+const Engineer = require('../models/Engineer');
+const fs = require('fs-extra');
+const misc = require('../helpers/response');
 module.exports = {
     getAll: async (request, response) => {
         const page = parseInt(request.query.page) || 1;
@@ -12,9 +12,9 @@ module.exports = {
         try {
             const total = await Engineer.getTotal();
             const resultTotal =  Math.ceil(total[0].total);
-            const checkNextPage = Math.ceil(resultTotal / limit);
+            const lastPage = Math.ceil(resultTotal / limit);
             const prevPage = page === 1 ? 1 : page - 1;
-            const nextPage = page === checkNextPage ? 1 : page + 1;
+            const nextPage = page === lastPage ? 1 : page + 1;
             const data = await Engineer.getAll(offset, limit, sort, sortBy, search);
             const pageDetail = {
                 total: resultTotal,

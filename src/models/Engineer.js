@@ -1,4 +1,4 @@
-const connection = require('../configs/db')
+const connection = require('../configs/db');
 module.exports = {
     getTotal: () => {
         return new Promise ((resolve, reject) => {
