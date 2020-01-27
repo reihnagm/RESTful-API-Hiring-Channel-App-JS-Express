@@ -50,8 +50,9 @@ PATCH api/v1/companies/:id
 POST api/v1/companies/profile  
 
 ### HOW TO USE
-Import SQL "hiring_channel_app.sql" to your database and
-you can test API via Postman or I finished building a website to consume this API. Check this : [React-Redux-Hiring-Channel-Website](https://github.com/reihnagm/React-Redux-Hiring-Channel-Website)
+Import SQL "hiring_channel_app.sql" to your database and running server. 
+You can test API via Postman or I finished building a website to consume this API.  
+Check this : [React-Redux-Hiring-Channel-Website](https://github.com/reihnagm/React-Redux-Hiring-Channel-Website)  
 
 ### Problem with Bcrypt-JS
 - if you Linux user and new migrate to Windows, maybe getting an error when installing npm, in my case, specify package "bcrypt", try to uninstall "npm uninstall bcrypt" and install "bcrypt-nodejs".
