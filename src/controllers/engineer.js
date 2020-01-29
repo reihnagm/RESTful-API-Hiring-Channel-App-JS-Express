@@ -34,7 +34,6 @@ module.exports = {
                     misc.responsePagination(response, 200, false, 'Succesfull get all data.', pageDetail, data);
                 }
             });
-
         } catch (error) {
             misc.response(response, 500, true, error.message);
         }
@@ -172,7 +171,18 @@ module.exports = {
         const user_id = request.body.user_id;
         try {
             const data = await Engineer.getProfile(user_id);
-            misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+            redis.get(`user_id:${user_id}`, (errorRedis, resultRedis) => {
+                if(resultRedis) {
+                    if(typeof user_id !== "undefined") {
+                        misc.response(response, 200, false, 'Succesfull get profile with redis.', JSON.parse(resultRedis));
+                    }
+                } else {
+                    if(typeof user_id !== "undefined") {
+                        redis.setex(`user_id:${user_id}`, 3600, JSON.stringify(data[0]));
+                        misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+                    }
+                }
+            });
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
@@ -181,7 +191,18 @@ module.exports = {
         const slug = request.params.slug;
         try {
             const data = await Engineer.getProfileBySlug(slug);
-            misc.response(response, 200, false, 'Succesfull get profile by slug.', data[0]);
+            redis.get(`slug:${slug}`, (errorRedis, resultRedis) => {
+                if(resultRedis) {
+                    if(typeof slug !== "undefined") {
+                        misc.response(response, 200, false, 'Succesfull get profile with redis.', JSON.parse(resultRedis));
+                    }
+                } else {
+                    if(typeof slug !== "undefined") {
+                        redis.setex(`slug:${slug}`, 3600, JSON.stringify(data[0]));
+                        misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+                    }
+                }
+            });
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
