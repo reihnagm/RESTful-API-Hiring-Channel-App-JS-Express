@@ -70,6 +70,17 @@ module.exports = {
             });
         });
     },
+    updateNameUser: (name, slug, user_id) => {
+        return new Promise((resolve, reject) => {
+            connection.query(`UPDATE user SET name = '${name}', slug = '${slug}' WHERE id = '${user_id}'`, (error, result) => {
+                if (error) {
+                    reject(new Error(error));
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    },
     getProfile: (user_id) => {
         return new Promise((resolve, reject) => {
             connection.query(`SELECT a.*, b.name, b.email, b.role_id from company a, user b WHERE a.user_id = b.id AND b.id = '${user_id}'`,
