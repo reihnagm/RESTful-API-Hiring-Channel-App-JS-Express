@@ -12,6 +12,7 @@ a Simple RESTful API this match for learning from scratch, especially this proje
     <li>Auth with JWT.</li>
     <li>Validate File Image.</li>
     <li>Password Hashing.</li>
+    <li>Redis Implementation.</li>
 </ol>
 
 ---
@@ -50,7 +51,7 @@ PATCH api/v1/companies/:id
 POST api/v1/companies/profile  
 
 ### HOW TO USE
-Import SQL "hiring_channel_app.sql" to your database and running server. 
+Import SQL "hiring_channel_app.sql" to your database and running server.  
 You can test API via Postman or I finished building a website to consume this API.  
 Check this : [React-Redux-Hiring-Channel-Website](https://github.com/reihnagm/React-Redux-Hiring-Channel-Website)  
 
