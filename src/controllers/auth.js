@@ -5,12 +5,14 @@ const Company = require('../models/Company');
 const misc = require('../helpers/response');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const redis = require('../configs/redis');
 const { validationResult } = require('express-validator');
 module.exports = {
     auth: async (request, response) => {
         const user_id = request.user.id;
         try {
             const data = await User.auth(user_id);
+            redis.flushall();
             misc.response(response, 200, false, 'Succesfull Authentication.', data[0]);
         } catch (error) {
             misc.response(response, 500, true, error.message);
@@ -20,11 +22,12 @@ module.exports = {
         const { email, password } = request.body;
         try {
             const user = await User.login(email);
-            const isMatch = await bcrypt.compare(password, user[0].password);
             if (user.length === 0) {
-                throw new Error('Invalid Credentials.');
+                throw new Error('User not exists.');
             }
+            const isMatch = await bcrypt.compare(password, user[0].password);
             if (!isMatch) {
+                error = true;
                 throw new Error('Invalid Credentials.');
             }
             const payload = {
@@ -33,6 +36,7 @@ module.exports = {
                 }
             }
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 });
+            redis.flushall();
             response.json({ token });
         } catch(error) {
             misc.response(response, 500, true, error.message);
