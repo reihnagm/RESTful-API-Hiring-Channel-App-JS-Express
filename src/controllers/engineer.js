@@ -93,6 +93,14 @@ module.exports = {
         }
     },
     update: async (request, response) => {
+        const engineer_id = request.params.id;
+        const skills = JSON.parse(request.body.skills); // di parse JSON.parse, balikin data jadi array
+        await Engineer.truncateSkills(engineer_id);
+        skills.map( async skill => {
+            setTimeout( async () => {
+                await Engineer.insertSkills(skill.id, engineer_id);
+            }, 1000);
+        });
         let error = false;
         let filename;
         let extension;
@@ -134,7 +142,6 @@ module.exports = {
             }
             const data = {
                 description: request.body.description ? request.body.description : '',
-                skill: request.body.skill ? request.body.skill : '',
                 location: request.body.location ? request.body.location : '',
                 birthdate:  request.body.birthdate ? request.body.birthdate : '',
                 showcase:  request.body.showcase ? request.body.showcase : '',
@@ -158,9 +165,11 @@ module.exports = {
         }
     },
     delete: async (request, response) => {
-        const engineer_id = request.params.id;
+        const engineer_id = request.params.engineer_id;
+        const user_id = request.params.user_id
         try {
             await Engineer.delete(engineer_id);
+            await Engineer.deleteUser(user_id);
             misc.response(response, 200, false, 'Succesfull delete data.');
             redis.flushall();
         } catch(error) {
@@ -184,6 +193,33 @@ module.exports = {
                 }
             });
         } catch(error) {
+            misc.response(response, 500, true, error.message);
+        }
+    },
+    getSkills:  async (request, response) => {
+        try {
+            const data = await Engineer.getSkills();
+            misc.response(response, 200, false, 'Successfull get skills.', data);
+        } catch (error) {
+            misc.response(repsonse, 500, true, error.message)
+        }
+    },
+    getSkillsBasedOnProfileEngineer:  async (request, response) => {
+        const engineer_id = request.params.engineer_id;
+        try {
+            const data = await Engineer.getSkillsBasedOnProfileEngineer(engineer_id);
+            misc.response(response, 200, false, 'Successfull get skills based on profile engineer.', data);
+        } catch (error) {
+            misc.response(repsonse, 500, true, error.message);
+        }
+    },
+    deleteSkillId: async (request, response) => {
+        const engineer_id = request.params.engineer_id;
+        const skill_id = request.params.skill_id;
+        try {
+            await Engineer.deleteSkillId(skill_id, engineer_id);
+            misc.response(response, 200, false, 'Successfull delete skills based on profile engineer.');
+        } catch (error) {
             misc.response(response, 500, true, error.message);
         }
     },
