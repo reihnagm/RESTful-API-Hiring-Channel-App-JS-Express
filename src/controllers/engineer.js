@@ -6,20 +6,20 @@ module.exports = {
     getAll: async (request, response) => {
         const page = parseInt(request.query.page) || 1;
         const search = request.query.search || '';
-        const limit = request.query.limit || 5;
         const sort = request.query.sort || 'DESC';
         const sortBy = request.query.sortBy || 'date_updated';
+        const limit = request.query.limit || 5;
         const offset = (page - 1) * limit;
         try {
             const total = await Engineer.getTotal();
-            const resultTotal =  Math.ceil(total[0].total);
+            const resultTotal = limit > 5 ? Math.ceil(total[0].total / limit) : total[0].total;
             const lastPage = Math.ceil(resultTotal / limit);
             const prevPage = page === 1 ? 1 : page - 1;
             const nextPage = page === lastPage ? 1 : page + 1;
             const data = await Engineer.getAll(offset, limit, sort, sortBy, search);
             const pageDetail = {
                 total: resultTotal,
-                per_page: limit,
+                per_page: lastPage,
                 next_page: nextPage,
                 prev_page: prevPage,
                 current_page: page,
@@ -96,18 +96,20 @@ module.exports = {
         const engineer_id = request.params.id;
         const skills = JSON.parse(request.body.skills); // di parse JSON.parse, balikin data jadi array
         await Engineer.truncateSkills(engineer_id);
-        skills.map( async skill => {
-            setTimeout( async () => {
-                await Engineer.insertSkills(skill.id, engineer_id);
-            }, 1000);
-        });
+        if(skills.length !== 0) {
+            skills.map( async skill => {
+                setTimeout( async () => {
+                    await Engineer.insertSkills(skill.id, engineer_id);
+                }, 1000);
+            });
+        }
         let error = false;
         let filename;
         let extension;
         let fileSize;
         if(request.file) {
             filename = request.file.originalname;
-            extension =  request.file.originalname.split('.')[1];
+            extension =  request.file.mimetype;
             fileSize = request.file.fileSize;
         }
         try {
@@ -124,11 +126,11 @@ module.exports = {
                 }
                 function isImage(extension) {
                     switch (extension) {
-                        case 'jpg':
-                        case 'jpeg':
-                        case 'png':
-                        case 'gif':
-                        case 'svg':
+                        case 'image/png':
+                        case 'image/jpeg':
+                        case 'image/gif':
+                        case 'image/bmp':
+                        case 'image/svg+xml':
                             return true;
                     }
                         return false;
@@ -147,7 +149,7 @@ module.exports = {
                 showcase:  request.body.showcase ? request.body.showcase : '',
                 telephone: request.body.telephone ? request.body.telephone : '',
                 salary: request.body.salary ? request.body.salary : '',
-                avatar: avatar,
+                avatar,
                 user_id: request.body.user_id
             }
             if(error === false) {
@@ -176,26 +178,6 @@ module.exports = {
             misc.response(response, 500, true, error.message);
         }
     },
-    getProfile: async (request, response) => {
-        const user_id = request.body.user_id;
-        try {
-            const data = await Engineer.getProfile(user_id);
-            redis.get(`user_id:${user_id}`, (errorRedis, resultRedis) => {
-                if(resultRedis) {
-                    if(typeof user_id !== "undefined") {
-                        misc.response(response, 200, false, 'Succesfull get profile with redis.', JSON.parse(resultRedis));
-                    }
-                } else {
-                    if(typeof user_id !== "undefined") {
-                        redis.setex(`user_id:${user_id}`, 3600, JSON.stringify(data[0]));
-                        misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
-                    }
-                }
-            });
-        } catch(error) {
-            misc.response(response, 500, true, error.message);
-        }
-    },
     getSkills:  async (request, response) => {
         try {
             const data = await Engineer.getSkills();
@@ -204,22 +186,23 @@ module.exports = {
             misc.response(repsonse, 500, true, error.message)
         }
     },
-    getSkillsBasedOnProfileEngineer:  async (request, response) => {
-        const engineer_id = request.params.engineer_id;
+    getProfile: async (request, response) => {
+        const user_id = request.body.user_id;
         try {
-            const data = await Engineer.getSkillsBasedOnProfileEngineer(engineer_id);
-            misc.response(response, 200, false, 'Successfull get skills based on profile engineer.', data);
-        } catch (error) {
-            misc.response(repsonse, 500, true, error.message);
-        }
-    },
-    deleteSkillId: async (request, response) => {
-        const engineer_id = request.params.engineer_id;
-        const skill_id = request.params.skill_id;
-        try {
-            await Engineer.deleteSkillId(skill_id, engineer_id);
-            misc.response(response, 200, false, 'Successfull delete skills based on profile engineer.');
-        } catch (error) {
+            const data = await Engineer.getProfile(user_id);
+            redis.get(`user_id_engineers:${user_id}`, (errorRedis, resultRedis) => {
+                if(resultRedis) {
+                    if(typeof user_id !== "undefined") {
+                        misc.response(response, 200, false, 'Succesfull get profile with redis.', JSON.parse(resultRedis));
+                    }
+                } else {
+                    if(typeof user_id !== "undefined") {
+                        redis.setex(`user_id_engineers:${user_id}`, 3600, JSON.stringify(data[0]));
+                        misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+                    }
+                }
+            });
+        } catch(error) {
             misc.response(response, 500, true, error.message);
         }
     },

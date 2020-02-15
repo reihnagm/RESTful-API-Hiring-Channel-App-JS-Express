@@ -2,7 +2,7 @@ const connection = require('../configs/db')
 module.exports = {
     getTotal: () => {
         return new Promise ((resolve, reject) => {
-            const query = `SELECT COUNT(*) total from company`
+            const query = `SELECT COUNT(*) total FROM company`
             connection.query(query, (error, result) => {
                 if(error) {
                     reject(new Error(error));

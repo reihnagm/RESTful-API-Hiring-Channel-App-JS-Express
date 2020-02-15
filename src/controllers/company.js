@@ -6,14 +6,14 @@ module.exports = {
     getAll: async (request, response) => {
         const page = parseInt(request.query.page) || 1;
         const search = request.query.search || '';
-        const limit = request.query.limit || 10;
+        const limit = request.query.limit || 5;
         const sort = request.query.sort || 'DESC';
         const sortBy = request.query.sortBy || 'date_updated';
         const offset = (page - 1) * limit;
         try {
             const total = await Company.getTotal();
-            const resultTotal =  Math.ceil(total[0].total);
-            const lastPage =  Math.ceil(resultTotal / limit);
+            const resultTotal = limit > 5 ? Math.ceil(total[0].total / limit) : total[0].total;
+            const lastPage = Math.ceil(resultTotal / limit);
             const prevPage = page === 1 ? 1 : page - 1;
             const nextPage = page === lastPage ? 1 : page + 1;
             const data = await Company.getAll(offset, limit, sort, sortBy, search);
@@ -76,7 +76,6 @@ module.exports = {
             }
             await Company.store(data);
             misc.response(response, 200, false, 'Succesfull create data.', data);
-            redis.flushall();
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
@@ -127,7 +126,7 @@ module.exports = {
                 description: request.body.description,
                 email: request.body.email,
                 telephone: request.body.telephone,
-                logo: logo,
+                logo,
                 user_id: request.body.user_id
             }
             if(error === false) {
@@ -158,7 +157,6 @@ module.exports = {
             const company_id = request.params.id;
             await Company.delete(company_id);
             misc.response(response, 200, false, 'Succesfull delete data.');
-            redis.flushall();
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
@@ -167,7 +165,18 @@ module.exports = {
         const user_id = request.body.user_id;
         try {
             const data = await Company.getProfile(user_id);
-            misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+            redis.get(`user_id_companies:${user_id}`, (errorRedis, resultRedis) => {
+                if(resultRedis) {
+                    if(typeof user_id !== "undefined") {
+                        misc.response(response, 200, false, 'Succesfull get profile with redis.', JSON.parse(resultRedis));
+                    }
+                } else {
+                    if(typeof user_id !== "undefined") {
+                        redis.setex(`user_id_companies:${user_id}`, 3600, JSON.stringify(data[0]));
+                        misc.response(response, 200, false, 'Succesfull get profile.', data[0]);
+                    }
+                }
+           });
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }

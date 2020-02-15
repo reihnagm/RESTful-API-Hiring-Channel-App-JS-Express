@@ -13,12 +13,16 @@ module.exports = {
         });
     },
     getAll: (offset, limit, sort, sortBy, search) => {
+        if(search) {
+            offset = 0;
+        }
         return new Promise((resolve, reject) => {
-            const query = `SELECT a.*, e.name, e.email, e.slug, GROUP_CONCAT(c.name SEPARATOR ', ') skills FROM engineer a
+            const query = `SELECT DISTINCT a.*, e.name, e.email, e.slug, GROUP_CONCAT(c.name SEPARATOR ', ') skills
+            FROM engineer a
             LEFT JOIN engineer_skill b ON a.id = b.engineer_id
             LEFT JOIN skills c ON c.id = b.skill_id
             INNER JOIN user e ON a.user_id = e.id
-            WHERE (e.name LIKE '%${search}%' OR c.name LIKE '%${search}%')
+            WHERE UPPER(e.name) LIKE '%${search}%'
             GROUP BY a.id
             ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
             connection.query(query, (error, result) => {
@@ -87,7 +91,7 @@ module.exports = {
     },
     getProfile: (user_id) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.*, d.name, d.email, GROUP_CONCAT(c.name SEPARATOR ', ') skills
+            connection.query(`SELECT a.*, d.name, d.email,  GROUP_CONCAT(C.id SEPARATOR ',') skills_id, GROUP_CONCAT(c.name SEPARATOR ',') skills
                 FROM engineer a
                 LEFT JOIN engineer_skill b ON a.id = b.engineer_id
                 LEFT JOIN skills c ON c.id = b.skill_id

@@ -40,7 +40,9 @@ $ npm run start
 ### ENDPOINT
 GET api/v1/engineers  
 GET api/v1/engineers/profile/:slug  
+GET api/v1/engineers/skills  
 POST api/v1/engineers  
+DELETE api/v1/engineers/:engineer_id/:user_id
 PATCH api/v1/engineers/:id  
 POST api/v1/engineers/profile  
 

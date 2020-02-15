@@ -12,7 +12,6 @@ module.exports = {
         const user_id = request.user.id;
         try {
             const data = await User.auth(user_id);
-            redis.flushall();
             misc.response(response, 200, false, 'Succesfull Authentication.', data[0]);
         } catch (error) {
             misc.response(response, 500, true, error.message);
@@ -36,7 +35,6 @@ module.exports = {
                 }
             }
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 });
-            redis.flushall();
             response.json({ token });
         } catch(error) {
             misc.response(response, 500, true, error.message);
@@ -79,5 +77,7 @@ module.exports = {
         } catch(error) {
             misc.response(response, 500, true, error.message);
         }
+    }, logout: async (request, reponse) => {
+        
     }
 }

@@ -17,9 +17,8 @@ Route
     .get('/', Engineer.getAll)
     .get('/profile/:slug', Engineer.getProfileBySlug)
     .get('/skills', Engineer.getSkills)
-    .get('/skills-engineer/:engineer_id', Engineer.getSkillsBasedOnProfileEngineer)
     .post('/', upload.single('avatar'), Engineer.store)
     .patch('/:id', upload.single('avatar'), Engineer.update)
     .delete('/:engineer_id/:user_id', Engineer.delete)
     .post('/profile', Engineer.getProfile);
-module.exports = Route
+module.exports = Route;
