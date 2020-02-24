@@ -7,5 +7,5 @@ connection.connect(err => {
     } else {
         console.log('Success Connect to Database');
     }
-})
+});
 module.exports = connection;

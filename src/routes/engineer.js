@@ -9,10 +9,10 @@ const storage = multer.diskStorage({
     filename: (request, file, callback) => {
         callback(null, file.originalname);
     }
-})
+});
 const upload = multer({
     storage
-})
+});
 Route
     .get('/', Engineer.getAll)
     .get('/profile/:slug', Engineer.getProfileBySlug)
