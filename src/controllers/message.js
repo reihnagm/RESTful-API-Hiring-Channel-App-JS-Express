@@ -23,9 +23,9 @@ module.exports = {
         }
     },
     get_reply_conversation_replies: async (request, response) => {
-        const conversations_id = request.params.conversation_id;
+        const conversation_id = request.params.conversation_id;   
         try {
-            const data = await Message.get_reply_conversation_replies(conversations_id);
+            const data = await Message.get_reply_conversation_replies(conversation_id);
             misc.response(response, 200, false, 'Successfull get reply conversation replies.', data);
         } catch (error) {
             misc.response(response, 500, true, error.message);
@@ -45,18 +45,8 @@ module.exports = {
     get_user_two: async (request, response) => {
         const conversation_id = request.params.conversation_id;
         try {
-			const data = await Message.get_user_two(conversation_id);
+            const data = await Message.get_user_two(conversation_id);
 			misc.response(response, 200, false, 'Successfull get user two.', data);
-        } catch (error) {
-            misc.response(response, 500, true, error.message);
-        }
-    },
-    check_conversations: async (request, response) => {
-        const user_one = request.params.user_one;
-        const user_two = request.params.user_two;
-        try {
-            const data = await Message.check_conversations(user_one, user_two);
-            misc.response(response, 200, false, 'Successfull get conversations id.', data);
         } catch (error) {
             misc.response(response, 500, true, error.message);
         }
@@ -74,16 +64,16 @@ module.exports = {
     insert_into_conversation_replies: async (request, response) => {
 		const user_one = request.params.user_one;
 		const user_two = request.params.user_two;
-		const message = request.body.message;
+        const message = request.body.message;
         try {
 			const checkData = await Message.check_conversations(user_one, user_two);
 			if(checkData.length === 0) {
 				Message.insert_into_conversations(user_one, user_two).then(async data => {
-					await Message.insert_into_conversation_replies(user_one, message, data.insertId);	
+                    await Message.insert_into_conversation_replies(user_one, message, data.insertId);	
 				});
 			} else {
-				await Message.insert_into_conversation_replies(user_one, message, checkData[0].id);	
-			}
+			    await Message.insert_into_conversation_replies(user_one, message, checkData[0].id);	
+            }
             misc.response(response, 200, false, 'Successfull insert into conversation replies.');
         } catch (error) {
             misc.response(response, 500, true, error.message);

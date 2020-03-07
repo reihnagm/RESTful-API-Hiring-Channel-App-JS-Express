@@ -40,12 +40,11 @@ module.exports = {
             });
         });
     },
-    get_reply_conversation_replies: (conversations_id) => {
+    get_reply_conversation_replies: (conversation_id) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
                 SELECT a.id, a.reply, b.name FROM conversation_replies a, user b WHERE a.user_id = b.id 
-                AND a.conversation_id = '${conversations_id}'
-                ORDER BY a.conversation_id DESC
+                AND a.conversation_id = '${conversation_id}'
                 `, (error, result) => {
                 if(error) {
                     reject(new Error(error));
@@ -70,25 +69,10 @@ module.exports = {
             });
         });
     },
-    check_conversations_users_reply: (user_one) => {
-        return new Promise ((resolve, reject) => {
-            connection.query(`
-                SELECT b.conversation_id FROM conversations a, conversation_replies b
-                WHERE a.id = b.conversation_id 
-                AND b.user_id = '${user_one}'
-                    `, (error, result) => {
-                if(error) {
-                    reject(new Error(error));
-                } else {
-                    resolve(result);
-                }
-            });
-        });
-    },
     get_user_two: (conversation_id) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                    SELECT a.user_two FROM conversations a WHERE a.id = '${conversation_id}'
+                    SELECT a.user_one, a.user_two FROM conversations a WHERE a.id = '${conversation_id}'
                     `, (error, result) => {
                 if(error) {
                     reject(new Error(error));
