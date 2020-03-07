@@ -59,8 +59,36 @@ module.exports = {
         return new Promise ((resolve, reject) => {
             connection.query(`
                     SELECT a.id FROM conversations a
-                    WHERE (user_one = '${user_one}' AND user_two = '${user_two}')
-                    OR (user_one = '${user_two}' AND user_two = '${user_one}')
+                    WHERE a.user_one = '${user_one}' AND a.user_two = '${user_two}'
+                    OR a.user_one = '${user_two}' AND a.user_two = '${user_one}'
+                    `, (error, result) => {
+                if(error) {
+                    reject(new Error(error));
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    },
+    check_conversations_users_reply: (user_one) => {
+        return new Promise ((resolve, reject) => {
+            connection.query(`
+                SELECT b.conversation_id FROM conversations a, conversation_replies b
+                WHERE a.id = b.conversation_id 
+                AND b.user_id = '${user_one}'
+                    `, (error, result) => {
+                if(error) {
+                    reject(new Error(error));
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    },
+    get_user_two: (conversation_id) => {
+        return new Promise ((resolve, reject) => {
+            connection.query(`
+                    SELECT a.user_two FROM conversations a WHERE a.id = '${conversation_id}'
                     `, (error, result) => {
                 if(error) {
                     reject(new Error(error));
@@ -86,25 +114,10 @@ module.exports = {
             });
         });
     },
-    get_user_one_conversations_id: (user_one) => {
-        return new Promise ((resolve, reject) => {
-            connection.query(`
-                    SELECT a.id FROM conversations
-                    WHERE user_one = '${user_one}'
-                    ORDER BY a.id DESC limit 1
-                    `, (error, result) => {
-                if(error) {
-                    reject(new Error(error));
-                } else {
-                    resolve(result);
-                }
-            });
-        });
-    },
     insert_into_conversations: (user_one, user_two) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                    INSERT INTO conversations (user_one,user_two)
+                    INSERT INTO conversations (user_one, user_two)
                     VALUES ('${user_one}','${user_two}')
                     `, (error, result) => {
                 if(error) {
