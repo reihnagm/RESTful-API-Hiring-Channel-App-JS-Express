@@ -43,7 +43,9 @@ module.exports = {
     get_reply_conversation_replies: (conversation_id) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                SELECT a.id, a.reply, b.name FROM conversation_replies a, user b WHERE a.user_id = b.id 
+                SELECT a.id, a.reply, b.name 
+                FROM conversation_replies a, user b 
+                WHERE a.user_id = b.id 
                 AND a.conversation_id = '${conversation_id}'
                 `, (error, result) => {
                 if(error) {
@@ -82,7 +84,7 @@ module.exports = {
             });
         });
     },
-    get_conversations_last_id: (user_two) => {
+    get_conversation_id: (user_two) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
                     SELECT a.id FROM conversations a

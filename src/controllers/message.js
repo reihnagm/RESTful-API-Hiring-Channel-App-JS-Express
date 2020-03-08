@@ -31,12 +31,12 @@ module.exports = {
             misc.response(response, 500, true, error.message);
         }
     },
-    get_conversations_last_id: async (request, response) => {
+    get_conversation_id: async (request, response) => {
         const user_two = request.params.user_two;
         try {
-			const data = await Message.get_conversations_last_id(user_two);
+			const data = await Message.get_conversation_id(user_two);
 			if(data.length !== 0) {
-				misc.response(response, 200, false, 'Successfull get conversations last id.', data[0].id);
+				misc.response(response, 200, false, 'Successfull get conversation id.', data[0].id);
 			}
         } catch (error) {
             misc.response(response, 500, true, error.message);
