@@ -17,7 +17,8 @@ module.exports = {
             offset = 0;
         }
         return new Promise((resolve, reject) => {
-            const query = `SELECT DISTINCT a.*, e.name, e.email, e.slug, GROUP_CONCAT(c.name SEPARATOR ', ') skills
+            const query = `SELECT DISTINCT a.*, e.name, e.email, e.slug, 
+            GROUP_CONCAT(c.name SEPARATOR ', ') skills
             FROM engineer a
             LEFT JOIN engineer_skill b ON a.id = b.engineer_id
             LEFT JOIN skills c ON c.id = b.skill_id
@@ -109,7 +110,8 @@ module.exports = {
     },
     getProfileBySlug: (slug) => {
         return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.*, d.name, d.email, GROUP_CONCAT(c.name SEPARATOR ', ') skills from engineer a
+            connection.query(`SELECT a.*, d.name, d.email, 
+            GROUP_CONCAT(c.name SEPARATOR ', ') skills from engineer a
             LEFT JOIN engineer_skill b ON a.id = b.engineer_id
             LEFT JOIN skills c ON c.id = b.skill_id
             INNER JOIN user d ON a.user_id = d.id
@@ -127,17 +129,6 @@ module.exports = {
     getSkills: () => {
         return new Promise((resolve, reject) => {
             connection.query(`SELECT * FROM skills`, (error, result) => {
-                if(error) {
-                    reject(new Error(error));
-                } else {
-                    resolve(result);
-                }
-            });
-        });
-    },
-    getSkillsBasedOnProfileEngineer: (engineer_id) => {
-        return new Promise((resolve, reject) => {
-            connection.query(`SELECT a.id, a.name from skills a, engineer_skill c WHERE c.engineer_id = '${engineer_id}' AND a.id = c.skill_id`, (error, result) => {
                 if(error) {
                     reject(new Error(error));
                 } else {

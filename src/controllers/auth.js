@@ -6,13 +6,12 @@ const misc = require('../helpers/response');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const redis = require('../configs/redis');
-const { validationResult } = require('express-validator');
 module.exports = {
     auth: async (request, response) => {
         const user_id = request.user.id;
         try {
             const data = await User.auth(user_id);
-            misc.response(response, 200, false, 'Succesfull Authentication.', data[0]);
+            misc.response(response, 200, false, "Succesfull Authentication.", data[0]);
         } catch (error) {
             misc.response(response, 500, true, error.message);
         }
@@ -22,12 +21,12 @@ module.exports = {
         try {
             const user = await User.login(email);
             if (user.length === 0) {
-                throw new Error('User not exists.');
+                throw new Error("User not exists.");
             }
             const isMatch = await bcrypt.compare(password, user[0].password);
             if (!isMatch) {
                 error = true;
-                throw new Error('Invalid Credentials.');
+                throw new Error("Invalid Credentials.");
             }
             const payload = {
                 user: {
@@ -47,7 +46,7 @@ module.exports = {
             const salt = await bcrypt.genSalt(10);
             const passwordHash = await bcrypt.hash(password, salt);
             if(user.length !== 0) {
-                throw new Error('User already exists.');
+                throw new Error("User already exists.");
             }
             const slug = name.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'');
             const data = {

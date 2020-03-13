@@ -14,10 +14,10 @@ const upload = multer({
     storage
 });
 Route
-    .get('/', Company.getAll)
-    .get('/profile/:slug', Company.getProfileBySlug)
-    .post('/', upload.single('logo'), Company.store)
-    .patch('/:id', upload.single('logo'), Company.update)
-    .delete('/:id', Company.delete)
-    .post('/profile', Company.getProfile);
+    .get("/", Company.getAll)
+    .get("/profile/:slug", Company.getProfileBySlug)
+    .post("/", upload.single("logo"), Company.store)
+    .patch("/:id", upload.single("logo"), Company.update)
+    .delete("/:id", Company.delete)
+    .post("/profile", Company.getProfile);
 module.exports = Route;

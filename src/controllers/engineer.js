@@ -23,8 +23,8 @@ module.exports = {
                 next_page: nextPage,
                 prev_page: prevPage,
                 current_page: page,
-                next_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prev_url: `http://localhost:5000${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+                next_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prev_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
             }
             redis.get(`page-${page}-sort-${sort}-sortBy-${sortBy}-limit-${limit}-search-${search}`, (errorRedis, resultRedis) => {
                 if(resultRedis) {
@@ -35,6 +35,7 @@ module.exports = {
                 }
             });
         } catch (error) {
+            // console.log(error.message); in-development
             misc.response(response, 500, true, error.message);
         }
     },
@@ -89,20 +90,19 @@ module.exports = {
                 redis.flushall();
             }
         } catch (error) {
+            // console.log(error.message); in-development
             misc.response(response, 500, true, error.message);
         }
     },
     update: async (request, response) => {
         const engineer_id = request.params.id;
-        const skills = JSON.parse(request.body.skills); // di parse JSON.parse, balikin data jadi array
-        await Engineer.truncateSkills(engineer_id);
+        const skills = JSON.parse(request.body.skills); // di parse JSON.parse, ubah data jadi array
+        await Engineer.truncateSkills(engineer_id); // trik agar menghapus semua skill engineer dan menambah dengan data yang berbeda
         if(skills.length !== 0) {
-            skills.map( async skill => {
-                setTimeout( async () => {
-                    await Engineer.insertSkills(skill.id, engineer_id);
-                }, 1000);
+            skills.map(async skill => {
+                await Engineer.insertSkills(skill.id, engineer_id);
             });
-        }
+        } 
         let error = false;
         let filename;
         let extension;
@@ -163,6 +163,7 @@ module.exports = {
                 redis.flushall();
             }
         } catch (error) {
+            // console.log(error.message); in-development
             misc.response(response, 500, true, error.message);
         }
     },
@@ -175,6 +176,7 @@ module.exports = {
             misc.response(response, 200, false, 'Succesfull delete data.');
             redis.flushall();
         } catch(error) {
+            // console.log(error.message); in-development
             misc.response(response, 500, true, error.message);
         }
     },
@@ -183,6 +185,7 @@ module.exports = {
             const data = await Engineer.getSkills();
             misc.response(response, 200, false, 'Successfull get skills.', data);
         } catch (error) {
+            // console.log(error.message); in-development
             misc.response(repsonse, 500, true, error.message)
         }
     },
@@ -203,6 +206,7 @@ module.exports = {
                 }
             });
         } catch(error) {
+            // console.log(error.message); in-development
             misc.response(response, 500, true, error.message);
         }
     },
@@ -223,6 +227,7 @@ module.exports = {
                 }
             });
         } catch(error) {
+            // console.log(error.message); in-development
             misc.response(response, 500, true, error.message);
         }
     }
