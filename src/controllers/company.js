@@ -23,8 +23,8 @@ module.exports = {
                 next_page: nextPage,
                 prev_page: prevPage,
                 current_page: page,
-                nextLink: `${proccess.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-                prevLink: `${proccess.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+                nextLink: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+                prevLink: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
             }
             misc.responsePagination(response, 200, false, "Successfull get all data.", pageDetail, data);
         } catch (error) {

@@ -3,7 +3,8 @@ module.exports = {
     get_conversation_lists: (user_session) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                SELECT DISTINCT a.id, b.id, d.avatar, a.name FROM user a, conversations b, conversation_replies c, engineer d 
+                SELECT DISTINCT a.id, b.id, d.avatar, a.name FROM 
+                user a, conversations b, conversation_replies c, engineer d 
                 WHERE  
                 CASE 
                     WHEN b.user_one = '${user_session}'
@@ -43,7 +44,7 @@ module.exports = {
     get_reply_conversation_replies: (conversation_id) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                SELECT a.id, a.reply, b.name 
+                SELECT a.id, a.reply, b.name, a.created_at 
                 FROM conversation_replies a, user b 
                 WHERE a.user_id = b.id 
                 AND a.conversation_id = '${conversation_id}'
@@ -114,11 +115,11 @@ module.exports = {
             });
         });
     },
-    insert_into_conversation_replies: (user_id, reply, conversation_id) => {
+    insert_into_conversation_replies: (user_id, message, conversation_id, created_at) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                    INSERT INTO conversation_replies (user_id, reply, conversation_id)
-                    VALUES ('${user_id}', '${reply}', '${conversation_id}')
+                    INSERT INTO conversation_replies (user_id, reply, conversation_id, created_at)
+                    VALUES ('${user_id}', '${message}', '${conversation_id}', '${created_at}')
                     `, (error, result) => {
                 if(error) {
                     reject(new Error(error));

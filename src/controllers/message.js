@@ -65,14 +65,15 @@ module.exports = {
 		const user_one = request.params.user_one;
 		const user_two = request.params.user_two;
         const message = request.body.message;
+        const created_at = request.body.created_at;
         try {
 			const checkData = await Message.check_conversations(user_one, user_two);
 			if(checkData.length === 0) {
 				Message.insert_into_conversations(user_one, user_two).then(async data => {
-                    await Message.insert_into_conversation_replies(user_one, message, data.insertId);	
+                    await Message.insert_into_conversation_replies(user_one, message, data.insertId, created_at);	
 				});
 			} else {
-			    await Message.insert_into_conversation_replies(user_one, message, checkData[0].id);	
+			    await Message.insert_into_conversation_replies(user_one, message, checkData[0].id, created_at);	
             }
             misc.response(response, 200, false, 'Successfull insert into conversation replies.');
         } catch (error) {
