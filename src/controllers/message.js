@@ -2,14 +2,6 @@ const Message = require('../models/Message');
 const misc = require('../helpers/response');
 const Pusher = require('pusher');
 
-let pusher = new Pusher({
-  appId: '965811',
-  key: '20b3b98bfc23f9164876',
-  secret: '0345558e3bb824e35d9f',
-  cluster: 'ap1',
-  encrypted: true
-});
-
 module.exports = {
     get_conversation_lists: async (request, response) => {
         const user_session = request.params.user_session;
@@ -85,6 +77,13 @@ module.exports = {
                     objInsertId = await Message.insert_into_conversations(user_one, user_two);
                 } catch(error) {}
                 finally {
+                    let pusher = new Pusher({
+                        appId: '965811',
+                        key: '20b3b98bfc23f9164876',
+                        secret: '0345558e3bb824e35d9f',
+                        cluster: 'ap1',
+                        encrypted: true
+                    });
                     pusher.trigger('my-channel', 'my-event', {
                         "id": new Date(),
                         "reply": message,

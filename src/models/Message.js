@@ -44,7 +44,7 @@ module.exports = {
     get_reply_conversation_replies: (conversation_id) => {
         return new Promise ((resolve, reject) => {
             connection.query(`
-                SELECT a.id, a.reply, b.name, a.created_at 
+                SELECT a.id, a.reply, b.name, a.user_id, a.created_at 
                 FROM conversation_replies a, user b 
                 WHERE a.user_id = b.id 
                 AND a.conversation_id = '${conversation_id}'
