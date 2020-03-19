@@ -15,9 +15,12 @@ module.exports = {
         return new Promise((resolve, reject) => {
             connection.query(`SELECT * FROM user WHERE email = ?`, email, (error, result) => {
                 if (error) {
-                    reject(new Error(error))
+                   if(error.code === "ECONNREFUSED") {
+                        reject(new Error('The requested server is unavailable. Please contact your support and describe your issue.'));
+                   }
+                   reject(new Error(error))
                 } else {
-                    resolve(result)
+                    resolve(result);
                 }
             })
         })
@@ -26,6 +29,9 @@ module.exports = {
         return new Promise((resolve, reject) => {
             connection.query('INSERT INTO user SET ?', data, (error, result) => {
                 if (error) {
+                    if(error.code === "ECONNREFUSED") {
+                        reject(new Error('The requested server is unavailable. Please contact your support and describe your issue.'));
+                    }
                     reject(new Error(error))
                 } else {
                     resolve(result)

@@ -54,7 +54,7 @@ module.exports = {
             const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 });
             response.json({ token });
         } catch(error) {
-            misc.response(response, 500, true, error);
+            misc.response(response, 500, true, error.message);
         }
     },
     register: async (request, response) => {

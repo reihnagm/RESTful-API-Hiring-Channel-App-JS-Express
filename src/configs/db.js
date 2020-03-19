@@ -1,11 +1,13 @@
 const mysql = require('mysql');
 const config = require('./configs');
-const connection = mysql.createConnection(config.database.mysql);
-connection.connect(err => {
+let connection = mysql.createPool(config.database.mysql);
+connection.getConnection((err, connection) => {
     if (err) {
-        console.log(`Error Database Connection: \n ${err}`);
+        console.log('\n\t *** Cannot establish a connection with the database. ***');
+        throw err;
     } else {
-        console.log('Success Connect to Database');
+        console.log('\n\t *** New connection established with the database. ***');
     }
 });
+  
 module.exports = connection;
