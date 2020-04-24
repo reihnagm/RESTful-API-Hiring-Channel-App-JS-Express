@@ -14,7 +14,7 @@ module.exports = {
       case 'image/bmp':
         return true
       default:
-        break
+        break;
     }
   }
 }

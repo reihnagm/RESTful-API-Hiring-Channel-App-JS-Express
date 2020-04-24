@@ -6,5 +6,4 @@ Route
     .get('/', jwtAuth, Auth.auth)
     .post('/login', Auth.login)
     .post('/register', Auth.register)
-    .post('/logout', Auth.logout);
 module.exports = Route;

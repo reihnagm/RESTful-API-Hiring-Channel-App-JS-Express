@@ -1,7 +1,7 @@
 {
-  "name": "hiring-channel-app",
+  "name": "hiring-channel-restful-api-node-js",
   "version": "1.0.0",
-  "description": "application hiring channel",
+  "description": "Backend for hiring channel app.",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

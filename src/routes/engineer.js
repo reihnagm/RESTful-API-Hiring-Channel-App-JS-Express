@@ -14,7 +14,7 @@ const upload = multer({
     storage
 });
 Route
-    .get("/", Engineer.getAll)
+    .get("/", Engineer.all)
     .get("/profile/:slug", Engineer.getProfileBySlug)
     .get("/skills", Engineer.getSkills)
     .post("/", upload.single("avatar"), Engineer.store)

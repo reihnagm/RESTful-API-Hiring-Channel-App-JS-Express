@@ -2,10 +2,10 @@ const express = require("express");
 const Route = express.Router();
 const Message = require("../controllers/message");
 Route
-    .get("/get_conversation_lists/:user_session", Message.get_conversation_lists)
-    .get("/get_reply_conversation_replies/:conversation_id", Message.get_reply_conversation_replies)
-    .get("/get_user_two/:conversation_id", Message.get_user_two)
-    .get("/get_conversation_id/:user_two", Message.get_conversation_id)
-    .get("/check_conversations/:user_one/:user_two", Message.check_conversations)
-    .post("/insert_into_conversation_replies/:user_one/:user_two", Message.insert_into_conversation_replies);
+    .get("/conversation-lists/:user_session", Message.conversationLists)
+    .get("/conversation-replies/:conversation_id", Message.conversationReplies)
+    .get("/user-two/:conversation_id", Message.userTwo)
+    .get("/conversation-id/:user_two", Message.conversationId)
+    .get("/check-conversations/:user_one/:user_two", Message.checkConversations)
+    .post("/conversation-replies/:user_one/:user_two", Message.storeConversationReplies);
 module.exports = Route;
