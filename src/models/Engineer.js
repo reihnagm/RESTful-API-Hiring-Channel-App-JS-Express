@@ -23,7 +23,7 @@ module.exports = {
       LEFT JOIN engineer_skill b ON a.id = b.engineer_id
       LEFT JOIN skills c ON c.id = b.skill_id
       INNER JOIN user e ON a.user_id = e.id
-      WHERE LOWER(e.name) LIKE '%${search}%'
+      WHERE LOWER(e.name) LIKE '%${search}%' OR LOWER(c.name) LIKE '%${search}%'
       GROUP BY a.id
       ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`;
       connection.query(query, (error, result) => {
