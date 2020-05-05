@@ -26,7 +26,7 @@ module.exports = {
     }
   },
   conversationReplies: async (request, response) => {
-    const conversation_id = request.params.conversation_id;   
+    const conversation_id = request.params.conversation_id;
     try {
       const data = await Message.conversationReplies(conversation_id);
       misc.response(response, 200, false, null, data);
@@ -69,7 +69,7 @@ module.exports = {
     }
   },
   storeConversationReplies: async (request, response) => {
-    let objInsertId;
+    let objInsertId, objInsertId2, payload;
     const user_one = request.params.user_one;
     const user_two = request.params.user_two;
     const message = request.body.message;
@@ -84,18 +84,26 @@ module.exports = {
           console.log(error.message); // in-development
           misc.response(response, 500, true, 'Server Error.');
         } finally {
-          await Message.storeConversationReplies(user_one, message, objInsertId.insertId, created_at);	
+          objInsertId2 = await Message.storeConversationReplies(user_one, message, objInsertId.insertId, created_at);
+          payload = {
+            'id':  objInsertId2.insertId,
+            'reply': message,
+            'user_id':  parseInt(user_one),
+            'name': user_session_name,
+            'created_at': created_at
+          }
         }
 			} else {
-        await Message.storeConversationReplies(user_one, message, check_conversations[0].id, created_at);	
+        objInsertId2 = await Message.storeConversationReplies(user_one, message, check_conversations[0].id, created_at);
+        payload = {
+          'id':  objInsertId2.insertId,
+          'reply': message,
+          'user_id':  parseInt(user_one),
+          'name': user_session_name,
+          'created_at': created_at
+        }
       }
-      const payload = {
-        'id': new Date(),
-        'reply': message,
-        'user_id':  parseInt(user_one),
-        'name': user_session_name,
-        'created_at': created_at
-      }
+
       pusher.trigger('my-channel', 'my-event', payload);
       misc.response(response, 200, null, false);
     } catch (error) {
