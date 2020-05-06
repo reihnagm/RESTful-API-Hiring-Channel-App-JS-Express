@@ -166,21 +166,6 @@ module.exports = {
       });
     });
   },
-  updateSkills: (old_skill_id, old_engineer_id, new_skill_id) => {
-    return new Promise((resolve, reject) => {
-      const query = `UPDATE engineer_skill SET skill_id = '${new_skill_id}'
-      WHERE engineer_id = '${old_engineer_id}'
-      AND skill_id = '${old_skill_id}'
-      `;
-      connection.query(query, (error, result) => {
-        if(error) {
-          reject(new Error(error));
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  },
   truncateSkills: (engineer_id) => {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM engineer_skill
