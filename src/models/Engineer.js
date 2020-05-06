@@ -97,13 +97,9 @@ module.exports = {
   },
   getProfile: (user_id) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, d.name, d.email,  GROUP_CONCAT(C.id SEPARATOR ',') skills_id, GROUP_CONCAT(c.name SEPARATOR ',') skills
-      FROM engineer a
-      LEFT JOIN engineer_skill b ON a.id = b.engineer_id
-      LEFT JOIN skills c ON c.id = b.skill_id
+      const query = `SELECT a.*, d.name, d.email FROM engineer a
       INNER JOIN user d ON a.user_id = d.id
-      WHERE a.user_id = '${user_id}'
-      GROUP BY a.id`;
+      WHERE a.user_id = '${user_id}'`;
       connection.query(query,
         (error, result) => {
           if(error) {
@@ -133,6 +129,19 @@ module.exports = {
       });
     });
   },
+  getSkillsBasedOnProfile: (engineer_id) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT a.name, a.id FROM skills a INNER JOIN engineer_skill b ON a.id = b.skill_id
+      WHERE b.engineer_id = '${engineer_id}'`;
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error));
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
   getSkills: () => {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM skills`;
@@ -145,9 +154,37 @@ module.exports = {
       });
     });
   },
+  getEngineerSkill: (engineer_id) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT a.* FROM engineer_skill a WHERE a.engineer_id = ${engineer_id}`;
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error));
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
+  updateSkills: (old_skill_id, old_engineer_id, new_skill_id) => {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE engineer_skill SET skill_id = '${new_skill_id}'
+      WHERE engineer_id = '${old_engineer_id}'
+      AND skill_id = '${old_skill_id}'
+      `;
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error));
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  },
   truncateSkills: (engineer_id) => {
     return new Promise((resolve, reject) => {
-      const query = `DELETE FROM engineer_skill WHERE engineer_id = '${engineer_id}'`;
+      const query = `DELETE FROM engineer_skill
+      WHERE engineer_id = '${engineer_id}'`;
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error));

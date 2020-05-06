@@ -97,12 +97,13 @@ module.exports = {
   update: async (request, response) => {
     const engineer_id = request.params.id;
     const skills = JSON.parse(request.body.skills); // di parse JSON.parse, ubah data jadi array
-    await Engineer.truncateSkills(engineer_id); // trik agar menghapus semua skill engineer berdasarkan id dan menambah data baru yang berbeda
-    if(skills.length !== 0) {
-      skills.map(async skill => {
+    await Engineer.truncateSkills(engineer_id); // trick menghapus data sesuai id dan menambah yang baru secara total
+    skills.map(async skill => {
+      setTimeout(async () => {
         await Engineer.insertSkills(skill.id, engineer_id);
-      });
-    }
+      }, 0); // harus di setTimeout agar data masuk secara input, jika tidak, data akan hilang
+    });
+
     let error = false;
     let filename;
     let extension;
@@ -192,7 +193,25 @@ module.exports = {
   getProfile: async (request, response) => {
     const user_id = request.body.user_id;
     try {
+      let obj = {};
       const data = await Engineer.getProfile(user_id);
+      const skills = await Engineer.getSkillsBasedOnProfile(data[0].id);
+
+      obj.id = data[0].id;
+      obj.description = data[0].description;
+      obj.location = data[0].location;
+      obj.birthdate = data[0].birthdate;
+      obj.showcase = data[0].showcase;
+      obj.telephone = data[0].telephone;
+      obj.salary = data[0].salary;
+      obj.avatar = data[0].avatar;
+      obj.user_id = data[0].user_id;
+      obj.date_created = data[0].date_created;
+      obj.date_updated = data[0].date_updated;
+      obj.name = data[0].name;
+      obj.email = data[0].email;
+      obj.skills = skills;
+
       redis.get(`user_id_engineers:${user_id}`, (errorRedis, resultRedis) => {
         if(resultRedis) {
           if(typeof user_id !== "undefined") {
@@ -200,8 +219,8 @@ module.exports = {
           }
         } else {
           if(typeof user_id !== "undefined") {
-            redis.setex(`user_id_engineers:${user_id}`, 3600, JSON.stringify(data[0]));
-            misc.response(response, 200, false, null, data[0]);
+            redis.setex(`user_id_engineers:${user_id}`, 3600, JSON.stringify(obj));
+            misc.response(response, 200, false, null, obj);
           }
         }
       });
