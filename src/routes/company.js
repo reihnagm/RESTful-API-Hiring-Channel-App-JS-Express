@@ -1,6 +1,6 @@
 const express = require('express');
 const Route = express.Router();
-const Company = require('../controllers/company');
+const company = require('../controllers/company');
 const multer = require('multer');
 const storage = multer.diskStorage({
   destination: (request, file, callback) => {
@@ -14,10 +14,10 @@ const upload = multer({
   storage
 });
 Route
-  .get("/", Company.all)
-  .get("/profile/:slug", Company.getProfileBySlug)
-  .post("/", upload.single("logo"), Company.store)
-  .patch("/:id", upload.single("logo"), Company.update)
-  .delete("/:id", Company.delete)
-  .post("/profile", Company.getProfile);
+  .get("/", company.all)
+  .get("/profile/:slug", company.getProfileBySlug)
+  .post("/", upload.single("logo"), company.store)
+  .patch("/:id", upload.single("logo"), company.update)
+  .delete("/:id", company.delete)
+  .post("/profile", company.getProfile);
 module.exports = Route;

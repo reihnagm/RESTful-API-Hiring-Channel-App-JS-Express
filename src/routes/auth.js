@@ -1,9 +1,9 @@
 const express = require('express');
 const Route = express.Router();
-const Auth = require('../controllers/auth');
+const auth = require('../controllers/auth');
 const jwtAuth = require('../helpers/jwt');
 Route
-    .get('/', jwtAuth, Auth.auth)
-    .post('/login', Auth.login)
-    .post('/register', Auth.register)
+    .get('/', jwtAuth, auth.auth)
+    .post('/login', auth.login)
+    .post('/register', auth.register);
 module.exports = Route;
