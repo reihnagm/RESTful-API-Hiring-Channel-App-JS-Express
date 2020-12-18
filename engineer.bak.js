@@ -28,7 +28,14 @@ module.exports = {
         next_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
         prev_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
       }
-      misc.responsePagination(response, 200, false, null, pageDetail, data)
+      redis.get(`page-${page}-sort-${sort}-sortBy-${sortBy}-limit-${limit}-search-${search}`, (errorRedis, resultRedis) => {
+        if(resultRedis) {
+          misc.responsePagination(response, 200, false, null, pageDetail, JSON.parse(resultRedis))
+        } else {
+          redis.setex(`page-${page}-sort-${sort}-sortBy-${sortBy}-limit-${limit}-search-${search}`, 3600, JSON.stringify(data))
+          misc.responsePagination(response, 200, false, null, pageDetail, data)
+        }
+      })
     } catch (error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -92,39 +99,14 @@ module.exports = {
   },
 
   update: async (request, response) => {
-    const engineerId = request.params.id
-    const userId = request.body.user_id
-    const name = request.body.name
-    const slug = name.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')
-    const description = request.body.description 
-    const location = request.body.location
-    const birthdate = request.body.birthdate
-    const showcase = request.body.showcase
-    const telephone = request.body.telephone
-    const salary = request.body.salary
-
-    // All skills selected 
-    const skillsStore = JSON.parse(request.body.skillsStore)
-
-     // All skills unselected
-    const skillsDestroy = JSON.parse(request.body.skillsDestroy) 
-
-    // Store skills
-    for(let z = 0; z < skillsStore.length; z++) {
-      const checkSkills = await Engineer.checkSkills(skillsStore[z].id, engineerId)
-      if(checkSkills.length == 0) {
-        await Engineer.storeSkills(skillsStore[z].id, engineerId)
-      }
-    }
-
-
-    // Delete skills
-    for (let i = 0; i < skillsDestroy.length; i++) {
-      for (let z = 0; z < skillsDestroy[i].length; z++) {
-        await Engineer.destroySkills(skillsDestroy[i][z].id, engineerId)
-      }
-    }
-
+    const engineer_id = request.params.id
+    // const skills = JSON.parse(request.body.skills) // di parse JSON.parse, ubah data jadi array
+    // await Engineer.truncateSkills(engineer_id) // trick menghapus data sesuai id dan menambah yang baru secara total
+    // skills.map(async skill => {
+    //   setTimeout(async () => {
+    //     await Engineer.insertSkills(skill.id, engineer_id)
+    //   }, 0) // harus di setTimeout agar data masuk secara input, jika tidak, data akan hilang
+    // })
 
     let error = false
     let filename
@@ -140,12 +122,12 @@ module.exports = {
         if(fileSize >= 5242880) {
           error = true
           fs.unlink(`public/images/engineer/${filename}`)
-          throw new Error('Oops! size cannot more than 5MB')
+          throw new Error('Oops! size cannot more than 5MB.')
         }
         if(!isImage(extension)) {
           error = true
           fs.unlink(`public/images/engineer/${filename}`)
-          throw new Error('Oops! file allowed only JPG, JPEG, PNG, GIF, SVG')
+          throw new Error('Oops! file allowed only JPG, JPEG, PNG, GIF, SVG.')
         }
         function isImage(extension) {
           switch (extension) {
@@ -166,21 +148,25 @@ module.exports = {
         avatar = request.body.avatar
       }
       const data = {
-        description: description,
-        location: location,
-        birthdate: birthdate,
-        showcase: showcase,
-        telephone: telephone,
-        salary: salary,
+        description: request.body.description ? request.body.description : '',
+        location: request.body.location ? request.body.location : '',
+        birthdate:  request.body.birthdate ? request.body.birthdate : '',
+        showcase:  request.body.showcase ? request.body.showcase : '',
+        telephone: request.body.telephone ? request.body.telephone : '',
+        salary: request.body.salary ? request.body.salary : '',
         avatar,
-        user_id: userId
+        user_id: request.body.user_id
       }
       if(error === false) {
-        await Engineer.update(data, engineerId)
-        await Engineer.updateNameUser(name, slug, userId)
+        const engineer_id = request.params.id
+        const user_id = request.body.user_id
+        const name = request.body.name
+        const slug = name.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')
+        await Engineer.update(data, engineer_id)
+        await Engineer.updateNameUser(name, slug, user_id)
         misc.response(response, 200, false, null, data)
+        redis.flushall()
       }
-      redis.flushall()
     } catch (error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -212,30 +198,39 @@ module.exports = {
   },
 
   getProfile: async (request, response) => {
-    const userId = request.body.user_id
+    const user_id = request.body.user_id
     try {
-      let profileObject = {}
-      let profile = await Engineer.getProfile(userId)
-      const skills = await Engineer.getSkillsBasedOnProfile(profile[0].id)
+      let obj = {}
+      const data = await Engineer.getProfile(user_id)
+      const skills = await Engineer.getSkillsBasedOnProfile(data[0].id)
 
-  
-      profileObject.id = profile[0].id
-      profileObject.description = profile[0].description
-      profileObject.location = profile[0].location
-      profileObject.birthdate = profile[0].birthdate
-      profileObject.showcase = profile[0].showcase
-      profileObject.telephone = profile[0].telephone
-      profileObject.avatar = profile[0].avatar
-      profileObject.salary = profile[0].salary
-      profileObject.user_id = profile[0].user_id
-      profileObject.date_created = profile[0].date_created
-      profileObject.date_updated = profile[0].date_updated
-      profileObject.name = profile[0].name
-      profileObject.email = profile[0].email
-      profileObject.skills = skills
-    
-      
-      misc.response(response, 200, false, null, profileObject) 
+      obj.id = data[0].id
+      obj.description = data[0].description
+      obj.location = data[0].location
+      obj.birthdate = data[0].birthdate
+      obj.showcase = data[0].showcase
+      obj.telephone = data[0].telephone
+      obj.salary = data[0].salary
+      obj.avatar = data[0].avatar
+      obj.user_id = data[0].user_id
+      obj.date_created = data[0].date_created
+      obj.date_updated = data[0].date_updated
+      obj.name = data[0].name
+      obj.email = data[0].email
+      obj.skills = skills
+
+      redis.get(`user_id_engineers:${user_id}`, (errorRedis, resultRedis) => {
+        if(resultRedis) {
+          if(typeof user_id !== "undefined") {
+            misc.response(response, 200, false, null, JSON.parse(resultRedis))
+          }
+        } else {
+          if(typeof user_id !== "undefined") {
+            redis.setex(`user_id_engineers:${user_id}`, 3600, JSON.stringify(obj))
+            misc.response(response, 200, false, null, obj)
+          }
+        }
+      })
     } catch(error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -245,27 +240,19 @@ module.exports = {
   getProfileBySlug: async (request, response) => {
     const slug = request.params.slug
     try {
-      let profileBySlugObject = {}
-      const profileBySlug = await Engineer.getProfileBySlug(slug)
-      const skills = await Engineer.getSkillsBasedOnProfile(profileBySlug[0].id)
-
-      profileBySlugObject.id = profileBySlug[0].id
-      profileBySlugObject.description = profileBySlug[0].description
-      profileBySlugObject.location = profileBySlug[0].location
-      profileBySlugObject.birthdate = profileBySlug[0].birthdate
-      profileBySlugObject.showcase = profileBySlug[0].showcase
-      profileBySlugObject.telephone = profileBySlug[0].telephone
-      profileBySlugObject.avatar = profileBySlug[0].avatar
-      profileBySlugObject.salary = profileBySlug[0].salary
-      profileBySlugObject.user_id = profileBySlug[0].user_id
-      profileBySlugObject.date_created = profileBySlug[0].date_created
-      profileBySlugObject.date_updated = profileBySlug[0].date_updated
-      profileBySlugObject.name = profileBySlug[0].name
-      profileBySlugObject.email = profileBySlug[0].email
-      profileBySlugObject.skills = skills
-    
-
-      misc.response(response, 200, false, null, profileBySlugObject)
+      const data = await Engineer.getProfileBySlug(slug)
+      redis.get(`slug:${slug}`, (errorRedis, resultRedis) => {
+        if(resultRedis) {
+          if(typeof slug !== "undefined") {
+            misc.response(response, 200, false, null, JSON.parse(resultRedis))
+          }
+        } else {
+          if(typeof slug !== "undefined") {
+            redis.setex(`slug:${slug}`, 3600, JSON.stringify(data[0]))
+            misc.response(response, 200, false, null, data[0])
+          }
+        }
+      })
     } catch(error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')

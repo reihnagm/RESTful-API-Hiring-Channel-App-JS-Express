@@ -1,5 +1,7 @@
 const connection = require('../configs/db');
+
 module.exports = {
+  
   getNotifications: () => {
     return new Promise((resolve, reject) => {
       const query = `SELECT a.* FROM message_notifications a`;
@@ -12,6 +14,7 @@ module.exports = {
       });
     });
   }, 
+  
   sendNotifications: (data) => {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO message_notifications SET ?`;
@@ -24,4 +27,5 @@ module.exports = {
       });
     });
   }
+
 }

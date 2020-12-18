@@ -1,4 +1,5 @@
 module.exports = {
+  
   response: (res, status, error, message, data) => {
     let resultPrint = {}
     resultPrint.status = status || 200
@@ -18,4 +19,5 @@ module.exports = {
     resultPrint.data = data || {}
     return res.status(resultPrint.status).json(resultPrint)
   }
+
 }

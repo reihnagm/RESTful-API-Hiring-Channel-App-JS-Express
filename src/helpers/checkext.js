@@ -1,4 +1,5 @@
 module.exports = {
+  
   checkFileImg: (extFile) => {
     switch (extFile) {
       case 'image/jpeg':
@@ -17,4 +18,5 @@ module.exports = {
         break;
     }
   }
+
 }

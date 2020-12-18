@@ -1,11 +1,21 @@
 {
-  "name": "hiring-channel-restful-api-node-js",
+  "name": "hiring-channel",
   "version": "1.0.0",
-  "description": "Backend for hiring channel app.",
+  "description": "Backend for hiring channel",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app"
+    "start": "nodemon app",
+    "sequelize:model:create:test": "sequelize model:create --name tests --attributes name:string,email:string,phone_number:string,gender:boolean",
+    "sequelize:db:migrate": "sequelize db:migrate",
+    "sequelize:init": "sequelize init",
+    "sequelize:init:config": "sequelize init:config",
+    "sequelize:init:migrations": "sequelize init:migrations",
+    "sequelize:init:models": "sequelize init:models",
+    "sequelize:init:seeders": "sequelize init:seeders",
+    "sequelize:migration:generate": "sequelize migration:generate",
+    "sequelize:model:generate": "sequelize model:generate",
+    "sequelize:seed:generate": "sequelize seed:generate"
   },
   "author": "Reihan Agam",
   "license": "MIT",
@@ -15,15 +25,22 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "express-validator": "^6.4.0",
+    "express-validator": "^6.6.0",
+    "compression": "^1.7.4",
+    "helmet": "^4.2.0",
     "fs-extra": "^8.1.0",
     "jsonwebtoken": "^8.5.1",
-    "morgan": "^1.9.1",
+    "morgan": "^1.10.0",
     "multer": "^1.4.2",
     "mysql": "^2.18.1",
+    "mysql2": "^2.1.0",
     "path": "^0.12.7",
-    "pusher": "^3.0.0",
+    "pusher": "^3.0.1",
     "redis": "^2.8.0",
+    "sequelize": "^6.2.4",
     "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.1.0"
   }
 }

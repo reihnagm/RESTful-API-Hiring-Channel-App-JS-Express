@@ -1,20 +1,23 @@
-const connection = require('../configs/db');
+const connection = require('../configs/db')
+
 module.exports = {
+  
   total: () => {
     return new Promise ((resolve, reject) => {
-      const query = `SELECT COUNT(*) AS total FROM engineer`;
+      const query = `SELECT COUNT(*) AS total FROM engineer`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   all: (offset, limit, sort, sortBy, search) => {
     if(search) {
-      offset = 0;
+      offset = 0
     }
     return new Promise((resolve, reject) => {
       const query = `SELECT DISTINCT a.*, e.name, e.email, e.slug,
@@ -25,182 +28,193 @@ module.exports = {
       INNER JOIN user e ON a.user_id = e.id
       WHERE LOWER(e.name) LIKE '%${search}%' OR LOWER(c.name) LIKE '%${search}%'
       GROUP BY a.id
-      ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`;
+      ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
       connection.query(query, (error, result) => {
         if (error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   store: (data) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO engineer SET ?`;
+      const query = `INSERT INTO engineer SET ?`
       connection.query(query, data, (error, result) => {
         if (error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   update: (data, id) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE engineer SET ? WHERE id = ?`;
+      const query = `UPDATE engineer SET ? WHERE id = ?`
       connection.query(query, [data, id], (error, result) => {
         if (error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   delete: (id) => {
     return new Promise((resolve, reject) => {
-      const query = `DELETE FROM engineer WHERE id = ?`;
+      const query = `DELETE FROM engineer WHERE id = ?`
       connection.query(query, id, (error, result) => {
         if (error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   deleteUser: (user_id) => {
     return new Promise((resolve, reject) => {
-      const query = `DELETE FROM user WHERE id = ?`;
+      const query = `DELETE FROM user WHERE id = ?`
       connection.query(query, user_id, (error, result) => {
         if (error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   updateNameUser: (name, slug, user_id) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE user SET name = '${name}', slug = '${slug}' WHERE id = '${user_id}'`;
+      const query = `UPDATE user SET name = '${name}', slug = '${slug}' WHERE id = '${user_id}'`
       connection.query(query, (error, result) => {
         if (error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+
   getProfile: (user_id) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, d.name, d.email FROM engineer a
+      const query = `SELECT a.*, d.name, d.email 
+      FROM engineer a
       INNER JOIN user d ON a.user_id = d.id
-      WHERE a.user_id = '${user_id}'`;
+      WHERE a.user_id = '${user_id}'`
       connection.query(query,
         (error, result) => {
           if(error) {
-            reject(new Error(error));
+            reject(new Error(error))
           } else {
-            resolve(result);
+            resolve(result)
           }
-        });
-    });
+        })
+    })
   },
+
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, d.name, d.email,
-      GROUP_CONCAT(c.name SEPARATOR ', ') skills from engineer a
-      LEFT JOIN engineer_skill b ON a.id = b.engineer_id
-      LEFT JOIN skills c ON c.id = b.skill_id
+      const query = `SELECT a.*, d.name, d.email
+      FROM engineer a
       INNER JOIN user d ON a.user_id = d.id
-      WHERE d.slug = '${slug}'
-      GROUP BY a.id`;
+      WHERE d.slug = '${slug}'`
       connection.query(query,
       (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+  
   getSkillsBasedOnProfile: (engineer_id) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.name, a.id FROM skills a INNER JOIN engineer_skill b ON a.id = b.skill_id
-      WHERE b.engineer_id = '${engineer_id}'`;
+      const query = `SELECT a.id, a.name FROM skills a INNER JOIN engineer_skill b ON a.id = b.skill_id
+      WHERE b.engineer_id = '${engineer_id}'`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+  
   getSkills: () => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM skills`;
+      const query = `SELECT * FROM skills`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
-  getEngineerSkill: (engineer_id) => {
+    
+  checkSkills: (skillId, engineerId) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.* FROM engineer_skill a WHERE a.engineer_id = ${engineer_id}`;
+      const query = `SELECT * FROM engineer_skill WHERE skill_id = ${skillId} AND engineer_id = ${engineerId}`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
-  truncateSkills: (engineer_id) => {
+
+  storeSkills: (skillId, engineerId) => {
     return new Promise((resolve, reject) => {
-      const query = `DELETE FROM engineer_skill
-      WHERE engineer_id = '${engineer_id}'`;
+      const query = `INSERT INTO engineer_skill (skill_id, engineer_id) VALUES('${skillId}', '${engineerId}')`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
-  insertSkills: (skill_id, engineer_id) => {
+  
+  destroySkills: (skillId, engineerId) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO engineer_skill (skill_id, engineer_id) VALUES('${skill_id}', '${engineer_id}')`;
+      const query = `DELETE FROM engineer_skill WHERE skill_id = '${skillId}' AND engineer_id = '${engineerId}'`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   },
+  
   insertDataUser: (user_id) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO engineer (user_id) VALUES('${user_id}')`;
+      const query = `INSERT INTO engineer (user_id) VALUES('${user_id}')`
       connection.query(query, (error, result) => {
         if(error) {
-          reject(new Error(error));
+          reject(new Error(error))
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   }
+
 }
