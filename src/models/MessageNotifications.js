@@ -4,7 +4,7 @@ module.exports = {
   
   getNotifications: () => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.* FROM message_notifications a`;
+      const query = `SELECT * FROM message_notifications`;
       connection.query(query, (error,result) => {
         if(error) {
           reject(new Error(error));

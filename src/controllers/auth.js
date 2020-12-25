@@ -1,11 +1,13 @@
-require('dotenv').config()
+require("dotenv").config()
 
-const User = require('../models/User')
-const Engineer = require('../models/Engineer')
-const Company = require('../models/Company')
-const misc = require('../helpers/response')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const { v4: uuidv4 } = require("uuid")
+const User = require("../models/User")
+const Engineer = require("../models/Engineer")
+const Company = require("../models/Company")
+const misc = require("../helpers/response")
+const s = require("../helpers/slug")
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
 class UserNotExists extends Error {
   constructor(message) {
@@ -33,8 +35,8 @@ module.exports = {
   auth: async (request, response) => {
     const userId = request.user.id
     try {
-      const user = await User.auth(userId)
-      misc.response(response, 200, false, null, user[0])
+      const u = await User.auth(userId)
+      misc.response(response, 200, false, null, u)
     } catch (error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error')
@@ -54,7 +56,9 @@ module.exports = {
       }
       const payload = {
         user: {
-          id: user[0].id
+          id: user[0].id,
+          uid: user[0].uid,
+          fullname: user[0].fullname
         }
       }
       const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
@@ -65,42 +69,53 @@ module.exports = {
   },
 
   register: async (request, response) => {
-    const { name, email, password, role_id } = request.body
+    const { nickname, fullname, email, password, role_id } = request.body
+    const uid = uuidv4()
+    const o = {} 
+    const createdAt = new Date()
+    const updatedAt = new Date()
+    let slug
     try {
-      const user = await User.checkUser(email)
+      const cu = await User.checkUser(email)
       const salt = await bcrypt.genSalt(10)
       const passwordHash = await bcrypt.hash(password, salt)
-      if(user.length !== 0) {
-          throw new UserAlreadyExists('User already exists')
+      if(cu.length !== 0) {
+        throw new UserAlreadyExists('User already exists')
       }
-      const slug = name.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')
-      const data = {
-        name,
-        email,
-        password: passwordHash,
-        role_id,
-        slug
-      }
-      const registered = await User.register(data)
+      slug = s.slug(fullname, false) 
+      const cs = await User.checkSlug(slug)
+
+      if(cs.length !== 0) {
+        slug = s.slug(fullname, true, uid)
+      } 
+
+      o.uid = uid
+      o.nickname = nickname
+      o.fullname = fullname
+      o.email = email
+      o.password = passwordHash
+      o.role_id = role_id
+      o.slug = slug
+      o.created_at = createdAt
+      o.updated_at = updatedAt
+      const registered = await User.register(o)
       switch (role_id) {
         case 1:
-          await Engineer.insertDataUser(registered.insertId)
+          await Engineer.insertDataUser(uuidv4(), uid)
         break
         case 2:
-          await Company.insertDataUser(registered.insertId)
+          await Company.insertDataUser(uuidv4(), uid)
         break
         default:
       }
       const payload = {
         user: {
-          id: registered.insertId
+          id: registered.insertId,
+          uid: uid,
+          fullname: fullname
         }
       }
-      const token = jwt.sign(
-        payload, 
-        process.env.JWT_KEY, 
-        { expiresIn: 360000 }
-      )
+      const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
       response.json({ token })
     } catch(error) {
       console.log(error.message) // in-development

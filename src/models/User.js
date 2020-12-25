@@ -4,12 +4,12 @@ module.exports = {
 
   auth: (id) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.id, a.name, a.email, a.role_id FROM user a WHERE a.id = '${id}'`
+      const query = `SELECT id, uid, fullname, nickname, email, role_id, created_at FROM users a WHERE a.id = '${id}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
         } else {
-          resolve(result)
+          resolve(result[0])
         }
       })
     })
@@ -17,12 +17,9 @@ module.exports = {
 
   login: (email) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT id, password FROM user WHERE email = ?`
+      const query = `SELECT id, uid, fullname, nickname, email, role_id, password FROM users WHERE email = ?`
       connection.query(query, email, (error, result) => {
         if (error) {
-          if(error.code === "ECONNREFUSED") {
-            reject(new Error('The requested server is unavailable. Please contact your support and describe your issue.'))
-          }
           reject(new Error(error))
         } else {
           resolve(result)
@@ -34,13 +31,9 @@ module.exports = {
 
   register: (data) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO user SET ?`
+      const query = `INSERT INTO users SET ?`
       connection.query(query, data, (error, result) => {
         if (error) {
-          if(error.code === "ECONNREFUSED") {
-            reject(new Error('The requested server is unavailable. Please contact your support and describe your issue.'))
-
-          }
           reject(new Error(error))
 
         } else {
@@ -54,14 +47,25 @@ module.exports = {
 
   checkUser: (email) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT email FROM user WHERE email = '${email}'`
+      const query = `SELECT email FROM users WHERE email = '${email}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
-
         } else {
           resolve(result)
+        }
+      })
+    })
+  },
 
+  checkSlug: (slug) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT slug FROM users WHERE slug = '${slug}'`
+      connection.query(query, (error, result) => {
+        if (error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
         }
       })
     })

@@ -4,7 +4,7 @@ module.exports = {
 
   total: () => {
     return new Promise ((resolve, reject) => {
-      const query = `SELECT COUNT(*) total FROM company`
+      const query = `SELECT COUNT(*) total FROM companies`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))
@@ -17,8 +17,8 @@ module.exports = {
 
   all: (offset, limit, sort, sortBy, search) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, b.name name_user, b.slug, b.email FROM company a INNER JOIN user b ON a.user_id = b.id
-        WHERE (a.name LIKE '%${search}%' or a.location LIKE '%${search}%')
+      const query = `SELECT a.*, b.name name_user, b.slug, b.email FROM companies a INNER JOIN users b ON a.user_uid = b.id
+        WHERE (a.name LIKE '%${search}%' OR a.location LIKE '%${search}%')
         ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
       connection.query(query, (error, result) => {
         if (error) {
@@ -32,7 +32,7 @@ module.exports = {
 
   store: (data) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO company SET ?`
+      const query = `INSERT INTO companies SET ?`
       connection.query(query, data, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -45,7 +45,7 @@ module.exports = {
 
   edit: (id) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM company WHERE id = '${id}'`
+      const query = `SELECT * FROM companies WHERE id = '${id}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -58,7 +58,7 @@ module.exports = {
 
   update: (data, id) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE company SET ? WHERE id = ?`
+      const query = `UPDATE companies SET ? WHERE id = ?`
       connection.query(query, [data, id], (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -71,7 +71,7 @@ module.exports = {
 
   delete: (id) => {
     return new Promise((resolve, reject) => {
-      connection.query('DELETE FROM company WHERE id = ?', id, (error, result) => {
+      connection.query('DELETE FROM companies WHERE id = ?', id, (error, result) => {
         if (error) {
           reject(new Error(error))
         } else {
@@ -83,7 +83,7 @@ module.exports = {
 
   updateNameUser: (name, slug, id) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE user SET name = '${name}', slug = '${slug}' WHERE id = '${id}'`
+      const query = `UPDATE users SET name = '${name}', slug = '${slug}' WHERE id = '${id}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -94,9 +94,9 @@ module.exports = {
     })
   },
 
-  getProfile: (user_id) => {
+  getProfile: (userId) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, b.name, b.email, b.role_id from company a, user b WHERE a.user_id = b.id AND b.id = '${user_id}'`  
+      const query = `SELECT a.*, b.name, b.email, b.role_id FROM companies a, users b WHERE a.user_uid = b.id AND b.id = '${userId}'`  
       connection.query(query,
       (error, result) => {
         if(error) {
@@ -110,7 +110,7 @@ module.exports = {
 
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, b.name, b.email from company a, user b WHERE a.user_id = b.id AND b.slug = '${slug}'`
+      const query = `SELECT a.*, b.name, b.email FROM companies a, user b WHERE a.user_uid = b.id AND b.slug = '${slug}'`
       connection.query(query,
         (error, result) => {
           if(error) {
@@ -122,9 +122,9 @@ module.exports = {
     })
   },
 
-  insertDataUser: (user_id) => {
+  insertDataUser: (uid, userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO company (user_id) VALUES ('${user_id}')`
+      const query = `INSERT INTO companies (uid, user_uid) VALUES ('${uid}','${userUid}')`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))

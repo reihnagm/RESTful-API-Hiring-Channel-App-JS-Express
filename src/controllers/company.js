@@ -10,7 +10,7 @@ module.exports = {
     const search = request.query.search || ''
     const limit = request.query.limit || 5
     const sort = request.query.sort || 'DESC'
-    const sortBy = request.query.sortBy || 'date_updated'
+    const sortBy = request.query.sortBy || 'updated_at'
     const offset = (page - 1) * limit
     try {
       const total = await Company.total()

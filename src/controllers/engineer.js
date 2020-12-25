@@ -1,15 +1,19 @@
+const { v4: uuidv4 } = require("uuid")
 const Engineer = require('../models/Engineer')
 const fs = require('fs-extra')
 const redis = require('../configs/redis')
 const misc = require('../helpers/response')
+const s = require('../helpers/slug')
 
 module.exports = {
 
   all: async (request, response) => {
+    const o = {}
+    const a = []
     const page = parseInt(request.query.page) || 1
     const search = request.query.search || ''
     const sort = request.query.sort || 'DESC'
-    const sortBy = request.query.sortBy || 'date_updated'
+    const sortBy = request.query.sortBy || 'updated_at'
     const limit = request.query.limit || 5
     const offset = (page - 1) * limit
     try {
@@ -18,7 +22,17 @@ module.exports = {
       const lastPage = Math.ceil(resultTotal / limit)
       const prevPage = page === 1 ? 1 : page - 1
       const nextPage = page === lastPage ? 1 : page + 1
-      const data = await Engineer.all(offset, limit, sort, sortBy, search)
+      const data = await Engineer.allv2(offset, limit, sort, sortBy, search)
+      for (let i = 0; i < data.length; i++) {
+        const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
+        o.uid = data[i].uid
+        o.fullname = data[i].fullname
+        o.avatar = data[i].avatar
+        o.salary = data[i].salary
+        o.slug = data[i].slug 
+        o.skills = skills
+      }
+      a.push(o)
       const pageDetail = {
         total: resultTotal,
         per_page: lastPage,
@@ -28,7 +42,7 @@ module.exports = {
         next_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
         prev_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
       }
-      misc.responsePagination(response, 200, false, null, pageDetail, data)
+      misc.responsePagination(response, 200, false, null, pageDetail, a)
     } catch (error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -36,10 +50,8 @@ module.exports = {
   },
 
   store: async (request, response) => {
-    let error = false
-    let filename
-    let extension
-    let fileSize
+    const o = {}
+    let filename, extension, fileSize
     if(request.file) {
       filename = request.file.originalname
       extension =  request.file.originalname.split('.')[1]
@@ -47,13 +59,11 @@ module.exports = {
     }
     try {
       if(request.file) {
-        if(fileSize >= 5242880) { // 5 MB
-          error = true
+        if(fileSize >= 5242880) { 
           fs.unlink(`public/images/engineer/${filename}`)
           throw new Error('Oops!, Size cannot more than 5MB.')
         }
         if(!isImage(extension)) {
-          error = true
           fs.unlink(`public/images/engineer/${filename}`)
           throw new Error('Oops!, File allowed only JPG, JPEG, PNG, GIF, SVG.')
         }
@@ -69,22 +79,17 @@ module.exports = {
             return false
         }
       }
-      const data = {
-        description: request.body.description,
-        skill: request.body.skill,
-        location: request.body.location,
-        birthdate: request.body.birthdate,
-        showcase: request.body.showcase,
-        telephone: request.body.telephone,
-        salary: request.body.salary,
-        avatar: request.file ? request.file.originalname : request.body.avatar,
-        user_id: request.body.user_id
-      }
-      if(error === false) {
-        await Engineer.store(data)
-        misc.response(response, 200, false, null, data)
-        redis.flushall()
-      }
+      o.description = request.body.description
+      o.skill = request.body.skill
+      o.location = request.body.location
+      o.birthdate = request.body.birthdate
+      o.showcase = request.body.showcase
+      o.telephone = request.body.telephone
+      o.salary = request.body.salary
+      o.avatar = request.file ? request.file.originalname : request.body.avatar
+      o.user_id = request.body.user_id
+      await Engineer.store(o)
+      misc.response(response, 200, false, null, o)     
     } catch (error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error')
@@ -92,10 +97,12 @@ module.exports = {
   },
 
   update: async (request, response) => {
-    const engineerId = request.params.id
-    const userId = request.body.user_id
-    const name = request.body.name
-    const slug = name.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')
+    let avatar, filename, extension, fileSize
+    const o = {}
+    const uid = request.body.uid
+    const fullname = request.body.fullname
+    const nickname = request.body.nickname
+    const slug = s.slug(fullname)
     const description = request.body.description 
     const location = request.body.location
     const birthdate = request.body.birthdate
@@ -104,46 +111,39 @@ module.exports = {
     const salary = request.body.salary
 
     // All skills selected 
-    const skillsStore = JSON.parse(request.body.skillsStore)
+    const skillsS = JSON.parse(request.body.skillsStore)
 
      // All skills unselected
-    const skillsDestroy = JSON.parse(request.body.skillsDestroy) 
+    const skillsD = JSON.parse(request.body.skillsDestroy) 
 
     // Store skills
-    for(let z = 0; z < skillsStore.length; z++) {
-      const checkSkills = await Engineer.checkSkills(skillsStore[z].id, engineerId)
+    for(let z = 0; z < skillsS.length; z++) {
+      const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
       if(checkSkills.length == 0) {
-        await Engineer.storeSkills(skillsStore[z].id, engineerId)
+        await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
       }
     }
-
 
     // Delete skills
-    for (let i = 0; i < skillsDestroy.length; i++) {
-      for (let z = 0; z < skillsDestroy[i].length; z++) {
-        await Engineer.destroySkills(skillsDestroy[i][z].id, engineerId)
+    for (let i = 0; i < skillsD.length; i++) {
+      for (let z = 0; z < skillsD[i].length; z++) {
+        await Engineer.destroySkills(skillsD[i][z].uid, uid)
       }
     }
 
-
-    let error = false
-    let filename
-    let extension
-    let fileSize
     if(request.file) {
       filename = request.file.originalname
       extension =  request.file.mimetype
       fileSize = request.file.fileSize
     }
+
     try {
       if(request.file) {
         if(fileSize >= 5242880) {
-          error = true
           fs.unlink(`public/images/engineer/${filename}`)
           throw new Error('Oops! size cannot more than 5MB')
         }
         if(!isImage(extension)) {
-          error = true
           fs.unlink(`public/images/engineer/${filename}`)
           throw new Error('Oops! file allowed only JPG, JPEG, PNG, GIF, SVG')
         }
@@ -159,28 +159,22 @@ module.exports = {
           return false
         }
       }
-      let avatar
       if(request.file) {
         avatar = request.file.originalname
       } else {
         avatar = request.body.avatar
       }
-      const data = {
-        description: description,
-        location: location,
-        birthdate: birthdate,
-        showcase: showcase,
-        telephone: telephone,
-        salary: salary,
-        avatar,
-        user_id: userId
-      }
-      if(error === false) {
-        await Engineer.update(data, engineerId)
-        await Engineer.updateNameUser(name, slug, userId)
-        misc.response(response, 200, false, null, data)
-      }
-      redis.flushall()
+      o.location = location
+      o.birthdate = birthdate
+      o.showcase = showcase
+      o.telephone = telephone
+      o.salary = salary
+      o.avatar =  avatar
+      o.description = description
+
+      await Engineer.update(o, uid)
+      // await Engineer.updateNameUser(name, slug, userUid)
+      misc.response(response, 200, false, null, o)
     } catch (error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -188,13 +182,12 @@ module.exports = {
   },
 
   delete: async (request, response) => {
-    const engineer_id = request.params.engineer_id
-    const user_id = request.params.user_id
+    const engineerId = request.params.engineerId
+    const userId = request.params.userId
     try {
-      await Engineer.delete(engineer_id)
-      await Engineer.deleteUser(user_id)
+      await Engineer.delete(engineerId)
+      await Engineer.deleteUser(userId)
       misc.response(response, 200, null, false)
-      redis.flushall()
     } catch(error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -202,8 +195,8 @@ module.exports = {
   },
 
   getSkills: async (request, response) => {
+    const data = await Engineer.getSkills()
     try {
-      const data = await Engineer.getSkills()
       misc.response(response, 200, false, null, data)
     } catch (error) {
       console.log(error.message) // in-development
@@ -212,30 +205,27 @@ module.exports = {
   },
 
   getProfile: async (request, response) => {
-    const userId = request.body.user_id
+    const userUid = request.body.userUid
+    const o = {}
+    const p = await Engineer.getProfile(userUid)
+    const skills = await Engineer.getSkillsBasedOnProfile(p.uid)
     try {
-      let profileObject = {}
-      let profile = await Engineer.getProfile(userId)
-      const skills = await Engineer.getSkillsBasedOnProfile(profile[0].id)
-
-  
-      profileObject.id = profile[0].id
-      profileObject.description = profile[0].description
-      profileObject.location = profile[0].location
-      profileObject.birthdate = profile[0].birthdate
-      profileObject.showcase = profile[0].showcase
-      profileObject.telephone = profile[0].telephone
-      profileObject.avatar = profile[0].avatar
-      profileObject.salary = profile[0].salary
-      profileObject.user_id = profile[0].user_id
-      profileObject.date_created = profile[0].date_created
-      profileObject.date_updated = profile[0].date_updated
-      profileObject.name = profile[0].name
-      profileObject.email = profile[0].email
-      profileObject.skills = skills
-    
-      
-      misc.response(response, 200, false, null, profileObject) 
+      o.id = p.id
+      o.uid = p.uid
+      o.fullname = p.fullname
+      o.nickname = p.nickname
+      o.email = p.email
+      o.skills = skills
+      o.description = p.description
+      o.location = p.location
+      o.birthdate = p.birthdate
+      o.showcase = p.showcase
+      o.telephone = p.telephone
+      o.avatar = p.avatar
+      o.salary = p.salary
+      o.created_at = p.created_at
+      o.updated_at = p.updated_at  
+      misc.response(response, 200, false, null, o) 
     } catch(error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')
@@ -244,28 +234,25 @@ module.exports = {
 
   getProfileBySlug: async (request, response) => {
     const slug = request.params.slug
+    const o = {}
+    const p = await Engineer.getProfileBySlug(slug)
+    const skills = await Engineer.getSkillsBasedOnProfile(p.uid)
     try {
-      let profileBySlugObject = {}
-      const profileBySlug = await Engineer.getProfileBySlug(slug)
-      const skills = await Engineer.getSkillsBasedOnProfile(profileBySlug[0].id)
-
-      profileBySlugObject.id = profileBySlug[0].id
-      profileBySlugObject.description = profileBySlug[0].description
-      profileBySlugObject.location = profileBySlug[0].location
-      profileBySlugObject.birthdate = profileBySlug[0].birthdate
-      profileBySlugObject.showcase = profileBySlug[0].showcase
-      profileBySlugObject.telephone = profileBySlug[0].telephone
-      profileBySlugObject.avatar = profileBySlug[0].avatar
-      profileBySlugObject.salary = profileBySlug[0].salary
-      profileBySlugObject.user_id = profileBySlug[0].user_id
-      profileBySlugObject.date_created = profileBySlug[0].date_created
-      profileBySlugObject.date_updated = profileBySlug[0].date_updated
-      profileBySlugObject.name = profileBySlug[0].name
-      profileBySlugObject.email = profileBySlug[0].email
-      profileBySlugObject.skills = skills
-    
-
-      misc.response(response, 200, false, null, profileBySlugObject)
+      o.id = p.id
+      o.description = p.description
+      o.location = p.location
+      o.birthdate = p.birthdate
+      o.showcase = p.showcase
+      o.telephone = p.telephone
+      o.avatar = p.avatar
+      o.salary = p.salary
+      o.user_id = p.user_id
+      o.created_at = p.created_at
+      o.updated_at = p.updated_at
+      o.name = p.name
+      o.email = p.email
+      o.skills = skills
+      misc.response(response, 200, false, null, o)
     } catch(error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')

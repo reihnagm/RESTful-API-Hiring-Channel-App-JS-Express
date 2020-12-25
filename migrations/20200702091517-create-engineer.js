@@ -13,6 +13,9 @@ module.exports = {
       id: {
         type: Sequelize.INTEGER
       },
+      uid: {
+        type: Sequelize.uid
+      }
       description: {
         type: Sequelize.STRING
       },

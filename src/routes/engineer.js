@@ -21,8 +21,8 @@ Route
   .get("/profile/:slug", engineer.getProfileBySlug)
   .get("/skills", engineer.getSkills)
   .post("/", upload.single("avatar"), engineer.store)
-  .patch("/:id", upload.single("avatar"), engineer.update)
-  .delete("/:engineer_id/:user_id", engineer.delete)
+  .put("/", upload.single("avatar"), engineer.update)
+  .delete("/:engineerId/:userUid", engineer.delete)
   .post("/profile", engineer.getProfile)
   
 module.exports = Route
