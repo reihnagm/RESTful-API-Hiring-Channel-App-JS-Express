@@ -69,7 +69,7 @@ module.exports = {
   },
 
   register: async (request, response) => {
-    const { nickname, fullname, email, password, role_id } = request.body
+    const { fullname, nickname, email, password, role_id } = request.body
     const uid = uuidv4()
     const o = {} 
     const createdAt = new Date()

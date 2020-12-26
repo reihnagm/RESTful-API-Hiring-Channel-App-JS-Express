@@ -4,26 +4,27 @@ const fs = require('fs-extra')
 const redis = require('../configs/redis')
 const misc = require('../helpers/response')
 const s = require('../helpers/slug')
+const f = require('../helpers/file')
 
 module.exports = {
 
   all: async (request, response) => {
-    const o = {}
     const a = []
     const page = parseInt(request.query.page) || 1
     const search = request.query.search || ''
     const sort = request.query.sort || 'DESC'
     const sortBy = request.query.sortBy || 'updated_at'
-    const limit = request.query.limit || 5
+    const limit = parseInt(request.query.limit) || 5
     const offset = (page - 1) * limit
     try {
       const total = await Engineer.total()
-      const resultTotal = limit > 5 ? Math.ceil(total[0].total / limit) : total[0].total
-      const lastPage = Math.ceil(resultTotal / limit)
+      const resultTotal = Math.ceil(total[0].total / limit) 
+      const perPage = Math.ceil(resultTotal / limit) 
       const prevPage = page === 1 ? 1 : page - 1
-      const nextPage = page === lastPage ? 1 : page + 1
+      const nextPage = page === perPage ? 1 : page + 1
       const data = await Engineer.allv2(offset, limit, sort, sortBy, search)
       for (let i = 0; i < data.length; i++) {
+        const o = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
         o.uid = data[i].uid
         o.fullname = data[i].fullname
@@ -31,16 +32,16 @@ module.exports = {
         o.salary = data[i].salary
         o.slug = data[i].slug 
         o.skills = skills
+        a.push(o)
       }
-      a.push(o)
       const pageDetail = {
         total: resultTotal,
-        per_page: lastPage,
-        next_page: nextPage,
-        prev_page: prevPage,
-        current_page: page,
-        next_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-        prev_url: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+        perPage: perPage,
+        nextPage: nextPage,
+        prevPage: prevPage,
+        currentPage: page,
+        nextUrl: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+        prevUrl: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
       }
       misc.responsePagination(response, 200, false, null, pageDetail, a)
     } catch (error) {
@@ -50,34 +51,26 @@ module.exports = {
   },
 
   store: async (request, response) => {
+    let avatar, filename, extension, fileSize
     const o = {}
-    let filename, extension, fileSize
     if(request.file) {
       filename = request.file.originalname
-      extension =  request.file.originalname.split('.')[1]
+      extension = request.file.originalname.split('.').pop()
       fileSize = request.file.fileSize
     }
     try {
       if(request.file) {
-        if(fileSize >= 5242880) { 
-          fs.unlink(`public/images/engineer/${filename}`)
-          throw new Error('Oops!, Size cannot more than 5MB.')
+        if(fileSize >= process.env.IMAGE_SIZE) { 
+          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+          throw new Error('Oops!, size is too large. Max: 5MB.')
         }
-        if(!isImage(extension)) {
-          fs.unlink(`public/images/engineer/${filename}`)
-          throw new Error('Oops!, File allowed only JPG, JPEG, PNG, GIF, SVG.')
+        if(!f.isImage(extension)) {
+          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+          throw new Error('Oops!, file allowed only JPG, JPEG, PNG, GIF, SVG.')
         }
-        function isImage(extension) {
-          switch (extension) {
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-            case 'svg':
-              return true
-          }
-            return false
-        }
+         avatar = request.file.originalname
+      } else {
+        avatar = request.body.avatar ? request.body.avatar : "avatar.png"
       }
       o.description = request.body.description
       o.skill = request.body.skill
@@ -86,8 +79,7 @@ module.exports = {
       o.showcase = request.body.showcase
       o.telephone = request.body.telephone
       o.salary = request.body.salary
-      o.avatar = request.file ? request.file.originalname : request.body.avatar
-      o.user_id = request.body.user_id
+      o.avatar = avatar
       await Engineer.store(o)
       misc.response(response, 200, false, null, o)     
     } catch (error) {
@@ -133,30 +125,19 @@ module.exports = {
 
     if(request.file) {
       filename = request.file.originalname
-      extension =  request.file.mimetype
+      extension = request.file.originalname.split('.').pop()
       fileSize = request.file.fileSize
     }
 
     try {
       if(request.file) {
         if(fileSize >= 5242880) {
-          fs.unlink(`public/images/engineer/${filename}`)
-          throw new Error('Oops! size cannot more than 5MB')
+          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+          throw new Error('Oops!, size is too large. Max: 5MB.')
         }
-        if(!isImage(extension)) {
-          fs.unlink(`public/images/engineer/${filename}`)
+        if(!f.isImage(extension)) {
+          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
           throw new Error('Oops! file allowed only JPG, JPEG, PNG, GIF, SVG')
-        }
-        function isImage(extension) {
-          switch (extension) {
-            case 'image/png':
-            case 'image/jpeg':
-            case 'image/gif':
-            case 'image/bmp':
-            case 'image/svg+xml':
-              return true
-          }
-          return false
         }
       }
       if(request.file) {
@@ -239,6 +220,7 @@ module.exports = {
     const skills = await Engineer.getSkillsBasedOnProfile(p.uid)
     try {
       o.id = p.id
+      o.fullname = p.fullname
       o.description = p.description
       o.location = p.location
       o.birthdate = p.birthdate
@@ -246,7 +228,7 @@ module.exports = {
       o.telephone = p.telephone
       o.avatar = p.avatar
       o.salary = p.salary
-      o.user_id = p.user_id
+      o.user_uid = p.user_uid
       o.created_at = p.created_at
       o.updated_at = p.updated_at
       o.name = p.name

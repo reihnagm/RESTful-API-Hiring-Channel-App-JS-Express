@@ -44,7 +44,7 @@ module.exports = {
       offset = 0
     }
     return new Promise((resolve, reject) => {
-      const query = `SELECT DISTINCT a.uid, a.avatar, e.fullname, a.salary, e.slug
+      const query = `SELECT DISTINCT a.uid, a.avatar,  a.salary, e.fullname, e.slug
       FROM engineers a
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid
@@ -149,7 +149,7 @@ module.exports = {
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT a.uid, a.avatar, a.location, a.showcase, a.telephone, a.salary, 
-      a.description, a.birthdate, d.fullname, d.nickname, d.email
+      a.description, a.birthdate, a.user_uid, d.fullname, d.nickname, d.email
       FROM engineers a
       INNER JOIN users d ON a.user_uid = d.uid
       WHERE d.slug = '${slug}'`
