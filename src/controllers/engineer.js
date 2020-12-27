@@ -12,17 +12,17 @@ module.exports = {
     const a = []
     const page = parseInt(request.query.page) || 1
     const search = request.query.search || ''
-    const sort = request.query.sort || 'DESC'
-    const sortBy = request.query.sortBy || 'updated_at'
-    const limit = parseInt(request.query.limit) || 5
-    const offset = (page - 1) * limit
+    const sort = request.query.sort == "Newer" ? "DESC" : "ASC"
+    const sortBy = request.query.sortby == "latest-update" ? "updated_at" : "updated_at" 
+    const show = parseInt(request.query.show) || 5
+    const offset = (page - 1) * show
     try {
       const total = await Engineer.total()
-      const resultTotal = Math.ceil(total[0].total / limit) 
-      const perPage = Math.ceil(resultTotal / limit) 
+      const resultTotal = Math.ceil(total[0].total / show) 
+      const perPage = Math.ceil(resultTotal / show) 
       const prevPage = page === 1 ? 1 : page - 1
       const nextPage = page === perPage ? 1 : page + 1
-      const data = await Engineer.allv2(offset, limit, sort, sortBy, search)
+      const data = await Engineer.allv2(offset, show, sort, sortBy, search)
       for (let i = 0; i < data.length; i++) {
         const o = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
@@ -92,9 +92,10 @@ module.exports = {
     let avatar, filename, extension, fileSize
     const o = {}
     const uid = request.body.uid
+    const userUid = request.body.userUid
     const fullname = request.body.fullname
+    const slug = s.slug(fullname, false, null)
     const nickname = request.body.nickname
-    const slug = s.slug(fullname)
     const description = request.body.description 
     const location = request.body.location
     const birthdate = request.body.birthdate
@@ -131,7 +132,7 @@ module.exports = {
 
     try {
       if(request.file) {
-        if(fileSize >= 5242880) {
+        if(fileSize >= process.env.IMAGE_SIZE) {
           fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
           throw new Error('Oops!, size is too large. Max: 5MB.')
         }
@@ -154,7 +155,7 @@ module.exports = {
       o.description = description
 
       await Engineer.update(o, uid)
-      // await Engineer.updateNameUser(name, slug, userUid)
+      await Engineer.updateNameUser(fullname, slug, userUid)
       misc.response(response, 200, false, null, o)
     } catch (error) {
       console.log(error.message) // in-development

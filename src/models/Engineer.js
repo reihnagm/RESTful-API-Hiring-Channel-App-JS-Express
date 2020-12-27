@@ -39,19 +39,19 @@ module.exports = {
     })
   },
 
-  allv2: (offset, limit, sort, sortBy, search) => {
+  allv2: (offset, show, sort, sortBy, search) => {
     if(search) {
       offset = 0
     }
     return new Promise((resolve, reject) => {
-      const query = `SELECT DISTINCT a.uid, a.avatar,  a.salary, e.fullname, e.slug
+      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname, e.slug
       FROM engineers a
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid
       INNER JOIN users e ON a.user_uid = e.uid
       WHERE LOWER(e.fullname) LIKE '%${search}%' OR LOWER(c.name) LIKE '%${search}%'
       GROUP BY a.id
-      ORDER BY a.${sortBy} ${sort} LIMIT ${offset}, ${limit}`
+      ORDER BY e.${sortBy} ${sort} LIMIT ${offset}, ${show}`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -115,9 +115,9 @@ module.exports = {
     })
   },
 
-  updateNameUser: (name, slug, userUid) => {
+  updateNameUser: (fullname, slug, userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE users SET name = '${name}', slug = '${slug}' WHERE uid = '${userUid}'`
+      const query = `UPDATE users SET fullname = '${fullname}', slug = '${slug}' WHERE uid = '${userUid}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
