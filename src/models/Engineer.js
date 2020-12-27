@@ -232,7 +232,7 @@ module.exports = {
   
   insertDataUser: (uid, userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO engineers (uid, user_uid) VALUES('${uid}','${userUid}')`
+      const query = `INSERT INTO engineers (uid, avatar, user_uid) VALUES('${uid}', 'avatar.png', '${userUid}')`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))

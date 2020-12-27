@@ -2,29 +2,30 @@ const Company = require('../models/Company')
 const fs = require('fs-extra')
 const redis = require('../configs/redis')
 const misc = require('../helpers/response')
+const f = require('../helpers/file')
 
 module.exports = {
 
   all: async (request, response) => {
     const page = parseInt(request.query.page) || 1
     const search = request.query.search || ''
-    const limit = request.query.limit || 5
     const sort = request.query.sort || 'DESC'
     const sortBy = request.query.sortBy || 'updated_at'
+    const show = parseInt(request.query.show) || 5
     const offset = (page - 1) * limit
     try {
       const total = await Company.total()
-      const resultTotal = limit > 5 ? Math.ceil(total[0].total / limit) : total[0].total
-      const lastPage = Math.ceil(resultTotal / limit)
+      const resultTotal = Math.ceil(total[0].total / show)
+      const perPage = Math.ceil(resultTotal / show)
       const prevPage = page === 1 ? 1 : page - 1
-      const nextPage = page === lastPage ? 1 : page + 1
-      const data = await Company.all(offset, limit, sort, sortBy, search)
+      const nextPage = page === perPage ? 1 : page + 1
+      const data = await Company.all(offset, show, sort, sortBy, search)
       const pageDetail = {
         total: resultTotal,
-        per_page: limit,
-        next_page: nextPage,
-        prev_page: prevPage,
-        current_page: page,
+        perPage: limit,
+        nextPage: nextPage,
+        prevPage: prevPage,
+        currentPage: page,
         nextLink: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
         prevLink: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
       }
@@ -36,52 +37,35 @@ module.exports = {
   },
 
   store: async (request, response) => {
-    let error = false
-    let filename
-    let extension
-    let fileSize
+    let logo, filename, extension, fileSize
+    const o = {}
     if(request.file) {
       filename = request.file.originalname
-      extension =  request.file.originalname.split('.')[1]
+      extension =  request.file.originalname.split('.').pop()
       fileSize = request.file.fileSize
     }
     try {
       if(request.file) {
-        if(fileSize >= 5242880) { // size 5 MB
-          error = true
-          fs.unlink(`public/images/company/${filename}`)
-          throw new Error("Oops! Size cannot more than 5MB.")
+        if(fileSize >=  process.env.IMAGE_SIZE) { 
+          fs.unlink(`${process.env.BASE_URL_IMAGE_COMPANY}/${filename}`)
+          throw new Error("Oops!, size is too large. Max: 5MB.")
         }
-        if(!isImage(extension)) {
-          error = true
-          fs.unlink(`public/images/company/${filename}`)
+        if(!f.isImage(extension)) {
+          fs.unlink(`${process.env.BASE_URL_IMAGE_COMPANY}/${filename}`)
           throw new Error("Oops! File allowed only JPG, JPEG, PNG, GIF, SVG.")
         }
-        function isImage(extension) {
-          switch (extension) {
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-            case 'svg':
-            return true
-          }
-            return false
-        }
+        logo = request.file.originalname
+      } else {
+        logo = request.body.logo ? request.body.logo : "avatar.png"
       }
-      const data = {
-        name: request.body.name,
-        location: request.body.location,
-        description: request.body.description,
-        email: request.body.email,
-        telephone: request.body.telephone,
-        logo: request.file ? request.file.originalname : '',
-        user_id: request.body.user_id
-      }
-      if(error === false) {
-        await Company.store(data)
-        misc.response(response, 200, false, null, data)
-      }
+      o.name = request.body.name
+      o.location = request.body.location
+      o.description = request.body.description
+      o.email = request.body.email
+      o.telephone = request.body.telephone
+      o.logo = logo
+      await Company.store(o)
+      misc.response(response, 200, false, null, data)
     } catch(error) {
       console.log(error.message) // in-development
       misc.response(response, 500, true, 'Server Error.')

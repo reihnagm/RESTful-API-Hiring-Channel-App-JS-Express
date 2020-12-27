@@ -12,8 +12,8 @@ module.exports = {
     const a = []
     const page = parseInt(request.query.page) || 1
     const search = request.query.search || ''
-    const sort = request.query.sort == "Newer" ? "DESC" : "ASC"
-    const sortBy = request.query.sortby == "latest-update" ? "updated_at" : "updated_at" 
+    const sort = request.query.sort == "newer" ? "DESC" : "ASC"
+    const sortBy = request.query.sortby == "latest-update" ? "updated_at" : request.query.sortby
     const show = parseInt(request.query.show) || 5
     const offset = (page - 1) * show
     try {
