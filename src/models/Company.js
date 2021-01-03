@@ -15,11 +15,15 @@ module.exports = {
     })
   },
 
-  all: (offset, limit, sort, sortBy, search) => {
+  all: (offset, limit, sort, sortby, search) => {
+    if(search) {
+      offset = 0
+    }
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, b.name name_user, b.slug, b.email FROM companies a INNER JOIN users b ON a.user_uid = b.id
-        WHERE (a.name LIKE '%${search}%' OR a.location LIKE '%${search}%')
-        ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
+      const query = `SELECT a.*, b.fullname AS username, b.email, b.slug
+      FROM companies a INNER JOIN users b ON a.user_uid = b.uid
+      WHERE (a.name LIKE '%${search}%' OR a.location LIKE '%${search}%')
+      ORDER BY ${sortby} ${sort} LIMIT ${offset}, ${limit}`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -94,9 +98,9 @@ module.exports = {
     })
   },
 
-  getProfile: (userId) => {
+  getProfile: (userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.*, b.name, b.email, b.role_id FROM companies a, users b WHERE a.user_uid = b.id AND b.id = '${userId}'`  
+      const query = `SELECT a.*, b.fullname, b.email, b.role FROM companies a, users b WHERE a.user_uid = b.uid AND b.uid = '${userUid}'`  
       connection.query(query,
       (error, result) => {
         if(error) {
@@ -122,10 +126,10 @@ module.exports = {
     })
   },
 
-  insertDataUser: (uid, userUid) => {
+  insertDataUser: (data) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO companies (uid, user_uid) VALUES ('${uid}','${userUid}')`
-      connection.query(query, (error, result) => {
+      const query = `INSERT INTO companies SET ?`
+      connection.query(query, data, (error, result) => {
         if(error) {
           reject(new Error(error))
         } else {

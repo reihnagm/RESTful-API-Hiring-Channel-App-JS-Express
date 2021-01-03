@@ -9,13 +9,13 @@ const app = express()
 const port = config.port
 const routerNav = require("./src/index")
 
+app.use(cors())
 app.use(helmet())
 app.use(compression())
 app.use(express.static("public"))
 app.use(logger("dev"))
-app.use(cors())
-app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use("/", routerNav)
 
 app.listen(port, () => {

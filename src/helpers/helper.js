@@ -1,6 +1,8 @@
+
+
 module.exports = {
-  
-  response: (res, status, error, message, data) => {
+
+	response: (res, status, error, message, data) => {
     let resultPrint = {}
     resultPrint.status = status || 200
     resultPrint.error = error || false
@@ -10,6 +12,7 @@ module.exports = {
     }
     return res.status(resultPrint.status).json(resultPrint)
   },
+
   responsePagination: (res, status, error, message, pageDetail, data) => {
     let resultPrint = {}
     resultPrint.status = status || 200
@@ -18,6 +21,23 @@ module.exports = {
     resultPrint.pageDetail = pageDetail || {}
     resultPrint.data = data || {}
     return res.status(resultPrint.status).json(resultPrint)
-  }
+  },
+
+	isImage: (ext) => {
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'svg':
+      return true
+    }
+    return false
+  },
+ 
+ 	slug: (val, isUnique, uniqueId) => {
+  	return isUnique ? `${val.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')}-${uniqueId}`
+ 		: `${val.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')}`
+ 	}
 
 }

@@ -1,20 +1,18 @@
 const { v4: uuidv4 } = require("uuid")
-const Engineer = require('../models/Engineer')
-const fs = require('fs-extra')
-const redis = require('../configs/redis')
-const misc = require('../helpers/response')
-const s = require('../helpers/slug')
-const f = require('../helpers/file')
+const Engineer = require("../models/Engineer")
+const fs = require("fs-extra")
+const redis = require("../configs/redis")
+const misc = require("../helpers/helper")
 
 module.exports = {
 
-  all: async (request, response) => {
-    const a = []
-    const page = parseInt(request.query.page) || 1
-    const search = request.query.search || ''
-    const sort = request.query.sort == "newer" ? "DESC" : "ASC"
-    const sortBy = request.query.sortby == "latest-update" ? "updated_at" : request.query.sortby
-    const show = parseInt(request.query.show) || 5
+  all: async (req, res) => {
+    const dataAssign = []
+    const page = parseInt(req.query.page) || 1
+    const search = req.query.search || ""
+    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    const show = parseInt(req.query.show) || 5
     const offset = (page - 1) * show
     try {
       const total = await Engineer.total()
@@ -22,17 +20,17 @@ module.exports = {
       const perPage = Math.ceil(resultTotal / show) 
       const prevPage = page === 1 ? 1 : page - 1
       const nextPage = page === perPage ? 1 : page + 1
-      const data = await Engineer.allv2(offset, show, sort, sortBy, search)
+      const data = await Engineer.allv2(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
-        const o = {}
+        const engineerObj = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
-        o.uid = data[i].uid
-        o.fullname = data[i].fullname
-        o.avatar = data[i].avatar
-        o.salary = data[i].salary
-        o.slug = data[i].slug 
-        o.skills = skills
-        a.push(o)
+        engineerObj.uid = data[i].uid
+        engineerObj.fullname = data[i].username
+        engineerObj.avatar = data[i].avatar
+        engineerObj.salary = data[i].salary
+        engineerObj.slug = data[i].slug 
+        engineerObj.skills = skills
+        dataAssign.push(engineerObj)
       }
       const pageDetail = {
         total: resultTotal,
@@ -40,205 +38,204 @@ module.exports = {
         nextPage: nextPage,
         prevPage: prevPage,
         currentPage: page,
-        nextUrl: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
-        prevUrl: `${process.env.BASE_URL}${request.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
+        nextUrl: `${process.env.BASE_URL}${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
+        prevUrl: `${process.env.BASE_URL}${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
       }
-      misc.responsePagination(response, 200, false, null, pageDetail, a)
-    } catch (error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+      misc.responsePagination(res, 200, false, null, pageDetail, dataAssign)
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
+      // next(err)
     }
   },
 
-  store: async (request, response) => {
-    let avatar, filename, extension, fileSize
-    const o = {}
-    if(request.file) {
-      filename = request.file.originalname
-      extension = request.file.originalname.split('.').pop()
-      fileSize = request.file.fileSize
-    }
+  store: async (req, res) => {
+    let avatar, filename, ext, fileSize, engineerObj
+    engineerObj = {}
+    const { description, skill, location, birthdate, showcase, telephone, salary } = req.body
+
     try {
-      if(request.file) {
+      
+      if(req.file) {
+        filename = req.file.originalname
+        ext = req.file.originalname.split('.').pop()
+        fileSize = req.file.fileSize
         if(fileSize >= process.env.IMAGE_SIZE) { 
           fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
-          throw new Error('Oops!, size is too large. Max: 5MB.')
+          throw new Error('Oops!, size is too large. Max: 1MB.')
         }
-        if(!f.isImage(extension)) {
+        if(!misc.isImage(ext)) {
           fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
           throw new Error('Oops!, file allowed only JPG, JPEG, PNG, GIF, SVG.')
         }
-         avatar = request.file.originalname
-      } else {
-        avatar = request.body.avatar ? request.body.avatar : "avatar.png"
-      }
-      o.description = request.body.description
-      o.skill = request.body.skill
-      o.location = request.body.location
-      o.birthdate = request.body.birthdate
-      o.showcase = request.body.showcase
-      o.telephone = request.body.telephone
-      o.salary = request.body.salary
-      o.avatar = avatar
-      await Engineer.store(o)
-      misc.response(response, 200, false, null, o)     
-    } catch (error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error')
-    }
-  },
-
-  update: async (request, response) => {
-    let avatar, filename, extension, fileSize
-    const o = {}
-    const uid = request.body.uid
-    const userUid = request.body.userUid
-    const fullname = request.body.fullname
-    const slug = s.slug(fullname, false, null)
-    const nickname = request.body.nickname
-    const description = request.body.description 
-    const location = request.body.location
-    const birthdate = request.body.birthdate
-    const showcase = request.body.showcase
-    const telephone = request.body.telephone
-    const salary = request.body.salary
-
-    // All skills selected 
-    const skillsS = JSON.parse(request.body.skillsStore)
-
-     // All skills unselected
-    const skillsD = JSON.parse(request.body.skillsDestroy) 
-
-    // Store skills
-    for(let z = 0; z < skillsS.length; z++) {
-      const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
-      if(checkSkills.length == 0) {
-        await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
-      }
-    }
-
-    // Delete skills
-    for (let i = 0; i < skillsD.length; i++) {
-      for (let z = 0; z < skillsD[i].length; z++) {
-        await Engineer.destroySkills(skillsD[i][z].uid, uid)
-      }
-    }
-
-    if(request.file) {
-      filename = request.file.originalname
-      extension = request.file.originalname.split('.').pop()
-      fileSize = request.file.fileSize
-    }
-
-    try {
-      if(request.file) {
-        if(fileSize >= process.env.IMAGE_SIZE) {
-          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
-          throw new Error('Oops!, size is too large. Max: 5MB.')
-        }
-        if(!f.isImage(extension)) {
-          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
-          throw new Error('Oops! file allowed only JPG, JPEG, PNG, GIF, SVG')
-        }
-      }
-      if(request.file) {
         avatar = request.file.originalname
       } else {
         avatar = request.body.avatar
       }
-      o.location = location
-      o.birthdate = birthdate
-      o.showcase = showcase
-      o.telephone = telephone
-      o.salary = salary
-      o.avatar =  avatar
-      o.description = description
 
-      await Engineer.update(o, uid)
-      await Engineer.updateNameUser(fullname, slug, userUid)
-      misc.response(response, 200, false, null, o)
-    } catch (error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+      engineerObj.description = description
+      engineerObj.skill = skill
+      engineerObj.location = location
+      engineerObj.birthdate = birthdate
+      engineerObj.showcase = showcase
+      engineerObj.telephone = telephone
+      engineerObj.salary = salary
+      engineerObj.avatar = avatar
+
+      await Engineer.store(engineerObj)
+      misc.response(res, 200, false, null)     
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error')
     }
   },
 
-  delete: async (request, response) => {
-    const engineerId = request.params.engineerId
-    const userId = request.params.userId
+  update: async (req, res) => {
+    let avatar, filename, ext, fileSize, engineerObj
+    engineerObj = {}
+    const { uid, fullname, nickname, description, location, birthdate, showcase, telephone, salary } = req.body
+    
+    const engineer = await Engineer.getProfileByEngineer(uid)
+    const userUid = engineer.userUid
+    const slug = misc.slug(fullname, false, null)
+
+    // All skills selected 
+    // const skillsS = JSON.parse(request.body.skillsStore)
+
+    //  // All skills unselected
+    // const skillsD = JSON.parse(request.body.skillsDestroy) 
+
+    // // Store skills
+    // for(let z = 0; z < skillsS.length; z++) {
+    //   const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
+    //   if(checkSkills.length == 0) {
+    //     await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
+    //   }
+    // }
+
+    // // Delete skills
+    // for (let i = 0; i < skillsD.length; i++) {
+    //   for (let z = 0; z < skillsD[i].length; z++) {
+    //     await Engineer.destroySkills(skillsD[i][z].uid, uid)
+    //   }
+    // }
+
     try {
-      await Engineer.delete(engineerId)
-      await Engineer.deleteUser(userId)
-      misc.response(response, 200, null, false)
-    } catch(error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+
+      if(req.file) {
+        filename = req.file.originalname
+        ext = req.file.originalname.split('.').pop()
+        fileSize = req.file.fileSize
+        if(fileSize >= process.env.IMAGE_SIZE) {
+          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+          throw new Error('Oops!, size is too large. Max: 1MB.')
+        }
+        if(!misc.isImage(ext)) {
+          fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+          throw new Error('Oops! file allowed only JPG, JPEG, PNG, GIF, SVG')
+        }
+        avatar = req.file.originalname
+      } else {
+        avatar = req.body.avatar
+      }
+      
+      engineerObj.location = location
+      engineerObj.birthdate = birthdate
+      engineerObj.showcase = showcase
+      engineerObj.salary = salary
+      engineerObj.avatar =  avatar
+      engineerObj.description = description
+      engineerObj.telephone = telephone
+
+      await Engineer.update(engineerObj, uid)
+      await Engineer.updateNameUser(fullname, nickname, slug, userUid)
+      misc.response(res, 200, false, null)
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
     }
   },
 
-  getSkills: async (request, response) => {
+  delete: async (req, res) => {
+    const engineerUid = req.params.engineerUid
+    const userUid = req.params.userUid
+    try {
+      await Engineer.delete(engineerUid)
+      await Engineer.deleteUser(userUid)
+      misc.response(res, 200, false, null)
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
+    }
+  },
+
+  getSkills: async (req, res) => {
     const data = await Engineer.getSkills()
     try {
-      misc.response(response, 200, false, null, data)
-    } catch (error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+      misc.response(res, 200, false, null, data)
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
     }
   },
 
-  getProfile: async (request, response) => {
-    const userUid = request.body.userUid
-    const o = {}
-    const p = await Engineer.getProfile(userUid)
-    const skills = await Engineer.getSkillsBasedOnProfile(p.uid)
+  getProfile: async (req, res) => {
+    const profileObj = {}
+    const userUid = req.body.userUid
+    const profile = await Engineer.getProfile(userUid)
+    const skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
     try {
-      o.id = p.id
-      o.uid = p.uid
-      o.fullname = p.fullname
-      o.nickname = p.nickname
-      o.email = p.email
-      o.skills = skills
-      o.description = p.description
-      o.location = p.location
-      o.birthdate = p.birthdate
-      o.showcase = p.showcase
-      o.telephone = p.telephone
-      o.avatar = p.avatar
-      o.salary = p.salary
-      o.created_at = p.created_at
-      o.updated_at = p.updated_at  
-      misc.response(response, 200, false, null, o) 
-    } catch(error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+      
+      profileObj.id = profile.id
+      profileObj.uid = profile.uid
+      profileObj.fullname = profile.fullname
+      profileObj.nickname = profile.nickname
+      profileObj.email = profile.email
+      profileObj.description = profile.description
+      profileObj.location = profile.location
+      profileObj.birthdate = profile.birthdate
+      profileObj.showcase = profile.showcase
+      profileObj.telephone = profile.telephone
+      profileObj.avatar = profile.avatar
+      profileObj.salary = profile.salary
+      profileObj.skills = skills
+      profileObj.created_at = profile.created_at
+      profileObj.updated_at = profile.updated_at  
+
+      misc.response(res, 200, false, null, profileObj) 
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
     }
   },
 
-  getProfileBySlug: async (request, response) => {
-    const slug = request.params.slug
-    const o = {}
-    const p = await Engineer.getProfileBySlug(slug)
-    const skills = await Engineer.getSkillsBasedOnProfile(p.uid)
+  getProfileBySlug: async (req, res) => {
+    const profileObj = {}
+    const slug = req.params.slug
+    const profile = await Engineer.getProfileBySlug(slug)
+    const skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
     try {
-      o.id = p.id
-      o.fullname = p.fullname
-      o.description = p.description
-      o.location = p.location
-      o.birthdate = p.birthdate
-      o.showcase = p.showcase
-      o.telephone = p.telephone
-      o.avatar = p.avatar
-      o.salary = p.salary
-      o.user_uid = p.user_uid
-      o.created_at = p.created_at
-      o.updated_at = p.updated_at
-      o.name = p.name
-      o.email = p.email
-      o.skills = skills
-      misc.response(response, 200, false, null, o)
-    } catch(error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+      
+      profileObj.id = profile.id
+      profileObj.fullname = profile.fullname
+      profileObj.description = profile.description
+      profileObj.location = profile.location
+      profileObj.birthdate = profile.birthdate
+      profileObj.showcase = profile.showcase
+      profileObj.telephone = profile.telephone
+      profileObj.avatar = profile.avatar
+      profileObj.salary = profile.salary
+      profileObj.user_uid = profile.user_uid
+      profileObj.created_at = profile.created_at
+      profileObj.updated_at = profile.updated_at
+      profileObj.name = profile.name
+      profileObj.email = profile.email
+      profileObj.skills = skills
+
+      misc.response(res, 200, false, null, profileObj)
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
     }
   }
   

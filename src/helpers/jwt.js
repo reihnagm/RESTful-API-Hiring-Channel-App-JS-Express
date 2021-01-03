@@ -1,5 +1,5 @@
 require('dotenv').config()
-const misc = require('../helpers/response')
+const misc = require('../helpers/helper')
 const jwt = require('jsonwebtoken')
 
 module.exports = function(request, response, next) {

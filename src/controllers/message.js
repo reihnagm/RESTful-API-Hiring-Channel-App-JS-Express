@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require("uuid")
 const Message = require('../models/Message')
-const misc = require('../helpers/response')
+const misc = require('../helpers/helper')
 const pusher = require('../configs/pusher')
 
 module.exports = {

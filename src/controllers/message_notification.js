@@ -1,5 +1,5 @@
 const MessageNotifications = require('../models/MessageNotifications')
-const misc = require('../helpers/response')
+const misc = require('../helpers/helper')
 module.exports = {
   
   getNotifications: async (request, response) => {

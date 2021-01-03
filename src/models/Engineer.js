@@ -15,7 +15,7 @@ module.exports = {
     })
   },
 
-  all: (offset, limit, sort, sortBy, search) => {
+  all: (offset, limit, sort, sortby, search) => {
     if(search) {
       offset = 0
     }
@@ -26,9 +26,8 @@ module.exports = {
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid
       INNER JOIN users e ON a.user_uid = e.uid
-      WHERE LOWER(e.fullname) LIKE '%${search}%' OR LOWER(c.name) LIKE '%${search}%'
-      GROUP BY a.id
-      ORDER BY ${sortBy} ${sort} LIMIT ${offset}, ${limit}`
+      WHERE LOWER(e.fullname) LIKE '%${search}%' GROUP BY a.id
+      ORDER BY ${sortby} ${sort} LIMIT ${offset}, ${limit}`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -39,19 +38,20 @@ module.exports = {
     })
   },
 
-  allv2: (offset, show, sort, sortBy, search) => {
+  allv2: (offset, show, sort, sortby, search) => {
     if(search) {
       offset = 0
     }
+    let preventAmbigiousSortby = `e.${sortby}`
     return new Promise((resolve, reject) => {
-      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname, e.slug
+      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname AS username, e.slug
       FROM engineers a
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid
       INNER JOIN users e ON a.user_uid = e.uid
       WHERE LOWER(e.fullname) LIKE '%${search}%' OR LOWER(c.name) LIKE '%${search}%'
       GROUP BY a.id
-      ORDER BY e.${sortBy} ${sort} LIMIT ${offset}, ${show}`
+      ORDER BY ${preventAmbigiousSortby} ${sort} LIMIT ${offset}, ${show}`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -115,9 +115,9 @@ module.exports = {
     })
   },
 
-  updateNameUser: (fullname, slug, userUid) => {
+  updateNameUser: (fullname, nickname, slug, userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE users SET fullname = '${fullname}', slug = '${slug}' WHERE uid = '${userUid}'`
+      const query = `UPDATE users SET fullname = '${fullname}', nickname = '${nickname}', slug = '${slug}' WHERE uid = '${userUid}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -136,13 +136,31 @@ module.exports = {
       INNER JOIN users d ON a.user_uid = d.uid
       WHERE a.user_uid = '${userUid}'`
       connection.query(query,
-        (error, result) => {
-          if(error) {
-            reject(new Error(error))
-          } else {
-            resolve(result[0])
-          }
-        })
+      (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result[0])
+        }
+      })
+    })
+  },
+
+  getProfileByEngineer: (engineerUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT a.uid, a.avatar, a.location, a.showcase, a.telephone, a.salary, 
+      a.description, a.birthdate, d.uid AS userUid, d.fullname, d.nickname, d.email 
+      FROM engineers a
+      INNER JOIN users d ON a.user_uid = d.uid
+      WHERE a.uid = '${engineerUid}'`
+      connection.query(query,
+      (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result[0])
+        }
+      })
     })
   },
 

@@ -1,13 +1,13 @@
 require("dotenv").config()
 
 const { v4: uuidv4 } = require("uuid")
+const fs = require('fs-extra')
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 const User = require("../models/User")
 const Engineer = require("../models/Engineer")
 const Company = require("../models/Company")
-const misc = require("../helpers/response")
-const s = require("../helpers/slug")
-const bcrypt = require("bcryptjs")
-const jwt = require("jsonwebtoken")
+const misc = require("../helpers/helper")
 
 class UserNotExists extends Error {
   constructor(message) {
@@ -32,19 +32,19 @@ class InvalidCredentials extends Error {
 
 module.exports = {
   
-  auth: async (request, response) => {
-    const userId = request.user.id
+  auth: async (req, res) => {
+    const userId = req.user.id
+    const auth = await User.auth(userId)
     try {
-      const u = await User.auth(userId)
-      misc.response(response, 200, false, null, u)
-    } catch (error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error')
+      misc.response(res, 200, false, null, auth)
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error')
     }
   },
 
-  login: async (request, response) => {
-    const { email, password } = request.body
+  login: async (req, res) => {
+    const { email, password } = req.body
     try {
       const user = await User.login(email)
       if (user.length === 0) {
@@ -62,49 +62,79 @@ module.exports = {
         }
       }
       const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
-      response.json({ token })
-    } catch(error) {
-      misc.response(response, 500, true, error.message)
+      res.json({ token })
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, err.message)
     }
   },
 
-  register: async (request, response) => {
-    const { fullname, nickname, email, password, role_id } = request.body
-    const uid = uuidv4()
-    const o = {} 
-    const createdAt = new Date()
-    const updatedAt = new Date()
-    let slug
+  register: async (req, res) => {
+    let uid, logo, filename, extension, fileSize, slug, createdAt, updatedAt, userObj, engineerObj, companyObj
+    uid = uuidv4()
+    userObj = {}
+    engineerObj = {}
+    companyObj = {}
+    createdAt = new Date()
+    updatedAt = new Date()
+    const { fullname, nickname, email, password, companyname, companyemail, companytelp, companydesc, companylocation } = req.body
+    const role = parseInt(req.body.role)
+    if(req.file) {
+      filename = req.file.originalname
+      ext = req.file.originalname.split('.').pop()
+      fileSize = req.file.fileSize
+      if(fileSize >= process.env.IMAGE_SIZE) { 
+        fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+        throw new Error('Oops!, size is too large. Max: 1MB.')
+      }
+      if(!misc.isImage(ext)) {
+        fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
+        throw new Error('Oops!, file allowed only JPG, JPEG, PNG, GIF, SVG.')
+      }
+      logo = req.file.originalname
+    }
+
     try {
-      const cu = await User.checkUser(email)
+      const checkUser = await User.checkUser(email)
       const salt = await bcrypt.genSalt(10)
       const passwordHash = await bcrypt.hash(password, salt)
-      if(cu.length !== 0) {
+      if(checkUser.length !== 0) {
         throw new UserAlreadyExists('User already exists')
       }
-      slug = s.slug(fullname, false) 
-      const cs = await User.checkSlug(slug)
+      slug = misc.slug(fullname, false) 
+      const checkSlug = await User.checkSlug(slug)
+      if(checkSlug.length !== 0) {
+        slug = misc.slug(fullname, true, uid)
+      }
 
-      if(cs.length !== 0) {
-        slug = s.slug(fullname, true, uid)
-      } 
+      userObj.uid = uid
+      userObj.nickname = nickname
+      userObj.fullname = fullname
+      userObj.email = email
+      userObj.password = passwordHash
+      userObj.role = role
+      userObj.slug = slug
+      userObj.created_at = createdAt
+      userObj.updated_at = updatedAt
+      
+      const registered = await User.register(userObj)
 
-      o.uid = uid
-      o.nickname = nickname
-      o.fullname = fullname
-      o.email = email
-      o.password = passwordHash
-      o.role_id = role_id
-      o.slug = slug
-      o.created_at = createdAt
-      o.updated_at = updatedAt
-      const registered = await User.register(o)
-      switch (role_id) {
+      switch (role) {
         case 1:
           await Engineer.insertDataUser(uuidv4(), uid)
         break
         case 2:
-          await Company.insertDataUser(uuidv4(), uid)
+          companyObj.uid = uuidv4()  
+          companyObj.name = companyname
+          companyObj.email = companyemail
+          companyObj.logo = logo
+          companyObj.telephone = companytelp
+          companyObj.description = companydesc
+          companyObj.location = companylocation
+          companyObj.created_at = createdAt
+          companyObj.updated_at = updatedAt
+          companyObj.user_uid = uid
+          await Company.insertDataUser(companyObj, uid)
         break
         default:
       }
@@ -116,10 +146,10 @@ module.exports = {
         }
       }
       const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
-      response.json({ token })
-    } catch(error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error')
+      res.json({ token })
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error')
     }
   },
   

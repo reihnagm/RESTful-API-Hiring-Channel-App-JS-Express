@@ -4,7 +4,7 @@ module.exports = {
 
   auth: (id) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT id, uid, fullname, nickname, email, role_id, created_at FROM users a WHERE a.id = '${id}'`
+      const query = `SELECT id, uid, fullname, nickname, email, role, created_at FROM users a WHERE a.id = '${id}'`
       connection.query(query, (error, result) => {
         if (error) {
           reject(new Error(error))
@@ -17,7 +17,7 @@ module.exports = {
 
   login: (email) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT id, uid, fullname, nickname, email, role_id, password FROM users WHERE email = ?`
+      const query = `SELECT id, uid, fullname, nickname, email, role, password FROM users WHERE email = ?`
       connection.query(query, email, (error, result) => {
         if (error) {
           reject(new Error(error))

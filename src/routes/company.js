@@ -19,8 +19,8 @@ Route
   .get("/", company.all)
   .get("/profile/:slug", company.getProfileBySlug)
   .post("/", upload.single("logo"), company.store)
-  .patch("/:id", upload.single("logo"), company.update)
-  .delete("/:id", company.delete)
+  .put("/", upload.single("logo"), company.update)
+  .delete("/:uid", company.delete)
   .post("/profile", company.getProfile)
 
 module.exports = Route
