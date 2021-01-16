@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require("uuid")
 const Company = require('../models/Company')
 const fs = require('fs-extra')
 const redis = require('../configs/redis')
@@ -24,7 +25,9 @@ module.exports = {
         const companyObj = {}
         companyObj.uid = data[i].uid
         companyObj.logo = data[i].logo
-        companyObj.fullname = data[i].username
+        companyObj.name = data[i].name
+        companyObj.email = data[i].email
+        companyObj.location = data[i].location
         companyObj.description = data[i].description
         companyObj.telephone = data[i].telephone
         companyObj.slug = data[i].slug 
@@ -87,11 +90,23 @@ module.exports = {
   },
 
   update: async (req, res) => {
-    let logo, filename, ext, fileSize, companyObj
+    let postJobUid, logo, filename, ext, fileSize, companyObj
     companyObj = {}
-    const { uid, name, location, description, email, telephone } = req.body
+    postJobUid = uuidv4()
+
+    const { uid, userUid, name, location, description, email, telephone, postJob } = req.body
+
+    let data = {
+      uid: postJobUid,
+      content: postJob,
+      user_uid: userUid,
+      company_uid: uid
+    }
 
     try {
+
+      await Company.storePostJob(data)
+
       if(req.file) {
         filename = req.file.originalname
         ext = req.file.originalname.split('.').pop()
@@ -118,7 +133,7 @@ module.exports = {
  
       await Company.update(companyObj, uid)
   
-      misc.response(res, 200, false, null, data)
+      misc.response(res, 200, false, null, null)
     } catch(err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
@@ -150,9 +165,32 @@ module.exports = {
   getProfile: async (req, res) => {
     const profileObj = {}
     const userUid = req.body.userUid
-    console.log(userUid)
+    const profile = await Company.getProfilev2(userUid)
+
     try {
-      const data = await Company.getProfile(userUid)
+      
+      profileObj.uid = profile.uid
+      profileObj.logo = profile.logo 
+      profileObj.name = profile.name
+      profileObj.email = profile.email
+      profileObj.content = profile.content
+      profileObj.description = profile.description
+      profileObj.requirement = profile.requirement
+      profileObj.location = profile.location
+      profileObj.telephone = profile.telephone
+      profileObj.username = profile.username
+
+      misc.response(res, 200, false, null, profileObj)
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
+    }
+  },
+
+  getProfileBySlug: async (req, res) => {
+    const slug = req.params.slug
+    try {
+      const data = await Company.getProfileBySlug(slug)
       misc.response(res, 200, false, null, data[0])
     } catch(err) {
       console.log(err.message) // in-development
@@ -160,14 +198,15 @@ module.exports = {
     }
   },
 
-  getProfileBySlug: async (request, response) => {
-    const slug = request.params.slug
+  postJob: async (req, res) => {
+    const postJobUid = uuidv4()
+    const { userUid, content } = req.body
     try {
-      const data = await Company.getProfileBySlug(slug)
-      misc.response(response, 200, false, null, data[0])
-    } catch(error) {
-      console.log(error.message) // in-development
-      misc.response(response, 500, true, 'Server Error.')
+      const data = await Company.sendPostJob(postJobUid, content, userUid)
+      misc.response(res, 200, false, null, null)
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
     }
   }
 

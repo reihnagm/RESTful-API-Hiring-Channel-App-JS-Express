@@ -100,25 +100,25 @@ module.exports = {
     const slug = misc.slug(fullname, false, null)
 
     // All skills selected 
-    // const skillsS = JSON.parse(request.body.skillsStore)
+    const skillsS = JSON.parse(req.body.skillsStore)
 
-    //  // All skills unselected
-    // const skillsD = JSON.parse(request.body.skillsDestroy) 
+    // All skills unselected
+    const skillsD = JSON.parse(req.body.skillsDestroy) 
 
-    // // Store skills
-    // for(let z = 0; z < skillsS.length; z++) {
-    //   const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
-    //   if(checkSkills.length == 0) {
-    //     await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
-    //   }
-    // }
+    // Store skills
+    for(let z = 0; z < skillsS.length; z++) {
+      const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
+      if(checkSkills.length == 0) {
+        await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
+      }
+    }
 
-    // // Delete skills
-    // for (let i = 0; i < skillsD.length; i++) {
-    //   for (let z = 0; z < skillsD[i].length; z++) {
-    //     await Engineer.destroySkills(skillsD[i][z].uid, uid)
-    //   }
-    // }
+    // Delete skills
+    for (let i = 0; i < skillsD.length; i++) {
+      for (let z = 0; z < skillsD[i].length; z++) {
+        await Engineer.destroySkills(skillsD[i][z].uid, uid)
+      }
+    }
 
     try {
 
@@ -183,6 +183,7 @@ module.exports = {
     const profileObj = {}
     const userUid = req.body.userUid
     const profile = await Engineer.getProfile(userUid)
+
     const skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
     try {
       

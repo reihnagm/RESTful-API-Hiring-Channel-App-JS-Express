@@ -82,7 +82,6 @@ module.exports = {
         if (error) {
           reject(new Error(error))
         } else {
-          console.log(result)
           resolve(result)
         }
       })

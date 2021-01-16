@@ -9,27 +9,6 @@ const Engineer = require("../models/Engineer")
 const Company = require("../models/Company")
 const misc = require("../helpers/helper")
 
-class UserNotExists extends Error {
-  constructor(message) {
-    super(message)
-    this.name = 'UserNotExists'
-  }
-}
-
-class UserAlreadyExists extends Error {
-  constructor(message) {
-    super(message)
-    this.name = 'UserAlreadyExists'
-  }
-}
-
-class InvalidCredentials extends Error {
-  constructor(message) {
-    super(message)
-    this.name = 'InvalidCredentials'
-  }
-}
-
 module.exports = {
   
   auth: async (req, res) => {
@@ -48,11 +27,11 @@ module.exports = {
     try {
       const user = await User.login(email)
       if (user.length === 0) {
-        throw new UserNotExists('User not exists')
+        throw new Error('User not exists')
       }
       const isMatch = await bcrypt.compare(password, user[0].password)
       if (!isMatch) {
-        throw new InvalidCredentials('Invalid Credentials')
+        throw new Error('Invalid Credentials')
       }
       const payload = {
         user: {
@@ -99,7 +78,7 @@ module.exports = {
       const salt = await bcrypt.genSalt(10)
       const passwordHash = await bcrypt.hash(password, salt)
       if(checkUser.length !== 0) {
-        throw new UserAlreadyExists('User already exists')
+        throw new Error('User already exists')
       }
       slug = misc.slug(fullname, false) 
       const checkSlug = await User.checkSlug(slug)
@@ -149,7 +128,7 @@ module.exports = {
       res.json({ token })
     } catch(err) {
       console.log(err.message) // in-development
-      misc.response(res, 500, true, 'Server Error')
+      misc.response(res, 500, true, err.message)
     }
   },
   
