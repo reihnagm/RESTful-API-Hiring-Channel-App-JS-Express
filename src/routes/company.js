@@ -20,7 +20,8 @@ Route
   .get("/profile/:slug", company.getProfileBySlug)
   .post("/", upload.single("logo"), company.store)
   .put("/", upload.single("logo"), company.update)
-  .delete("/:uid", company.delete)
+  .post("/add-jobs", company.addJobs)
   .post("/profile", company.getProfile)
+  .delete("/:uid", company.delete)
 
 module.exports = Route

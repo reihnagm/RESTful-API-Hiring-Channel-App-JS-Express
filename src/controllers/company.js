@@ -20,17 +20,16 @@ module.exports = {
       const perPage = Math.ceil(resultTotal / show)
       const prevPage = page === 1 ? 1 : page - 1
       const nextPage = page === perPage ? 1 : page + 1
-      const data = await Company.all(offset, show, sort, sortby, search)
+      const data = await Company.allv2(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
         const companyObj = {}
+        const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
         companyObj.uid = data[i].uid
         companyObj.logo = data[i].logo
-        companyObj.name = data[i].name
-        companyObj.email = data[i].email
-        companyObj.location = data[i].location
-        companyObj.description = data[i].description
-        companyObj.telephone = data[i].telephone
-        companyObj.slug = data[i].slug 
+        companyObj.name = data[i].title
+        companyObj.email = data[i].content
+        companyObj.location = data[i].salary
+        companyObj.skills = skills
         dataAssign.push(companyObj)
       }
       const pageDetail = {
@@ -102,6 +101,8 @@ module.exports = {
       user_uid: userUid,
       company_uid: uid
     }
+
+    console.log(data)
 
     try {
 
@@ -198,11 +199,20 @@ module.exports = {
     }
   },
 
-  postJob: async (req, res) => {
-    const postJobUid = uuidv4()
-    const { userUid, content } = req.body
+  addJobs: async (req, res) => {
+    let postJobUid, postJobSkillsUid
+    postJobSkillsUid = uuidv4()
+    postJobUid = uuidv4()
+    const { title, content, salary, skills, companyUid } = req.body
+
+    const allSkill = JSON.parse(skills)
+
+    for(let i = 0; i < allSkill.length; i++) {
+      await Company.storePostJobSkills(postJobSkillsUid, allSkill[i].uid, companyUid)
+    }
+
     try {
-      const data = await Company.sendPostJob(postJobUid, content, userUid)
+      const data = await Company.sendPostJob(postJobUid, title, content, salary, companyUid)
       misc.response(res, 200, false, null, null)
     } catch(err) {
       console.log(err.message) // in-development

@@ -35,6 +35,28 @@ module.exports = {
     })
   },
 
+  allv2: (offset, limit, sort, sortby, search) => {
+    if(search) {
+      offset = 0
+    }
+    let preventAmbigiousSortby = `a.${sortby}`
+    return new Promise((resolve, reject) => {
+      const query = `SELECT a.uid, b.logo, a.title, a.content, a.salary
+      FROM post_jobs a 
+      INNER JOIN companies b ON a.company_uid = b.uid 
+      WHERE (a.title LIKE '%${search}%' OR b.location LIKE '%${search}%')
+      ORDER BY ${preventAmbigiousSortby} ${sort} LIMIT ${offset}, ${limit}`
+      connection.query(query, (error, result) => {
+        if (error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+
   store: (data) => {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO companies SET ?`
@@ -134,7 +156,11 @@ module.exports = {
 
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.* FROM companies a, users b WHERE a.user_uid = b.uid AND b.slug = '${slug}'`
+      const query = `SELECT c.content, a.uid, a.logo, a.name, a.email, a.location, a.description, a.telephone 
+      FROM companies a
+      LEFT JOIN post_jobs c ON a.uid = c.company_uid
+      INNER JOIN users b ON a.user_uid = b.uid 
+      WHERE a.user_uid = b.uid AND b.slug = '${slug}'`
       connection.query(query,
         (error, result) => {
           if(error) {
@@ -159,10 +185,37 @@ module.exports = {
     })
   },
 
+  getSkillsBasedOnProfile: (PostJobUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT a.uid, a.name, a.color FROM skills a INNER JOIN post_job_skills b ON a.uid = b.skill_uid
+      WHERE b.post_job_uid = '${postJobUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   storePostJob: (data) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_jobs (uid, content, user_uid, company_uid) VALUES('${data.uid}', '${data.content}', '${data.user_uid}', '${data.company_uid}') ON DUPLICATE KEY UPDATE content = '${data.content}'`
-      connection.query(query, (error, result) => {
+      const query = `INSERT INTO post_jobs SET ?`
+      connection.query(query, data, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  storePostJobSkills: (postJobSkillsUid, skillUid, companyUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO post_job_skills (uid, skill_uid, company_uid) VALUES('${postJobSkillsUid}', '${skillUid}', '${companyUid}') ON DUPLICATE KEY UPDATE skill_uid = '${skillUid}'`
+      connection.query(query, data, (error, result) => {
         if(error) {
           reject(new Error(error))
         } else {

@@ -19,10 +19,9 @@ const upload = multer({
 Route
   .get("/", engineer.all)
   .get("/profile/:slug", engineer.getProfileBySlug)
-  .get("/skills", engineer.getSkills)
   .post("/", upload.single("avatar"), engineer.store)
   .put("/", upload.single("avatar"), engineer.update)
-  .delete("/:engineerId/:userUid", engineer.delete)
   .post("/profile", engineer.getProfile)
+  .delete("/:engineerId/:userUid", engineer.delete)
   
 module.exports = Route

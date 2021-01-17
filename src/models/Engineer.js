@@ -194,19 +194,6 @@ module.exports = {
       })
     })
   },
-  
-  getSkills: () => {
-    return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM skills`
-      connection.query(query, (error, result) => {
-        if(error) {
-          reject(new Error(error))
-        } else {
-          resolve(result)
-        }
-      })
-    })
-  },
     
   checkSkills: (skillUid, engineerUid) => {
     return new Promise((resolve, reject) => {

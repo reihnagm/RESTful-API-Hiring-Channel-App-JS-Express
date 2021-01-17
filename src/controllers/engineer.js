@@ -169,16 +169,6 @@ module.exports = {
     }
   },
 
-  getSkills: async (req, res) => {
-    const data = await Engineer.getSkills()
-    try {
-      misc.response(res, 200, false, null, data)
-    } catch (err) {
-      console.log(err.message) // in-development
-      misc.response(res, 500, true, 'Server Error.')
-    }
-  },
-
   getProfile: async (req, res) => {
     const profileObj = {}
     const userUid = req.body.userUid
