@@ -26,9 +26,9 @@ module.exports = {
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
         companyObj.uid = data[i].uid
         companyObj.logo = data[i].logo
-        companyObj.name = data[i].title
-        companyObj.email = data[i].content
-        companyObj.location = data[i].salary
+        companyObj.title = data[i].title
+        companyObj.content = data[i].content
+        companyObj.salary = data[i].salary
         companyObj.skills = skills
         dataAssign.push(companyObj)
       }
@@ -200,19 +200,30 @@ module.exports = {
   },
 
   addJobs: async (req, res) => {
-    let postJobUid, postJobSkillsUid
-    postJobSkillsUid = uuidv4()
+    let postJobUid, postJobSkillsUid, postJobTypesUid
     postJobUid = uuidv4()
-    const { title, content, salary, skills, companyUid } = req.body
+    postJobSkillsUid = uuidv4()
+    postJobTypesUid = uuidv4()
+    
+    const { title, content, salary, skills, jobtypes, companyUid } = req.body
 
     const allSkill = JSON.parse(skills)
 
     for(let i = 0; i < allSkill.length; i++) {
-      await Company.storePostJobSkills(postJobSkillsUid, allSkill[i].uid, companyUid)
+      await Company.storePostJobSkills(postJobSkillsUid, allSkill[i].uid, postJobUid)
     }
 
+    await Company.storePostJobTypes(postJobTypesUid, jobtypes.uid, postJobUid)  
+
     try {
-      const data = await Company.sendPostJob(postJobUid, title, content, salary, companyUid)
+      let payload = {
+        uid: postJobUid,
+        title: title, 
+        content: content,
+        salary: salary,
+        company_uid: companyUid
+      }
+      await Company.storePostJob(payload)
       misc.response(res, 200, false, null, null)
     } catch(err) {
       console.log(err.message) // in-development

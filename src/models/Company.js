@@ -185,7 +185,7 @@ module.exports = {
     })
   },
 
-  getSkillsBasedOnProfile: (PostJobUid) => {
+  getSkillsBasedOnProfile: (postJobUid) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT a.uid, a.name, a.color FROM skills a INNER JOIN post_job_skills b ON a.uid = b.skill_uid
       WHERE b.post_job_uid = '${postJobUid}'`
@@ -199,10 +199,10 @@ module.exports = {
     })
   },
 
-  storePostJob: (data) => {
+  storePostJob: (payload) => {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO post_jobs SET ?`
-      connection.query(query, data, (error, result) => {
+      connection.query(query, payload, (error, result) => {
         if(error) {
           reject(new Error(error))
         } else {
@@ -212,10 +212,23 @@ module.exports = {
     })
   },
 
-  storePostJobSkills: (postJobSkillsUid, skillUid, companyUid) => {
+  storePostJobSkills: (postJobSkillsUid, skillUid, postJobUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_job_skills (uid, skill_uid, company_uid) VALUES('${postJobSkillsUid}', '${skillUid}', '${companyUid}') ON DUPLICATE KEY UPDATE skill_uid = '${skillUid}'`
-      connection.query(query, data, (error, result) => {
+      const query = `INSERT INTO post_job_skills (uid, skill_uid, post_job_uid, created_at, updated_at) VALUES('${postJobSkillsUid}', '${skillUid}', '${postJobUid}', NOW(), NOW()) ON DUPLICATE KEY UPDATE skill_uid = '${skillUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  storePostJobTypes: (postJobTypesUid, jobTypeUid, postJobUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO post_job_types (uid, job_type_uid, post_job_uid, created_at, updated_at) VALUES('${postJobTypesUid}', '${jobTypeUid}', '${postJobUid}', NOW(), NOW()) ON DUPLICATE KEY UPDATE job_type_uid = '${jobTypeUid}'`
+      connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))
         } else {
