@@ -41,7 +41,7 @@ module.exports = {
     }
     let preventAmbigiousSortby = `a.${sortby}`
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.uid, b.logo, a.title, a.content, a.salary
+      const query = `SELECT a.uid, a.slug, b.logo, a.title, a.content, a.salary
       FROM post_jobs a 
       INNER JOIN companies b ON a.company_uid = b.uid 
       WHERE (a.title LIKE '%${search}%' OR b.location LIKE '%${search}%')
@@ -156,30 +156,17 @@ module.exports = {
 
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT c.content, a.uid, a.logo, a.name, a.email, a.location, a.description, a.telephone 
+      const query = `SELECT c.title, c.content, c.salary, c.uid, c.slug, a.logo, a.name, a.email, a.location, a.description, a.telephone 
       FROM companies a
       LEFT JOIN post_jobs c ON a.uid = c.company_uid
       INNER JOIN users b ON a.user_uid = b.uid 
-      WHERE a.user_uid = b.uid AND b.slug = '${slug}'`
+      WHERE a.user_uid = b.uid AND c.slug = '${slug}'`
       connection.query(query,
-        (error, result) => {
-          if(error) {
-            reject(new Error(error))
-          } else {
-            resolve(result)
-          }
-        })
-    })
-  },
-
-  insertDataUser: (data) => {
-    return new Promise((resolve, reject) => {
-      const query = `INSERT INTO companies SET ?`
-      connection.query(query, data, (error, result) => {
+      (error, result) => {
         if(error) {
           reject(new Error(error))
         } else {
-          resolve(result)
+          resolve(result[0])
         }
       })
     })
@@ -199,10 +186,37 @@ module.exports = {
     })
   },
 
-  storePostJob: (payload) => {
+  getJobTypesBasedOnProfile: (postJobUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_jobs SET ?`
-      connection.query(query, payload, (error, result) => {
+      const query = `SELECT a.uid, a.name FROM job_types a INNER JOIN post_job_types b ON a.uid = b.job_type_uid
+      WHERE b.post_job_uid = '${postJobUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result[0])
+        }
+      })
+    })
+  },
+
+  insertDataUser: (data) => {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO companies SET ?`
+      connection.query(query, data, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  storePostJob: (data) => {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO post_jobs (uid, title, content, salary, company_uid, slug) VALUES('${data.uid}', '${data.title}', "${data.content}", '${data.salary}', '${data.company_uid}', '${data.slug}')`
+      connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))
         } else {
@@ -214,7 +228,7 @@ module.exports = {
 
   storePostJobSkills: (postJobSkillsUid, skillUid, postJobUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_job_skills (uid, skill_uid, post_job_uid, created_at, updated_at) VALUES('${postJobSkillsUid}', '${skillUid}', '${postJobUid}', NOW(), NOW()) ON DUPLICATE KEY UPDATE skill_uid = '${skillUid}'`
+      const query = `INSERT INTO post_job_skills (uid, skill_uid, post_job_uid, created_at, updated_at) VALUES('${postJobSkillsUid}', '${skillUid}', '${postJobUid}', NOW(), NOW())`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))
@@ -227,7 +241,7 @@ module.exports = {
 
   storePostJobTypes: (postJobTypesUid, jobTypeUid, postJobUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_job_types (uid, job_type_uid, post_job_uid, created_at, updated_at) VALUES('${postJobTypesUid}', '${jobTypeUid}', '${postJobUid}', NOW(), NOW()) ON DUPLICATE KEY UPDATE job_type_uid = '${jobTypeUid}'`
+      const query = `INSERT INTO post_job_types (uid, job_type_uid, post_job_uid, created_at, updated_at) VALUES('${postJobTypesUid}', '${jobTypeUid}', '${postJobUid}', NOW(), NOW())`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))

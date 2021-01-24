@@ -173,10 +173,9 @@ module.exports = {
     const profileObj = {}
     const userUid = req.body.userUid
     const profile = await Engineer.getProfile(userUid)
-
     const skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
-    try {
-      
+    
+    try { 
       profileObj.id = profile.id
       profileObj.uid = profile.uid
       profileObj.fullname = profile.fullname

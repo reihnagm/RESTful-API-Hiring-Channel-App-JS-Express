@@ -20,7 +20,9 @@ Route
   .get("/profile/:slug", company.getProfileBySlug)
   .post("/", upload.single("logo"), company.store)
   .put("/", upload.single("logo"), company.update)
-  .post("/add-jobs", company.addJobs)
+  .post("/store-post-job", company.storePostJob)
+  .post("/edit-post-job", company.editPostJob)
+  .put("/update-post-job", company.updatePostJob)
   .post("/profile", company.getProfile)
   .delete("/:uid", company.delete)
 

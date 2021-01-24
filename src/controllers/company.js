@@ -25,6 +25,7 @@ module.exports = {
         const companyObj = {}
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
         companyObj.uid = data[i].uid
+        companyObj.slug= data[i].slug
         companyObj.logo = data[i].logo
         companyObj.title = data[i].title
         companyObj.content = data[i].content
@@ -101,8 +102,6 @@ module.exports = {
       user_uid: userUid,
       company_uid: uid
     }
-
-    console.log(data)
 
     try {
 
@@ -189,20 +188,35 @@ module.exports = {
   },
 
   getProfileBySlug: async (req, res) => {
+    let profileObj = {}
     const slug = req.params.slug
+
     try {
-      const data = await Company.getProfileBySlug(slug)
-      misc.response(res, 200, false, null, data[0])
+      
+      const profile = await Company.getProfileBySlug(slug)
+      const skills = await Company.getSkillsBasedOnProfile(profile.uid)
+
+      profileObj.title = profile.title
+      profileObj.slug = profile.slug
+      profileObj.name = profile.name
+      profileObj.email = profile.email
+      profileObj.location = profile.location
+      profileObj.logo = profile.logo
+      profileObj.content = profile.content
+      profileObj.description = profile.description
+      profileObj.telephone = profile.telephone
+      profileObj.skills = skills
+
+      misc.response(res, 200, false, null, profileObj)
     } catch(err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
     }
   },
 
-  addJobs: async (req, res) => {
-    let postJobUid, postJobSkillsUid, postJobTypesUid
+  storePostJob: async (req, res) => {
+    let postJobUid, postJobTypesUid
     postJobUid = uuidv4()
-    postJobSkillsUid = uuidv4()
     postJobTypesUid = uuidv4()
     
     const { title, content, salary, skills, jobtypes, companyUid } = req.body
@@ -210,7 +224,7 @@ module.exports = {
     const allSkill = JSON.parse(skills)
 
     for(let i = 0; i < allSkill.length; i++) {
-      await Company.storePostJobSkills(postJobSkillsUid, allSkill[i].uid, postJobUid)
+      await Company.storePostJobSkills(uuidv4(), allSkill[i].uid, postJobUid)
     }
 
     await Company.storePostJobTypes(postJobTypesUid, jobtypes.uid, postJobUid)  
@@ -221,7 +235,8 @@ module.exports = {
         title: title, 
         content: content,
         salary: salary,
-        company_uid: companyUid
+        company_uid: companyUid,
+        slug: misc.makeid(5)
       }
       await Company.storePostJob(payload)
       misc.response(res, 200, false, null, null)
@@ -229,6 +244,38 @@ module.exports = {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
     }
+  },
+
+  editPostJob: async (req, res) => {
+    let postObj = {}
+    const slug = req.body.slug    
+    const postjob = await Company.getProfileBySlug(slug)
+    const skills = await Company.getSkillsBasedOnProfile(postjob.uid)
+    const jobtypes = await Company.getJobTypesBasedOnProfile(postjob.uid)
+
+    postObj.title = postjob.title
+    postObj.slug = postjob.slug
+    postObj.name = postjob.name
+    postObj.email = postjob.email
+    postObj.salary = postjob.salary
+    postObj.location = postjob.location
+    postObj.logo = postjob.logo
+    postObj.content = postjob.content
+    postObj.description = postjob.description
+    postObj.telephone = postjob.telephone
+    postObj.skills = skills
+    postObj.jobtypes = jobtypes
+
+    try {
+      misc.response(res, 200, false, null, postObj)
+    } catch(err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
+    }
+  },
+
+  updatePostJob: async (req, res) => {
+
   }
 
 }

@@ -34,6 +34,16 @@ module.exports = {
     }
     return false
   },
+
+  makeid(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  },
  
  	slug: (val, isUnique, uniqueId) => {
   	return isUnique ? `${val.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')}-${uniqueId}`
