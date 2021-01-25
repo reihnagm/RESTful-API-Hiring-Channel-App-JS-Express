@@ -194,7 +194,7 @@ module.exports = {
         if(error) {
           reject(new Error(error))
         } else {
-          resolve(result[0])
+          resolve(result)
         }
       })
     })
