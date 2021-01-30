@@ -215,10 +215,9 @@ module.exports = {
   },
 
   storePostJob: async (req, res) => {
-    let postJobUid, postJobTypesUid
+    let postJobUid
     postJobUid = uuidv4()
-    postJobTypesUid = uuidv4()
-    
+  
     const { title, content, salary, skills, jobtypes, companyUid } = req.body
 
     const allSkill = JSON.parse(skills)
@@ -227,7 +226,7 @@ module.exports = {
       await Company.storePostJobSkills(uuidv4(), allSkill[i].uid, postJobUid)
     }
 
-    await Company.storePostJobTypes(postJobTypesUid, jobtypes.uid, postJobUid)  
+    await Company.storePostJobTypes(uuidv4(), jobtypes.uid, postJobUid)  
 
     try {
       let payload = {
@@ -247,12 +246,15 @@ module.exports = {
   },
 
   editPostJob: async (req, res) => {
-    let postObj = {}
-    const slug = req.body.slug    
-    const postjob = await Company.getProfileBySlug(slug)
-    const skills = await Company.getSkillsBasedOnProfile(postjob.uid)
-    const jobtypes = await Company.getJobTypesBasedOnProfile(postjob.uid)
+    let postObj, slug, postjob, skills, jobtypes
 
+    postObj = {}
+    slug = req.body.slug    
+    postjob = await Company.getProfileBySlug(slug)
+    skills = await Company.getSkillsBasedOnProfile(postjob.uid)
+    jobtypes = await Company.getJobTypesBasedOnProfile(postjob.uid)
+
+    postObj.uid = postjob.uid
     postObj.title = postjob.title
     postObj.slug = postjob.slug
     postObj.name = postjob.name
@@ -275,7 +277,45 @@ module.exports = {
   },
 
   updatePostJob: async (req, res) => {
+    let title, content, postJobUid, skillsStore, skillsDestroy, jobtypesStore
+    try {
 
+      title = req.body.payload.title
+      content = req.body.payload.content
+      postJobUid = req.body.payload.postJobUid
+
+      skillsStore = req.body.payload.skillsStore.skillsSelectedMask
+      skillsDestroy = req.body.payload.skillsDestroy.skillsSelectedDestroy
+      jobtypesStore = req.body.payload.jobtypes.jobtypesSelectedMask
+
+      // Store Skills
+      for (let i = 0; i < skillsStore.length; i++) {
+        let uid = skillsStore[i].uid
+        const checkSkills = await Company.checkPostJobSkills(uid, postJobUid)
+        if(checkSkills.length === 0) {
+          await Company.storePostJobSkills(uuidv4(), uid, postJobUid)
+        }
+      }
+
+      // Destroy Skills
+      for (let i = 0; i < skillsDestroy.length; i++) {
+        for (let z = 0; z < skillsDestroy[i].length; z++) {
+          let uid = skillsDestroy[i][z].uid
+          await Company.destroyPostJobSkills(uid, postJobUid)
+        }
+      }
+
+      // Store Post Job Type
+      for (let i = 0; i < jobtypesStore.length; i++) {
+        let uid = jobtypesStore[i].uid
+        await Company.storePostJobTypes(uuidv4(), uid, postJobUid)
+      }
+
+      misc.response(res, 200, false, null)
+    } catch(err) {
+      console.log(err.message)
+      misc.response(res, 500, true, 'Server Error.')
+    }
   }
 
 }

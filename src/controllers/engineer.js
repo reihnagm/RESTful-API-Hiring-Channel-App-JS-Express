@@ -91,31 +91,28 @@ module.exports = {
   },
 
   update: async (req, res) => {
-    let avatar, filename, ext, fileSize, engineerObj
+    let engineer, userUid, slug, skillsStore, skillsDestroy, avatar, filename, ext, fileSize, engineerObj
     engineerObj = {}
     const { uid, fullname, nickname, description, location, birthdate, showcase, telephone, salary } = req.body
     
-    const engineer = await Engineer.getProfileByEngineer(uid)
-    const userUid = engineer.userUid
-    const slug = misc.slug(fullname, false, null)
+    engineer = await Engineer.getProfileByEngineer(uid)
+    userUid = engineer.userUid
+    slug = misc.slug(fullname, false, null)
 
-    // All skills selected 
-    const skillsS = JSON.parse(req.body.skillsStore)
-
-    // All skills unselected
-    const skillsD = JSON.parse(req.body.skillsDestroy) 
+    skillsStore = JSON.parse(req.body.skillsStore)
+    skillsDestroy = JSON.parse(req.body.skillsDestroy) 
 
     // Store skills
-    for(let z = 0; z < skillsS.length; z++) {
+    for(let z = 0; z < skillsStore.length; z++) {
       const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
       if(checkSkills.length == 0) {
         await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
       }
     }
 
-    // Delete skills
-    for (let i = 0; i < skillsD.length; i++) {
-      for (let z = 0; z < skillsD[i].length; z++) {
+    // Destroy skills
+    for (let i = 0; i < skillsDestroy.length; i++) {
+      for (let z = 0; z < skillsDestroy[i].length; z++) {
         await Engineer.destroySkills(skillsD[i][z].uid, uid)
       }
     }
@@ -176,6 +173,7 @@ module.exports = {
     const skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
     
     try { 
+    
       profileObj.id = profile.id
       profileObj.uid = profile.uid
       profileObj.fullname = profile.fullname

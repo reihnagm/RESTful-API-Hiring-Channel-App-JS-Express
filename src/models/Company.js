@@ -56,6 +56,19 @@ module.exports = {
     })
   },
 
+  checkSkills: () => {
+    return new Promise((resolve, reject) => {
+      const query = ``
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
 
   store: (data) => {
     return new Promise((resolve, reject) => {
@@ -156,7 +169,7 @@ module.exports = {
 
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT c.title, c.content, c.salary, c.uid, c.slug, a.logo, a.name, a.email, a.location, a.description, a.telephone 
+      const query = `SELECT c.uid, c.title, c.content, c.salary, c.uid, c.slug, a.logo, a.name, a.email, a.location, a.description, a.telephone 
       FROM companies a
       LEFT JOIN post_jobs c ON a.uid = c.company_uid
       INNER JOIN users b ON a.user_uid = b.uid 
@@ -226,9 +239,9 @@ module.exports = {
     })
   },
 
-  storePostJobSkills: (postJobSkillsUid, skillUid, postJobUid) => {
+  storePostJobSkills: (uid, skillUid, postJobUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_job_skills (uid, skill_uid, post_job_uid, created_at, updated_at) VALUES('${postJobSkillsUid}', '${skillUid}', '${postJobUid}', NOW(), NOW())`
+      const query = `INSERT INTO post_job_skills (uid, skill_uid, post_job_uid, created_at, updated_at) VALUES('${uid}', '${skillUid}', '${postJobUid}', NOW(), NOW())`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))
@@ -239,9 +252,9 @@ module.exports = {
     })
   },
 
-  storePostJobTypes: (postJobTypesUid, jobTypeUid, postJobUid) => {
+  storePostJobTypes: (uid, jobTypeUid, postJobUid) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO post_job_types (uid, job_type_uid, post_job_uid, created_at, updated_at) VALUES('${postJobTypesUid}', '${jobTypeUid}', '${postJobUid}', NOW(), NOW())`
+      const query = `INSERT INTO post_job_types (uid, job_type_uid, post_job_uid, created_at, updated_at) VALUES('${uid}', '${jobTypeUid}', '${postJobUid}', NOW(), NOW()) ON DUPLICATE KEY UPDATE job_type_uid = '${jobTypeUid}'`
       connection.query(query, (error, result) => {
         if(error) {
           reject(new Error(error))
@@ -251,5 +264,58 @@ module.exports = {
       })
     })
   },
+
+  checkPostJobSkills: (skillUid, companyUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM post_job_skills WHERE skill_uid = '${skillUid}' AND post_job_uid = '${companyUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  checkPostJobTypes: (jobTypeUid, postJobUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM post_job_types WHERE job_type_uid = '${jobTypeUid}' AND post_job_uid = '${postJobUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  destroyPostJobSkills: (skillUid, postJobUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM post_job_skills WHERE skill_uid = '${skillUid}' AND post_job_uid = '${postJobUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  destroyPostJobTypes: (jobTypeUid, postJobUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM post_job_types WHERE job_type_uid = '${jobTypeUid}' AND post_job_uid = '${postJobUid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   
 }
