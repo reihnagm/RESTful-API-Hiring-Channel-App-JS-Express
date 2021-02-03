@@ -78,34 +78,43 @@ module.exports = {
   },
 
   register: async (req, res) => {
-    let uid, logo, filename, extension, fileSize, slug, createdAt, updatedAt, userObj, engineerObj, companyObj
+    let uid, logo, userObj, engineerObj, companyObj, filename, extension, fileSize, slug, createdAt, updatedAt
+    
     uid = uuidv4()
     userObj = {}
     engineerObj = {}
     companyObj = {}
     createdAt = new Date()
     updatedAt = new Date()
-    const { fullname, nickname, email, password, companyname, companyemail, companytelp, companydesc, companylocation } = req.body
-    const role = parseInt(req.body.role)
+    
+    const { fullname, nickname, email, password, role, companyname, companyemail, companytelp, companydesc, companylocation } = req.body
+
     if(req.file) {
+      
       filename = req.file.originalname
       ext = req.file.originalname.split('.').pop()
       fileSize = req.file.fileSize
+      
       if(fileSize >= process.env.IMAGE_SIZE) { 
         fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
         throw new Error('Oops!, size is too large. Max: 1MB.')
       }
+      
       if(!misc.isImage(ext)) {
         fs.unlink(`${process.env.BASE_URL_IMAGE_ENGINEER}/${filename}`)
         throw new Error('Oops!, file allowed only JPG, JPEG, PNG, GIF, SVG.')
       }
+      
       logo = req.file.originalname
+
     }
 
     try {
+      
       const checkUser = await User.checkUser(email)
       const salt = await bcrypt.genSalt(10)
       const passwordHash = await bcrypt.hash(password, salt)
+      
       if(checkUser.length !== 0) {
         throw new Error('User already exists')
       }
@@ -127,7 +136,7 @@ module.exports = {
       
       const registered = await User.register(userObj)
 
-      switch (role) {
+      switch (parseInt(role)) {
         case 1:
           await Engineer.insertDataUser(uuidv4(), uid)
         break

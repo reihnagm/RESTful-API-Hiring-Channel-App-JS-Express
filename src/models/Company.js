@@ -15,6 +15,23 @@ module.exports = {
     })
   },
 
+  totalVacancies: (companyUid) => {
+    return new Promise ((resolve, reject) => {
+      const query = `SELECT COUNT(*) vacancies FROM post_jobs a
+      INNER JOIN companies b ON a.company_uid = b.uid
+      AND b.uid = '${companyUid}'
+      GROUP BY b.id`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error(error))
+        } else {
+          resolve(result[0])
+        }
+      })
+    })
+  },
+
+
   all: (offset, limit, sort, sortby, search) => {
     if(search) {
       offset = 0
@@ -41,7 +58,7 @@ module.exports = {
     }
     let preventAmbigiousSortby = `a.${sortby}`
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.uid, a.slug, b.logo, a.title, a.content, a.salary
+      const query = `SELECT a.uid, a.slug, b.logo, a.company_uid, a.title, a.content, a.salary
       FROM post_jobs a 
       INNER JOIN companies b ON a.company_uid = b.uid 
       WHERE (a.title LIKE '%${search}%' OR b.location LIKE '%${search}%')

@@ -31,6 +31,8 @@ module.exports = {
         const companyObj = {}
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
         const jobtypes = await Company.getJobTypesBasedOnProfile(data[i].uid)
+        const vacancies = await Company.totalVacancies(data[i].company_uid)
+        console.log(vacancies)
         companyObj.uid = data[i].uid
         companyObj.slug= data[i].slug
         companyObj.logo = data[i].logo
@@ -38,8 +40,9 @@ module.exports = {
         companyObj.content = data[i].content
         companyObj.salary = data[i].salary
         companyObj.skills = skills
+        companyObj.vacancies = vacancies.vacancies
         for (let z = 0; z < jobtypes.length; z++) {
-          companyObj.jobtypes = jobtypes[z]
+          companyObj.jobtypes = jobtypes[z].name
         }
         dataAssign.push(companyObj)
       }
