@@ -12,10 +12,39 @@ const misc = require("../helpers/helper")
 module.exports = {
   
   auth: async (req, res) => {
-    const userId = req.user.id
-    const auth = await User.auth(userId)
+    let auth, authObj, userUid, roleUid, roleName, avatar
+      
+
+    authObj = {}
+    userUid = req.user.uid
+    auth = await User.auth(userUid)
+    
+    if(auth.role === 1) {
+      const engineer = await Engineer.getProfile(userUid)
+      roleUid = engineer.uid
+      avatar = engineer.avatar 
+      roleName = "Engineer"
+    } else {
+      const company = await Company.getProfilev2(userUid)
+      roleUid = company.uid
+      avatar = company.logo
+      roleName = "Company"
+    }
+    
     try {
-      misc.response(res, 200, false, null, auth)
+      
+      authObj.id = auth.id
+      authObj.uid = auth.uid
+      authObj.avatar = avatar
+      authObj.fullname = auth.fullname
+      authObj.nickname = auth.nickname
+      authObj.email = auth.email
+      authObj.role = auth.role
+      authObj.roleUid = roleUid
+      authObj.roleName = roleName 
+      authObj.createdAt = auth.created_at
+
+      misc.response(res, 200, false, null, authObj)
     } catch (err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error')

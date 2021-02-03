@@ -56,20 +56,6 @@ module.exports = {
     })
   },
 
-  checkSkills: () => {
-    return new Promise((resolve, reject) => {
-      const query = ``
-      connection.query(query, (error, result) => {
-        if(error) {
-          reject(new Error(error))
-        } else {
-          resolve(result)
-        }
-      })
-    })
-  },
-
-
   store: (data) => {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO companies SET ?`
@@ -151,10 +137,9 @@ module.exports = {
 
   getProfilev2: (userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT c.content, a.uid, a.logo, a.name, a.email, a.location, a.description, a.telephone, b.fullname AS username 
+      const query = `SELECT c.content, a.uid, a.logo, a.name, a.email, a.location, a.description, a.telephone
       FROM companies a 
       LEFT JOIN post_jobs c ON a.uid = c.company_uid
-      INNER JOIN users b ON a.user_uid = b.uid
       WHERE a.user_uid = '${userUid}'`  
       connection.query(query,
       (error, result) => {
@@ -169,11 +154,10 @@ module.exports = {
 
   getProfileBySlug: (slug) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT c.uid, c.title, c.content, c.salary, c.uid, c.slug, a.logo, a.name, a.email, a.location, a.description, a.telephone 
+      const query = `SELECT c.uid, c.title, c.content, c.salary, c.company_uid, c.slug, a.logo, a.name, a.email, a.location, a.description, a.telephone 
       FROM companies a
       LEFT JOIN post_jobs c ON a.uid = c.company_uid
-      INNER JOIN users b ON a.user_uid = b.uid 
-      WHERE a.user_uid = b.uid AND c.slug = '${slug}'`
+      WHERE c.slug = '${slug}'`
       connection.query(query,
       (error, result) => {
         if(error) {
@@ -236,6 +220,20 @@ module.exports = {
           resolve(result)
         }
       })
+    })
+  },
+
+  updatePostJob: (title, content, uid) => {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE post_jobs SET title = '${title}', content = '${content}' 
+      WHERE uid = '${uid}'`
+      connection.query(query, (error, result) => {
+        if(error) {
+          reject(new Error())
+        } else {
+          resolve(result)
+        }
+      }) 
     })
   },
 

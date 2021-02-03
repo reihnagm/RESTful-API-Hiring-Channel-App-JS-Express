@@ -7,23 +7,30 @@ const misc = require('../helpers/helper')
 module.exports = {
 
   all: async (req, res) => {
-    const dataAssign = []
-    const page = parseInt(req.query.page) || 1
-    const search = req.query.search || ""
-    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
-    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
-    const show = parseInt(req.query.show) || 5
-    const offset = (page - 1) * show
+    let data, dataAssign, total,
+    resultTotal,
+    page, search, sort, sortby,
+    show, perPage, prevPage, nextPage, offset 
+
+    dataAssign = []
+    page = parseInt(req.query.page) || 1
+    search = req.query.search || ""
+    sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    show = parseInt(req.query.show) || 5
+    offset = (page - 1) * show
+    
     try {
-      const total = await Company.total()
-      const resultTotal = Math.ceil(total[0].total / show)
-      const perPage = Math.ceil(resultTotal / show)
-      const prevPage = page === 1 ? 1 : page - 1
-      const nextPage = page === perPage ? 1 : page + 1
-      const data = await Company.allv2(offset, show, sort, sortby, search)
+      total = await Company.total()
+      resultTotal = Math.ceil(total[0].total / show)
+      perPage = Math.ceil(resultTotal / show)
+      prevPage = page === 1 ? 1 : page - 1
+      nextPage = page === perPage ? 1 : page + 1
+      data = await Company.allv2(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
         const companyObj = {}
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
+        const jobtypes = await Company.getJobTypesBasedOnProfile(data[i].uid)
         companyObj.uid = data[i].uid
         companyObj.slug= data[i].slug
         companyObj.logo = data[i].logo
@@ -31,6 +38,9 @@ module.exports = {
         companyObj.content = data[i].content
         companyObj.salary = data[i].salary
         companyObj.skills = skills
+        for (let z = 0; z < jobtypes.length; z++) {
+          companyObj.jobtypes = jobtypes[z]
+        }
         dataAssign.push(companyObj)
       }
       const pageDetail = {
@@ -163,9 +173,11 @@ module.exports = {
   },
   
   getProfile: async (req, res) => {
-    const profileObj = {}
-    const userUid = req.body.userUid
-    const profile = await Company.getProfilev2(userUid)
+    let profileObj, profile, userUid
+
+    profileObj = {}
+    userUid = req.body.userUid
+    profile = await Company.getProfilev2(userUid)
 
     try {
       
@@ -178,7 +190,6 @@ module.exports = {
       profileObj.requirement = profile.requirement
       profileObj.location = profile.location
       profileObj.telephone = profile.telephone
-      profileObj.username = profile.username
 
       misc.response(res, 200, false, null, profileObj)
     } catch(err) {
@@ -188,13 +199,15 @@ module.exports = {
   },
 
   getProfileBySlug: async (req, res) => {
-    let profileObj = {}
-    const slug = req.params.slug
+    let profileObj, profile, skills, slug
+    
+    profileObj = {}
+    slug = req.params.slug
 
     try {
       
-      const profile = await Company.getProfileBySlug(slug)
-      const skills = await Company.getSkillsBasedOnProfile(profile.uid)
+      profile = await Company.getProfileBySlug(slug)
+      skills = await Company.getSkillsBasedOnProfile(profile.uid)
 
       profileObj.title = profile.title
       profileObj.slug = profile.slug
@@ -206,6 +219,7 @@ module.exports = {
       profileObj.description = profile.description
       profileObj.telephone = profile.telephone
       profileObj.skills = skills
+      profileObj.companyUid = profile.company_uid
 
       misc.response(res, 200, false, null, profileObj)
     } catch(err) {
@@ -220,15 +234,14 @@ module.exports = {
   
     const { title, content, salary, skills, jobtypes, companyUid } = req.body
 
-    const allSkill = JSON.parse(skills)
-
-    for(let i = 0; i < allSkill.length; i++) {
-      await Company.storePostJobSkills(uuidv4(), allSkill[i].uid, postJobUid)
+    for(let i = 0; i < skills.skills.length; i++) {
+      await Company.storePostJobSkills(uuidv4(), skills.skills[i].uid, postJobUid)
     }
 
     await Company.storePostJobTypes(uuidv4(), jobtypes.uid, postJobUid)  
 
     try {
+      
       let payload = {
         uid: postJobUid,
         title: title, 
@@ -237,7 +250,10 @@ module.exports = {
         company_uid: companyUid,
         slug: misc.makeid(5)
       }
+      
+      // Store Post Job 
       await Company.storePostJob(payload)
+
       misc.response(res, 200, false, null, null)
     } catch(err) {
       console.log(err.message) // in-development
@@ -278,6 +294,7 @@ module.exports = {
 
   updatePostJob: async (req, res) => {
     let title, content, postJobUid, skillsStore, skillsDestroy, jobtypesStore
+
     try {
 
       title = req.body.payload.title
@@ -310,6 +327,9 @@ module.exports = {
         let uid = jobtypesStore[i].uid
         await Company.storePostJobTypes(uuidv4(), uid, postJobUid)
       }
+
+      // Update Post Job
+      await Company.updatePostJob(title, content, postJobUid)
 
       misc.response(res, 200, false, null)
     } catch(err) {
