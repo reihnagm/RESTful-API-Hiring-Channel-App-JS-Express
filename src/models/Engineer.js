@@ -38,13 +38,37 @@ module.exports = {
     })
   },
 
-  allv2: (offset, show, sort, sortby, search) => {
+  allWithPagination: (offset, show, sort, sortby, search) => {
     if(search) {
       offset = 0
     }
     let preventAmbigiousSortby = `e.${sortby}`
     return new Promise((resolve, reject) => {
-      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname AS username, e.slug
+      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname, e.slug
+      FROM engineers a
+      LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
+      LEFT JOIN skills c ON c.uid = b.skill_uid
+      INNER JOIN users e ON a.user_uid = e.uid
+      WHERE LOWER(e.fullname) LIKE '%${search}%' OR LOWER(c.name) LIKE '%${search}%'
+      GROUP BY a.id
+      ORDER BY ${preventAmbigiousSortby} ${sort} LIMIT ${offset}, ${show}`
+      connection.query(query, (error, result) => {
+        if (error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  allWithInfiniteScroll: (offset, show, sort, sortby, search) => {
+    if(search) {
+      offset = 0
+    }    
+    let preventAmbigiousSortby = `e.${sortby}`
+    return new Promise((resolve, reject) => {
+      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname, e.slug
       FROM engineers a
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid

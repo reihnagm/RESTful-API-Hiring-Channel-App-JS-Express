@@ -1,18 +1,20 @@
 const { v4: uuidv4 } = require("uuid")
 const Engineer = require("../models/Engineer")
+const User = require("../models/User")
+const bcrypt = require("bcryptjs")
 const fs = require("fs-extra")
 const redis = require("../configs/redis")
 const misc = require("../helpers/helper")
 
 module.exports = {
 
-  all: async (req, res) => {
-    const dataAssign = []
+  allWithPagination: async (req, res) => {
+
     const page = parseInt(req.query.page) || 1
     const search = req.query.search || ""
     const sort = req.query.sort === "newer" ? "DESC" : "ASC"
     const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
-    const show = parseInt(req.query.show) || 5
+    const show = parseInt(req.query.show) || 10   
     const offset = (page - 1) * show
     try {
       const total = await Engineer.total()
@@ -20,16 +22,19 @@ module.exports = {
       const perPage = Math.ceil(resultTotal / show) 
       const prevPage = page === 1 ? 1 : page - 1
       const nextPage = page === perPage ? 1 : page + 1
-      const data = await Engineer.allv2(offset, show, sort, sortby, search)
+      const data = await Engineer.allWithPagination(offset, show, sort, sortby, search)
+      const dataAssign = []
       for (let i = 0; i < data.length; i++) {
         const engineerObj = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
+
         engineerObj.uid = data[i].uid
-        engineerObj.fullname = data[i].username
+        engineerObj.fullname = data[i].fullname
         engineerObj.avatar = data[i].avatar
         engineerObj.salary = data[i].salary
         engineerObj.slug = data[i].slug 
         engineerObj.skills = skills
+
         dataAssign.push(engineerObj)
       }
       const pageDetail = {
@@ -40,12 +45,49 @@ module.exports = {
         currentPage: page,
         nextUrl: `${process.env.BASE_URL}${req.originalUrl.replace('page=' + page, 'page=' + nextPage)}`,
         prevUrl: `${process.env.BASE_URL}${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
-      }
+      } 
       misc.responsePagination(res, 200, false, null, pageDetail, dataAssign)
+      misc.responsePagination(res, 200, false, null, null, dataAssign)
     } catch (err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
-      // next(err)
+    }
+  },
+
+  allWithInfiniteScroll: async (req, res) => {
+
+    const page = parseInt(req.query.page) || 1
+    const search = req.query.search || ""
+    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    const show = parseInt(req.query.show) || 10
+    const offset = parseInt(req.query.offset) || 0   
+   
+    try {
+      const total = await Engineer.total()
+      const resultTotal = Math.ceil(total[0].total / show) 
+      const perPage = Math.ceil(resultTotal / show) 
+      const prevPage = page === 1 ? 1 : page - 1
+      const nextPage = page === perPage ? 1 : page + 1
+      const data = await Engineer.allWithInfiniteScroll(offset, show, sort, sortby, search)
+      const dataAssign = []
+      for (let i = 0; i < data.length; i++) {
+        const engineerObj = {}
+        const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
+
+        engineerObj.uid = data[i].uid
+        engineerObj.fullname = data[i].fullname
+        engineerObj.avatar = data[i].avatar
+        engineerObj.salary = data[i].salary
+        engineerObj.slug = data[i].slug 
+        engineerObj.skills = skills
+
+        dataAssign.push(engineerObj)
+      }
+      misc.responsePagination(res, 200, false, null, null, dataAssign)
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
     }
   },
 
@@ -225,6 +267,36 @@ module.exports = {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
     }
+  },
+
+  dummy: async (req, res) => {
+    for (let i = 0; i < 60; i++) {
+      let userObj = {}
+      const salt = await bcrypt.genSalt(10)
+      const passwordHash = await bcrypt.hash('123456', salt)
+      let uid = uuidv4()
+      let fullname = `dummy-${i}`
+      let nickname = `dummy-${i}`
+      let email = `dummy-${i}@gmail.com`
+      let slug = `dummy-${i}`
+      let role = 1
+      let created_at = new Date()
+      let updated_at = new Date()
+
+      userObj.uid = uid
+      userObj.nickname = nickname
+      userObj.fullname = fullname
+      userObj.email = email
+      userObj.password = passwordHash
+      userObj.role = role
+      userObj.slug = slug
+      userObj.created_at = created_at
+      userObj.updated_at = updated_at
+
+      await User.register(userObj)
+      await Engineer.insertDataUser(uuidv4(), uid)
+    }
+      misc.response(res, 200, false, null, null)
   }
   
 }
