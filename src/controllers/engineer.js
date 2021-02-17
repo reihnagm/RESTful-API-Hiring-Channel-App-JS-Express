@@ -23,9 +23,9 @@ module.exports = {
       const prevPage = page === 1 ? 1 : page - 1
       const nextPage = page === perPage ? 1 : page + 1
       const data = await Engineer.allWithPagination(offset, show, sort, sortby, search)
-      const dataAssign = []
+      let dataAssign = []
       for (let i = 0; i < data.length; i++) {
-        const engineerObj = {}
+        let engineerObj = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
 
         engineerObj.uid = data[i].uid
@@ -64,15 +64,10 @@ module.exports = {
     const offset = parseInt(req.query.offset) || 0   
    
     try {
-      const total = await Engineer.total()
-      const resultTotal = Math.ceil(total[0].total / show) 
-      const perPage = Math.ceil(resultTotal / show) 
-      const prevPage = page === 1 ? 1 : page - 1
-      const nextPage = page === perPage ? 1 : page + 1
       const data = await Engineer.allWithInfiniteScroll(offset, show, sort, sortby, search)
-      const dataAssign = []
+      let dataAssign = []
       for (let i = 0; i < data.length; i++) {
-        const engineerObj = {}
+        let engineerObj = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
 
         engineerObj.uid = data[i].uid
@@ -146,9 +141,9 @@ module.exports = {
 
     // Store skills
     for(let z = 0; z < skillsStore.length; z++) {
-      const checkSkills = await Engineer.checkSkills(skillsS[z].uid, uid)
+      const checkSkills = await Engineer.checkSkills(skillsStore[z].uid, uid)
       if(checkSkills.length == 0) {
-        await Engineer.storeSkills(uuidv4(), skillsS[z].uid, uid)
+        await Engineer.storeSkills(uuidv4(), skillsStore[z].uid, uid)
       }
     }
 

@@ -16,7 +16,7 @@ const upload = multer({
 })
 
 Route
-  .get("/", company.all)
+  .get("/", company.allWithInfiniteScroll)
   .get("/profile/:slug", company.getProfileBySlug)
   .post("/", upload.single("logo"), company.store)
   .put("/", upload.single("logo"), company.update)

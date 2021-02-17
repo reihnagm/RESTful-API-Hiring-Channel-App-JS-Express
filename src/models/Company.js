@@ -73,6 +73,27 @@ module.exports = {
     })
   },
 
+  allWithInfiniteScroll: (offset, limit, sort, sortby, search) => {
+    if(search) {
+      offset = 0
+    }
+    let preventAmbigiousSortby = `a.${sortby}`
+    return new Promise((resolve, reject) => {
+      const query = `SELECT a.uid, a.slug, b.logo, a.company_uid, a.title, a.content, a.salary
+      FROM post_jobs a 
+      INNER JOIN companies b ON a.company_uid = b.uid 
+      WHERE (a.title LIKE '%${search}%' OR b.location LIKE '%${search}%')
+      ORDER BY ${preventAmbigiousSortby} ${sort} LIMIT ${offset}, ${limit}`
+      connection.query(query, (error, result) => {
+        if (error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
   store: (data) => {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO companies SET ?`

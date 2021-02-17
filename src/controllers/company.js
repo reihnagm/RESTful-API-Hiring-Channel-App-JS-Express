@@ -6,7 +6,7 @@ const misc = require('../helpers/helper')
 
 module.exports = {
 
-  all: async (req, res) => {
+  allWithPagination: async (req, res) => {
     let data, dataAssign, total,
     resultTotal,
     page, search, sort, sortby,
@@ -28,11 +28,10 @@ module.exports = {
       nextPage = page === perPage ? 1 : page + 1
       data = await Company.allv2(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
-        const companyObj = {}
+        let companyObj = {}
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
         const jobtypes = await Company.getJobTypesBasedOnProfile(data[i].uid)
         const vacancies = await Company.totalVacancies(data[i].company_uid)
-        console.log(vacancies)
         companyObj.uid = data[i].uid
         companyObj.slug= data[i].slug
         companyObj.logo = data[i].logo
@@ -56,6 +55,46 @@ module.exports = {
         prevLink: `${process.env.BASE_URL}${req.originalUrl.replace('page=' + page, 'page=' + prevPage)}`
       }
       misc.responsePagination(res, 200, false, null, pageDetail, dataAssign)
+    } catch (err) {
+      console.log(err.message) // in-development
+      misc.response(res, 500, true, 'Server Error.')
+    }
+  },
+
+  allWithInfiniteScroll: async (req, res) => {
+    
+    const page = parseInt(req.query.page) || 1
+    const search = req.query.search || ""
+    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    const show = parseInt(req.query.show) || 10
+    const offset = parseInt(req.query.offset) || 0
+    
+    try {
+      const data = await Company.allWithInfiniteScroll(offset, show, sort, sortby, search)
+      let dataAssign = []
+      for (let i = 0; i < data.length; i++) {
+        let companyObj = {}
+        const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
+        const jobtypes = await Company.getJobTypesBasedOnProfile(data[i].uid)
+        const vacancies = await Company.totalVacancies(data[i].company_uid)
+       
+        companyObj.uid = data[i].uid
+        companyObj.slug = data[i].slug
+        companyObj.logo = data[i].logo
+        companyObj.title = data[i].title
+        companyObj.content = data[i].content
+        companyObj.salary = data[i].salary
+        companyObj.skills = skills
+        companyObj.vacancies = vacancies.vacancies
+        
+        for (let z = 0; z < jobtypes.length; z++) {
+          companyObj.jobtypes = jobtypes[z].name
+        }
+        
+        dataAssign.push(companyObj)
+      }
+      misc.responsePagination(res, 200, false, null, null, dataAssign)
     } catch (err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
