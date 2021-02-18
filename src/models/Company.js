@@ -17,7 +17,7 @@ module.exports = {
 
   totalVacancies: (companyUid) => {
     return new Promise ((resolve, reject) => {
-      const query = `SELECT COUNT(*) vacancies FROM post_jobs a
+      const query = `SELECT COUNT(*) total FROM post_jobs a
       INNER JOIN companies b ON a.company_uid = b.uid
       AND b.uid = '${companyUid}'
       GROUP BY b.id`

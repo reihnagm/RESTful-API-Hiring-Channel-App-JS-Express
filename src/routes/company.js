@@ -18,6 +18,7 @@ const upload = multer({
 Route
   .get("/", company.allWithInfiniteScroll)
   .get("/profile/:slug", company.getProfileBySlug)
+  .get("/dummy", company.dummy)
   .post("/", upload.single("logo"), company.store)
   .put("/", upload.single("logo"), company.update)
   .post("/store-post-job", company.storePostJob)

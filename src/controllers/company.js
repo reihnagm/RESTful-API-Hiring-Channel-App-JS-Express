@@ -27,24 +27,30 @@ module.exports = {
       prevPage = page === 1 ? 1 : page - 1
       nextPage = page === perPage ? 1 : page + 1
       data = await Company.allv2(offset, show, sort, sortby, search)
+
       for (let i = 0; i < data.length; i++) {
         let companyObj = {}
+        
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
         const jobtypes = await Company.getJobTypesBasedOnProfile(data[i].uid)
         const vacancies = await Company.totalVacancies(data[i].company_uid)
+        
         companyObj.uid = data[i].uid
-        companyObj.slug= data[i].slug
+        companyObj.slug = data[i].slug
         companyObj.logo = data[i].logo
         companyObj.title = data[i].title
         companyObj.content = data[i].content
         companyObj.salary = data[i].salary
         companyObj.skills = skills
-        companyObj.vacancies = vacancies.vacancies
+        companyObj.vacancies = vacancies.total
+        
         for (let z = 0; z < jobtypes.length; z++) {
           companyObj.jobtypes = jobtypes[z].name
         }
+
         dataAssign.push(companyObj)
       }
+
       const pageDetail = {
         total: resultTotal,
         perPage: perPage,
@@ -378,6 +384,57 @@ module.exports = {
       console.log(err.message)
       misc.response(res, 500, true, 'Server Error.')
     }
-  }
+  },
+
+  dummy: async (req, res) => {
+    for (let i = 0; i < 4; i++) {
+      let companyObj = {}
+      let postJobObj = {}
+     
+      let companyUid = uuidv4()
+      let name = `SAMSANTECH`
+      let logo = `samsan.jpg`
+      let location = `South Korean`
+      let email = `samsantech@gmail.com`
+      let telp = `089670558381`
+      let desc = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a ullamcorper est. Proin feugiat quis magna id efficitur. Nullam dictum magna at sapien blandit, ut pharetra nunc scelerisque. Morbi et interdum metus, at pulvinar nunc. Pellentesque malesuada lacus eget nisi tempor, at hendrerit massa accumsan. Etiam placerat luctus lorem ac dictum.`
+      let user_uid = `aa52daa4-6e55-4dea-8749-f0a64c762fe5`
+      let role = 2
+
+      let postJobUid = uuidv4()
+      let title = `Front End Developer ${i + 1}`
+      let content = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a ullamcorper est. Proin feugiat quis magna id efficitur. Nullam dictum magna at sapien blandit, ut pharetra nunc scelerisque. Morbi et interdum metus, at pulvinar nunc. Pellentesque malesuada lacus eget nisi tempor, at hendrerit massa accumsan. Etiam placerat luctus lorem ac dictum.`
+      let salary = `${i + 1}0.000.00`
+      let slug = `front-end-developer-${i + 1}`
+      let createdAt = new Date()
+      let updatedAt = new Date()
+
+      companyObj.uid = companyUid
+      companyObj.name = name
+      companyObj.logo = logo
+      companyObj.location = location
+      companyObj.email = email
+      companyObj.telephone = telp
+      companyObj.description = desc
+      companyObj.user_uid = user_uid
+      companyObj.created_at = createdAt
+      companyObj.updated_at = updatedAt
+
+      postJobObj.uid = postJobUid
+      postJobObj.title = title
+      postJobObj.content = content
+      postJobObj.salary = salary
+      postJobObj.slug = slug
+      postJobObj.company_uid = companyUid
+      postJobObj.created_at = createdAt
+      postJobObj.updated_at = updatedAt
+
+      await Company.store(companyObj)
+      await Company.storePostJob(postJobObj)
+    }
+    misc.response(res, 200, false, null, null)
+  },
+
+
 
 }
