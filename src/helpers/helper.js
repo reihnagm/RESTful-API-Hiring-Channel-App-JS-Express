@@ -45,8 +45,8 @@ module.exports = {
     return result;
   },
  
- 	slug: (val, isUnique, uniqueId) => {
-  	return isUnique ? `${val.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')}-${uniqueId}`
+ 	slug: (val, isUnique, markUnique) => {
+  	return isUnique ? `${val.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')}-${markUnique}`
  		: `${val.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'')}`
  	}
 

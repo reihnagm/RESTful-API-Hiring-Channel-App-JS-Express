@@ -92,7 +92,7 @@ module.exports = {
         companyObj.content = data[i].content
         companyObj.salary = data[i].salary
         companyObj.skills = skills
-        companyObj.vacancies = vacancies.vacancies
+        companyObj.vacancies = vacancies.total
         
         for (let z = 0; z < jobtypes.length; z++) {
           companyObj.jobtypes = jobtypes[z].name
@@ -231,6 +231,8 @@ module.exports = {
       
       profileObj.uid = profile.uid
       profileObj.logo = profile.logo 
+      profileObj.title = profile.title
+      profileObj.slug = profile.slug
       profileObj.name = profile.name
       profileObj.email = profile.email
       profileObj.content = profile.content
@@ -238,6 +240,7 @@ module.exports = {
       profileObj.requirement = profile.requirement
       profileObj.location = profile.location
       profileObj.telephone = profile.telephone
+      profileObj.userUid = profile.user_uid
 
       misc.response(res, 200, false, null, profileObj)
     } catch(err) {
@@ -268,6 +271,7 @@ module.exports = {
       profileObj.telephone = profile.telephone
       profileObj.skills = skills
       profileObj.companyUid = profile.company_uid
+      profileObj.userUid = profile.user_uid
 
       misc.response(res, 200, false, null, profileObj)
     } catch(err) {
@@ -310,10 +314,10 @@ module.exports = {
   },
 
   editPostJob: async (req, res) => {
-    let postObj, slug, postjob, skills, jobtypes
+    let slug, postObj, skills, jobtypes
 
+    slug = req.body.slug  
     postObj = {}
-    slug = req.body.slug    
     postjob = await Company.getProfileBySlug(slug)
     skills = await Company.getSkillsBasedOnProfile(postjob.uid)
     jobtypes = await Company.getJobTypesBasedOnProfile(postjob.uid)
@@ -341,14 +345,15 @@ module.exports = {
   },
 
   updatePostJob: async (req, res) => {
-    let title, content, postJobUid, skillsStore, skillsDestroy, jobtypesStore
+    let title, content, slug, postJobUid, skillsStore, skillsDestroy, jobtypesStore
 
     try {
 
       title = req.body.payload.title
       content = req.body.payload.content
+      slug = misc.slug(req.body.payload.title, false, null)
+      salary = req.body.payload.salary
       postJobUid = req.body.payload.postJobUid
-
       skillsStore = req.body.payload.skillsStore.skillsSelectedMask
       skillsDestroy = req.body.payload.skillsDestroy.skillsSelectedDestroy
       jobtypesStore = req.body.payload.jobtypes.jobtypesSelectedMask
@@ -377,7 +382,7 @@ module.exports = {
       }
 
       // Update Post Job
-      await Company.updatePostJob(title, content, postJobUid)
+      await Company.updatePostJob(title, slug, content, salary, postJobUid)
 
       misc.response(res, 200, false, null)
     } catch(err) {
@@ -392,20 +397,20 @@ module.exports = {
       let postJobObj = {}
      
       let companyUid = uuidv4()
-      let name = `SAMSANTECH`
-      let logo = `samsan.jpg`
+      let name = `INJAE COMPANY`
+      let logo = `injae.jpg`
       let location = `South Korean`
-      let email = `samsantech@gmail.com`
-      let telp = `089670558381`
+      let email = `injae@gmail.com`
+      let telp = `089670558382`
       let desc = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a ullamcorper est. Proin feugiat quis magna id efficitur. Nullam dictum magna at sapien blandit, ut pharetra nunc scelerisque. Morbi et interdum metus, at pulvinar nunc. Pellentesque malesuada lacus eget nisi tempor, at hendrerit massa accumsan. Etiam placerat luctus lorem ac dictum.`
-      let user_uid = `aa52daa4-6e55-4dea-8749-f0a64c762fe5`
+      let user_uid = `b0ae68a4-fec1-4690-860d-10a6c4307d8c`
       let role = 2
 
       let postJobUid = uuidv4()
-      let title = `Front End Developer ${i + 1}`
+      let title = `Back End Developer ${i + 1}`
       let content = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed a ullamcorper est. Proin feugiat quis magna id efficitur. Nullam dictum magna at sapien blandit, ut pharetra nunc scelerisque. Morbi et interdum metus, at pulvinar nunc. Pellentesque malesuada lacus eget nisi tempor, at hendrerit massa accumsan. Etiam placerat luctus lorem ac dictum.`
       let salary = `${i + 1}0.000.00`
-      let slug = `front-end-developer-${i + 1}`
+      let slug = `back-end-developer-${i + 1}`
       let createdAt = new Date()
       let updatedAt = new Date()
 
