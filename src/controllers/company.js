@@ -68,17 +68,19 @@ module.exports = {
   },
 
   allWithInfiniteScroll: async (req, res) => {
+    let page, search, sort, sortby, show, offset
+    let data
+    let dataAssign = []
     
-    const page = parseInt(req.query.page) || 1
-    const search = req.query.search || ""
-    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
-    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
-    const show = parseInt(req.query.show) || 10
-    const offset = parseInt(req.query.offset) || 0
+    page = parseInt(req.query.page) || 1
+    search = req.query.search || ""
+    sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    show = parseInt(req.query.show) || 10
+    offset = parseInt(req.query.offset) || 0
     
     try {
-      const data = await Company.allWithInfiniteScroll(offset, show, sort, sortby, search)
-      let dataAssign = []
+      data = await Company.allWithInfiniteScroll(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
         let companyObj = {}
         const skills = await Company.getSkillsBasedOnProfile(data[i].uid)
@@ -108,8 +110,9 @@ module.exports = {
   },
 
   store: async (req, res) => {
-    let logo, filename, ext, fileSize, companyObj
-    companyObj = {}
+    let logo, filename, ext, fileSize
+    let companyObj = {}
+
     const { name, location, description, email, telephone } = req.body
 
     try {
@@ -148,22 +151,19 @@ module.exports = {
   },
 
   update: async (req, res) => {
-    let postJobUid, logo, filename, ext, fileSize, companyObj
-    companyObj = {}
-    postJobUid = uuidv4()
+    let logo, filename, ext, fileSize
+    let companyUserObj = {}
+    let companyObj = {}
 
-    const { uid, userUid, name, location, description, email, telephone, postJob } = req.body
-
-    let data = {
-      uid: postJobUid,
-      content: postJob,
-      user_uid: userUid,
-      company_uid: uid
-    }
+    const { uid, userUid, userFullName, userNickname, name, location, description, email, telephone, postJob } = req.body
 
     try {
 
-      await Company.storePostJob(data)
+      if(userFullName !== "" || userNickname !== "") {
+        companyUserObj.fullname = userFullName
+        companyUserObj.nickname = userNickname
+        await Company.updateUserProfileCompany(companyUserObj, userUid)
+      }
 
       if(req.file) {
         filename = req.file.originalname
@@ -221,9 +221,9 @@ module.exports = {
   },
   
   getProfile: async (req, res) => {
-    let profileObj, profile, userUid
-
-    profileObj = {}
+    let profile, userUid
+    let profileObj = {}
+    
     userUid = req.body.userUid
     profile = await Company.getProfilev2(userUid)
 
@@ -250,9 +250,9 @@ module.exports = {
   },
 
   getProfileBySlug: async (req, res) => {
-    let profileObj, profile, skills, slug
-    
-    profileObj = {}
+    let profile, skills, slug
+    let profileObj = {}
+
     slug = req.params.slug
 
     try {
@@ -281,15 +281,16 @@ module.exports = {
   },
 
   storePostJob: async (req, res) => {
-    let postJobUid
-    postJobUid = uuidv4()
+    let postJobUid = uuidv4()
   
     const { title, content, salary, skills, jobtypes, companyUid } = req.body
 
     for(let i = 0; i < skills.skills.length; i++) {
+      // Store Post Job Skills
       await Company.storePostJobSkills(uuidv4(), skills.skills[i].uid, postJobUid)
     }
 
+    // Store Post Job Types
     await Company.storePostJobTypes(uuidv4(), jobtypes.uid, postJobUid)  
 
     try {
@@ -314,10 +315,10 @@ module.exports = {
   },
 
   editPostJob: async (req, res) => {
-    let slug, postObj, skills, jobtypes
+    let slug, skills, jobtypes
+    let postObj = {}
 
     slug = req.body.slug  
-    postObj = {}
     postjob = await Company.getProfileBySlug(slug)
     skills = await Company.getSkillsBasedOnProfile(postjob.uid)
     jobtypes = await Company.getJobTypesBasedOnProfile(postjob.uid)
@@ -351,14 +352,14 @@ module.exports = {
 
       title = req.body.payload.title
       content = req.body.payload.content
-      slug = misc.slug(req.body.payload.title, false, null)
+      slug = misc.slug(req.body.payload.title, true, misc.makeid(5))
       salary = req.body.payload.salary
       postJobUid = req.body.payload.postJobUid
       skillsStore = req.body.payload.skillsStore.skillsSelectedMask
       skillsDestroy = req.body.payload.skillsDestroy.skillsSelectedDestroy
       jobtypesStore = req.body.payload.jobtypes.jobtypesSelectedMask
 
-      // Store Skills
+      // Store Post Job Skills
       for (let i = 0; i < skillsStore.length; i++) {
         let uid = skillsStore[i].uid
         const checkSkills = await Company.checkPostJobSkills(uid, postJobUid)
@@ -367,7 +368,7 @@ module.exports = {
         }
       }
 
-      // Destroy Skills
+      // Destroy Post Job Skills
       for (let i = 0; i < skillsDestroy.length; i++) {
         for (let z = 0; z < skillsDestroy[i].length; z++) {
           let uid = skillsDestroy[i][z].uid

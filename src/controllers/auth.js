@@ -12,11 +12,11 @@ const misc = require("../helpers/helper")
 module.exports = {
   
   auth: async (req, res) => {
-    let auth, authObj, userUid, roleUid, roleName, avatar
-      
+    let auth, userUid, roleUid, roleName, avatar
+    let authObj = {}  
 
-    authObj = {}
     userUid = req.user.uid
+
     auth = await User.auth(userUid)
     
     if(auth.role === 1) {
@@ -69,8 +69,13 @@ module.exports = {
           fullname: user[0].fullname
         }
       }
-      const token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
-      res.json({ token })
+      const access_token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '1h' })
+      const refresh_token = await jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7d' })
+
+      res.json({ 
+        'access_token': access_token,
+        'refresh_token': refresh_token
+      })
     } catch(err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, err.message)
@@ -78,14 +83,13 @@ module.exports = {
   },
 
   register: async (req, res) => {
-    let uid, logo, userObj, engineerObj, companyObj, filename, extension, fileSize, slug, createdAt, updatedAt
-    
+    let uid, logo, filename, extension, fileSize, slug, createdAt, updatedAt
     uid = uuidv4()
-    userObj = {}
-    engineerObj = {}
-    companyObj = {}
     createdAt = new Date()
     updatedAt = new Date()
+    let userObj = {}
+    let engineerObj = {}
+    let companyObj = {}
     
     const { fullname, nickname, email, password, role, companyname, companyemail, companytelp, companydesc, companylocation } = req.body
 
@@ -155,6 +159,7 @@ module.exports = {
         break
         default:
       }
+
       const payload = {
         user: {
           id: registered.insertId,
@@ -162,8 +167,14 @@ module.exports = {
           fullname: fullname
         }
       }
-      const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: 360000 })
-      res.json({ token })
+      
+      const access_token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '1h' })
+      const refresh_token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: '7d' })
+      
+      res.json({ 
+        "access_token": access_token,
+        "refresh_token": refresh_token
+      })
     } catch(err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, err.message)

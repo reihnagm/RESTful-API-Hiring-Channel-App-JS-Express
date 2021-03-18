@@ -9,21 +9,27 @@ const misc = require("../helpers/helper")
 module.exports = {
 
   allWithPagination: async (req, res) => {
+    let page, search, sort, sortby, show, offset
+    let total, resultTotal, perPage, prevPage, nextPage
+    let pageDetail
+    let dataAssign = []
 
-    const page = parseInt(req.query.page) || 1
-    const search = req.query.search || ""
-    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
-    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
-    const show = parseInt(req.query.show) || 10   
-    const offset = (page - 1) * show
+    page = parseInt(req.query.page) || 1
+    search = req.query.search || ""
+    sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    show = parseInt(req.query.show) || 10   
+    offset = (page - 1) * show
+    
     try {
-      const total = await Engineer.total()
-      const resultTotal = Math.ceil(total[0].total / show) 
-      const perPage = Math.ceil(resultTotal / show) 
-      const prevPage = page === 1 ? 1 : page - 1
-      const nextPage = page === perPage ? 1 : page + 1
-      const data = await Engineer.allWithPagination(offset, show, sort, sortby, search)
-      let dataAssign = []
+      
+      total = await Engineer.total()
+      resultTotal = Math.ceil(total[0].total / show) 
+      perPage = Math.ceil(resultTotal / show) 
+      prevPage = page === 1 ? 1 : page - 1
+      nextPage = page === perPage ? 1 : page + 1
+
+      data = await Engineer.allWithPagination(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
         let engineerObj = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
@@ -37,7 +43,7 @@ module.exports = {
 
         dataAssign.push(engineerObj)
       }
-      const pageDetail = {
+      pageDetail = {
         total: resultTotal,
         perPage: perPage,
         nextPage: nextPage,
@@ -55,17 +61,19 @@ module.exports = {
   },
 
   allWithInfiniteScroll: async (req, res) => {
+    let page, search, sort, sortby, show, offset
+    let data
+    let dataAssign = []
 
-    const page = parseInt(req.query.page) || 1
-    const search = req.query.search || ""
-    const sort = req.query.sort === "newer" ? "DESC" : "ASC"
-    const sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
-    const show = parseInt(req.query.show) || 10
-    const offset = parseInt(req.query.offset) || 0   
+    page = parseInt(req.query.page) || 1
+    search = req.query.search || ""
+    sort = req.query.sort === "newer" ? "DESC" : "ASC"
+    sortby = req.query.filterby === "latest-update" ? "updated_at" : req.query.filterby || "updated_at"
+    show = parseInt(req.query.show) || 10
+    offset = parseInt(req.query.offset) || 0   
    
     try {
-      const data = await Engineer.allWithInfiniteScroll(offset, show, sort, sortby, search)
-      let dataAssign = []
+      data = await Engineer.allWithInfiniteScroll(offset, show, sort, sortby, search)
       for (let i = 0; i < data.length; i++) {
         let engineerObj = {}
         const skills = await Engineer.getSkillsBasedOnProfile(data[i].uid)
@@ -87,8 +95,9 @@ module.exports = {
   },
 
   store: async (req, res) => {
-    let avatar, filename, ext, fileSize, engineerObj
-    engineerObj = {}
+    let avatar, filename, ext, fileSize
+    let engineerObj = {}
+
     const { description, skill, location, birthdate, showcase, telephone, salary } = req.body
 
     try {
@@ -128,8 +137,11 @@ module.exports = {
   },
 
   update: async (req, res) => {
-    let engineer, userUid, slug, skillsStore, skillsDestroy, avatar, filename, ext, fileSize, engineerObj
-    engineerObj = {}
+    let engineer, userUid, slug
+    let skillsStore, skillsDestroy
+    let avatar, filename, ext, fileSize
+    let engineerObj = {}
+   
     const { uid, fullname, nickname, description, location, birthdate, showcase, telephone, salary } = req.body
     
     engineer = await Engineer.getProfileByEngineer(uid)
@@ -150,7 +162,7 @@ module.exports = {
     // Destroy skills
     for (let i = 0; i < skillsDestroy.length; i++) {
       for (let z = 0; z < skillsDestroy[i].length; z++) {
-        await Engineer.destroySkills(skillsD[i][z].uid, uid)
+        await Engineer.destroySkills(skillsDestroy[i][z].uid, uid)
       }
     }
 
@@ -183,7 +195,9 @@ module.exports = {
 
       await Engineer.update(engineerObj, uid)
       await Engineer.updateNameUser(fullname, nickname, slug, userUid)
+      
       misc.response(res, 200, false, null)
+
     } catch (err) {
       console.log(err.message) // in-development
       misc.response(res, 500, true, 'Server Error.')
@@ -235,10 +249,12 @@ module.exports = {
   },
 
   getProfileBySlug: async (req, res) => {
-    const profileObj = {}
-    const slug = req.params.slug
-    const profile = await Engineer.getProfileBySlug(slug)
-    const skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
+    let slug, profile, skills
+    profileObj = {}
+    slug = req.params.slug
+    profile = await Engineer.getProfileBySlug(slug)
+    skills = await Engineer.getSkillsBasedOnProfile(profile.uid)
+   
     try {
       
       profileObj.id = profile.id
@@ -265,18 +281,22 @@ module.exports = {
   },
 
   dummy: async (req, res) => {
+    let uid, fullname, nickname, email, slug, role, createdAt, updatedAt 
+    let salt, password
+    let userObj = {}
+
     for (let i = 0; i < 60; i++) {
-      let userObj = {}
-      const salt = await bcrypt.genSalt(10)
-      const passwordHash = await bcrypt.hash('123456', salt)
-      let uid = uuidv4()
-      let fullname = `dummy-${i}`
-      let nickname = `dummy-${i}`
-      let email = `dummy-${i}@gmail.com`
-      let slug = `dummy-${i}`
-      let role = 1
-      let created_at = new Date()
-      let updated_at = new Date()
+      salt = await bcrypt.genSalt(10)
+      passwordHash = await bcrypt.hash('123456', salt)
+      
+      uid = uuidv4()
+      fullname = `dummy-${i}`
+      nickname = `dummy-${i}`
+      email = `dummy-${i}@gmail.com`
+      slug = `dummy-${i}`
+      role = 1
+      createdAt = new Date()
+      updatedAt = new Date()
 
       userObj.uid = uid
       userObj.nickname = nickname
@@ -291,7 +311,7 @@ module.exports = {
       await User.register(userObj)
       await Engineer.insertDataUser(uuidv4(), uid)
     }
-      misc.response(res, 200, false, null, null)
+    misc.response(res, 200, false, null, null)
   }
   
 }

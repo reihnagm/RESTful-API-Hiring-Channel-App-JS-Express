@@ -120,10 +120,23 @@ module.exports = {
     })
   },
 
-  update: (data, uid) => {
+  update: (data, companyUid) => {
     return new Promise((resolve, reject) => {
       const query = `UPDATE companies SET ? WHERE uid = ?`
-      connection.query(query, [data, uid], (error, result) => {
+      connection.query(query, [data, companyUid], (error, result) => {
+        if (error) {
+          reject(new Error(error))
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  },
+
+  updateUserProfileCompany: (data, userUid) => {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE users SET ? WHERE uid = ?`
+      connection.query(query, [data, userUid], (error, result) => {
         if (error) {
           reject(new Error(error))
         } else {
@@ -145,18 +158,6 @@ module.exports = {
     })
   },
 
-  updateNameUser: (name, slug, id) => {
-    return new Promise((resolve, reject) => {
-      const query = `UPDATE users SET name = '${name}', slug = '${slug}' WHERE id = '${id}'`
-      connection.query(query, (error, result) => {
-        if (error) {
-          reject(new Error(error))
-        } else {
-          resolve(result)
-        }
-      })
-    })
-  },
 
   getProfile: (userUid) => {
     return new Promise((resolve, reject) => {
@@ -175,9 +176,10 @@ module.exports = {
 
   getProfilev2: (userUid) => {
     return new Promise((resolve, reject) => {
-      const query = `SELECT c.title, c.content, c.slug, a.uid, a.logo, a.name, a.email, a.location, a.description, a.telephone, a.user_uid
+      const query = `SELECT d.fullname, d.nickname, c.title, c.content, c.slug, a.uid, a.logo, a.name, a.email, a.location, a.description, a.telephone, a.user_uid
       FROM companies a 
       LEFT JOIN post_jobs c ON a.uid = c.company_uid
+      LEFT JOIN users d ON a.user_uid = d.uid
       WHERE a.user_uid = '${userUid}'`  
       connection.query(query,
       (error, result) => {
@@ -263,7 +265,7 @@ module.exports = {
 
   updatePostJob: (title, slug, content, salary, uid) => {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE post_jobs SET title = '${title}', content = '${content}', salary = '${salary}' 
+      const query = `UPDATE post_jobs SET title = '${title}', slug = '${slug}', content = '${content}', salary = '${salary}' 
       WHERE uid = '${uid}'`
       connection.query(query, (error, result) => {
         if(error) {
