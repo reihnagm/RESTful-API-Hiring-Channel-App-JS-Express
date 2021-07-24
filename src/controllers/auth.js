@@ -52,13 +52,13 @@ module.exports = {
   },
 
   login: async (req, res) => {
-    const { email, password } = req.body
+    const { email, pass } = req.body
     try {
       const user = await User.login(email)
       if (user.length === 0) {
         throw new Error('User not exists')
       }
-      const isMatch = await bcrypt.compare(password, user[0].password)
+      const isMatch = await bcrypt.compare(pass, user[0].password)
       if (!isMatch) {
         throw new Error('Invalid Credentials')
       }

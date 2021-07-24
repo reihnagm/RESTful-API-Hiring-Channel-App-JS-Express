@@ -18,11 +18,11 @@ module.exports = {
   login: (email) => {
     return new Promise((resolve, reject) => {
       const query = `SELECT id, uid, fullname, nickname, email, role, password FROM users WHERE email = ?`
-      connection.query(query, email, (error, result) => {
-        if (error) {
-          reject(new Error(error))
+      connection.query(query, email, (err, res) => {
+        if (err) {
+          reject(new Error(err))
         } else {
-          resolve(result)
+          resolve(res)
         }
       })
 

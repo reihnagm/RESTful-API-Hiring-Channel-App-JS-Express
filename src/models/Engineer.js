@@ -44,7 +44,7 @@ module.exports = {
     }
     let preventAmbigiousSortby = `e.${sortby}`
     return new Promise((resolve, reject) => {
-      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname, e.slug
+      const query = `SELECT a.uid, a.avatar, a.salary, e.fullname, e.slug
       FROM engineers a
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid
@@ -68,7 +68,7 @@ module.exports = {
     }    
     let preventAmbigiousSortby = `e.${sortby}`
     return new Promise((resolve, reject) => {
-      const query = `SELECT DISTINCT a.uid, a.avatar, a.salary, e.fullname, e.slug
+      const query = `SELECT a.uid, a.avatar, a.salary, e.fullname, e.slug
       FROM engineers a
       LEFT JOIN engineer_skills b ON a.uid = b.engineer_uid
       LEFT JOIN skills c ON c.uid = b.skill_uid
